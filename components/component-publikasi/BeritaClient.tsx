@@ -1,55 +1,66 @@
 "use client";
 
-import { useState, useEffect } from "react"; // Tambah useEffect
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Search, Calendar, User, ArrowRight, Tag, ChevronLeft, ChevronRight } from "lucide-react"; // Tambah Icon Navigasi
-import { MOCK_NEWS } from "@/lib/data-dummy";
+import { Search, Calendar, User, ArrowRight, Tag, ChevronLeft, ChevronRight } from "lucide-react";
+// HAPUS import MOCK_NEWS dari sini! Kita pakai props.
 
-const ITEMS_PER_PAGE = 6; // Tampilkan 6 berita per halaman di grid
+const ITEMS_PER_PAGE = 6;
 
-export default function BeritaClient() {
+// 1. Definisikan Tipe Data Props
+interface NewsItem {
+  id: string; // ID Prisma itu string (CUID), bukan number
+  title: string;
+  slug: string;
+  category: "Berita" | "Kegiatan" | "Edukasi";
+  date: string;
+  author: string;
+  excerpt: string;
+  image: string;
+  isFeatured: boolean;
+}
+
+interface BeritaClientProps {
+  initialData: NewsItem[]; // Data yang diterima dari Database
+}
+
+// 2. Terima Props di sini
+export default function BeritaClient({ initialData }: BeritaClientProps) {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
-  
-  // State Pagination
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 1. Filter Logic
-  const filteredNews = MOCK_NEWS.filter((item) => {
+  // 3. Gunakan 'initialData' sebagai sumber data, BUKAN 'MOCK_NEWS'
+  const filteredNews = initialData.filter((item) => {
     const matchSearch = item.title.toLowerCase().includes(search.toLowerCase());
     const matchCategory = filterCategory === "All" || item.category === filterCategory;
     return matchSearch && matchCategory;
   });
 
-  // 2. Pisahkan Featured News (Hanya muncul jika tidak ada search/filter aktif)
-  // Logic: Featured News tidak ikut dipaginasi di grid bawah
+  // --- Sisa logika di bawah ini SAMA PERSIS, tidak perlu diubah ---
+  
   const featuredNews = search === "" && filterCategory === "All" 
-    ? filteredNews.find((item) => item.isFeatured) 
+    ? initialData.find((item) => item.isFeatured) // Ganti MOCK_NEWS jadi initialData
     : null;
 
-  // 3. Sisa berita untuk Grid List
   const listNews = featuredNews 
     ? filteredNews.filter(item => item.id !== featuredNews.id) 
     : filteredNews;
 
-  // 4. Logika Pagination untuk List News
   const totalPages = Math.ceil(listNews.length / ITEMS_PER_PAGE);
   const currentListNews = listNews.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset ke halaman 1 jika filter berubah
   useEffect(() => {
     setCurrentPage(1);
   }, [search, filterCategory]);
 
-  // Handler ganti halaman
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    // Scroll sedikit ke bawah agar fokus ke grid (opsional, sesuaikan kebutuhan)
     const gridElement = document.getElementById("news-grid");
     if (gridElement) {
         gridElement.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -57,10 +68,10 @@ export default function BeritaClient() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 pt-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pb-20 pt-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         
-        {/* --- Header Section --- */}
+        {/* Header Section */}
         <div className="text-center mb-12 space-y-4">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
@@ -79,9 +90,8 @@ export default function BeritaClient() {
           </motion.p>
         </div>
 
-        {/* --- Search & Filter --- */}
+        {/* Search & Filter */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          {/* Filter Kategori */}
           <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
             {["All", "Berita", "Kegiatan", "Edukasi"].map((cat) => (
               <button
@@ -98,7 +108,6 @@ export default function BeritaClient() {
             ))}
           </div>
 
-          {/* Search Bar */}
           <div className="relative w-full md:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -111,8 +120,8 @@ export default function BeritaClient() {
           </div>
         </div>
 
-        {/* --- Featured News (Hero) --- */}
-        {featuredNews && currentPage === 1 && ( // Opsional: Hero hanya muncul di page 1
+        {/* Featured News */}
+        {featuredNews && currentPage === 1 && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -131,7 +140,7 @@ export default function BeritaClient() {
                     Utama
                   </div>
                 </div>
-                <div className="p-6 md:p-10 flex flex-col justify-center bg-gradient-to-br from-white to-blue-50">
+                <div className="p-6 md:p-10 flex flex-col justify-center bg-gradient-to-br from-white to-blue-200">
                   <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
                     <span className="flex items-center gap-1 text-blue-600 font-semibold">
                       <Tag className="w-3 h-3" /> {featuredNews.category}
@@ -156,8 +165,8 @@ export default function BeritaClient() {
           </motion.div>
         )}
 
-        {/* --- List News (Grid) --- */}
-        <div id="news-grid" className="scroll-mt-24"> {/* ID untuk target scroll */}
+        {/* List News Grid */}
+        <div id="news-grid" className="scroll-mt-24">
             {currentListNews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {currentListNews.map((news, index) => (
@@ -169,7 +178,6 @@ export default function BeritaClient() {
                     transition={{ delay: index * 0.1 }}
                 >
                     <Link href={`/publikasi/berita-kegiatan/${news.slug}`} className="group flex flex-col h-full bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all">
-                    {/* Image */}
                     <div className="relative h-48 overflow-hidden">
                         <Image
                         src={news.image}
@@ -182,7 +190,6 @@ export default function BeritaClient() {
                         </div>
                     </div>
                     
-                    {/* Content */}
                     <div className="p-5 flex flex-col flex-grow">
                         <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
                         <span className="flex items-center gap-1">
@@ -212,7 +219,6 @@ export default function BeritaClient() {
                 ))}
             </div>
             ) : (
-            /* Empty State */
             <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
                 <p className="text-gray-500">Tidak ada berita yang ditemukan.</p>
                 <button 
@@ -225,10 +231,9 @@ export default function BeritaClient() {
             )}
         </div>
 
-        {/* --- PAGINATION (UPDATED STYLE) --- */}
+        {/* Pagination */}
         {listNews.length > ITEMS_PER_PAGE && (
             <div className="mt-12 flex justify-center items-center gap-4">
-                {/* Previous Button */}
                 <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
@@ -237,12 +242,10 @@ export default function BeritaClient() {
                     <ChevronLeft className="w-5 h-5" />
                 </button>
 
-                {/* Page Indicator */}
                 <span className="text-sm font-medium text-gray-600">
                     Halaman <span className="text-blue-600 font-bold">{currentPage}</span> dari {totalPages}
                 </span>
 
-                {/* Next Button */}
                 <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}

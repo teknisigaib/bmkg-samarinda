@@ -25,8 +25,6 @@ import {
   Newspaper,
   BookA,
   BookText,
-  BookType
-
 } from "lucide-react";
 
 export default function Navbar() {
@@ -167,16 +165,10 @@ export default function Navbar() {
       icon: <BookA className="w-5 h-5 text-blue-500" />,
     },
     {
-      name: "Artikel",
+      name: "Artikel & Makalah",
       desc: "Artikel ilmiah",
       href: "/publikasi/artikel",
       icon: <BookText className="w-5 h-5 text-blue-500" />,
-    },
-    {
-      name: "Makalah",
-      desc: "Makalah penelitian",
-      href: "/publikasi/makalah",
-      icon: <BookType className="w-5 h-5 text-blue-500" />,
     },
   ];
 

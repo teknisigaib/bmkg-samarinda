@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL") // Opsional jika nanti butuh direct connection
+}
+
+// ------------------------------------
+// Tabel 1: Berita & Kegiatan
+// ------------------------------------
+model Post {
+  id          String   @id @default(cuid()) // ID unik otomatis (cth: clh123...)
+  title       String
+  slug        String   @unique // URL harus unik
+  category    String   // 'Berita', 'Kegiatan', 'Edukasi'
+  content     String   @db.Text // Isi HTML panjang
+  excerpt     String   // Ringkasan
+  imageUrl    String?  // Link gambar (Opsional/Boleh kosong ditandai ?)
+  author      String   @default("Admin")
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now()) // Tanggal otomatis saat dibuat
+  updatedAt   DateTime @updatedAt      // Tanggal otomatis saat diedit
+
+  @@map("posts") // Nama tabel di database nanti jadi 'posts' (huruf kecil)
+}
+
+// ------------------------------------
+// Tabel 2: Publikasi (Buletin, Artikel, Makalah)
+// ------------------------------------
+model Publication {
+  id        String   @id @default(cuid())
+  type      String   // 'Buletin', 'Artikel', 'Makalah'
+  title     String
+  slug      String?  @unique // Opsional, Buletin mungkin tidak butuh slug halaman detail
+  author    String   @default("Tim BMKG")
+  year      String   // '2024', '2023'
+  edition   String?  // Khusus Buletin ('November')
+  abstract  String?  @db.Text // Ringkasan (Makalah/Artikel)
+  tags      String[] // Array: ["Iklim", "Radar"] (Fitur keren Postgres)
+  coverUrl  String?  // Link Cover Gambar
+  pdfUrl    String   // Link File PDF (Wajib)
+  createdAt DateTime @default(now())
+
+  @@map("publications")
+}

@@ -14,26 +14,36 @@ import {
   ChevronRight,
   RotateCcw
 } from "lucide-react";
-import { MOCK_BULETIN, type BuletinItem } from "@/lib/data-dummy";
+
+// --- Definisi Tipe Data (Sesuai dengan yang dikirim dari page.tsx) ---
+export type BuletinItem = {
+  id: string;
+  title: string;
+  edition: string;
+  year: string;
+  cover: string;
+  pdfUrl: string;
+};
+
+interface BuletinClientProps {
+  initialData: BuletinItem[];
+}
 
 const ITEMS_PER_PAGE = 8;
 
-export default function BuletinClient() {
+export default function BuletinClient({ initialData }: BuletinClientProps) {
   const [selectedBuletin, setSelectedBuletin] = useState<BuletinItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // 1. Ambil daftar tahun unik untuk Dropdown
-  const years = useMemo(() => {
-    const uniqueYears = Array.from(new Set(MOCK_BULETIN.map((item) => item.year)));
-    return uniqueYears.sort((a, b) => Number(b) - Number(a)); // Urutkan 2024, 2023...
-  }, []);
-
-  // PERUBAHAN 1: Default state adalah "All" (Semua Tahun)
   const [selectedYear, setSelectedYear] = useState("All");
 
-  // PERUBAHAN 2: Logika Filter
-  // Jika "All", ambil semua. Jika tidak, filter berdasarkan tahun.
-  const filteredData = MOCK_BULETIN.filter((item) => {
+  // 1. Ambil daftar tahun unik dari data database
+  const years = useMemo(() => {
+    const uniqueYears = Array.from(new Set(initialData.map((item) => item.year)));
+    return uniqueYears.sort((a, b) => Number(b) - Number(a));
+  }, [initialData]);
+
+  // 2. Filter Logic
+  const filteredData = initialData.filter((item) => {
     return selectedYear === "All" || item.year === selectedYear;
   });
 
@@ -44,26 +54,28 @@ export default function BuletinClient() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  // Reset halaman saat filter berubah
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedYear]);
 
+  // Handler Ganti Halaman
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // PERUBAHAN 3: Fungsi Reset kembali ke "All"
+  // Handler Reset Filter
   const handleReset = () => {
     setSelectedYear("All");
     setCurrentPage(1);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 pt-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pb-20 pt-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         
-        {/* --- Header --- */}
+        {/* Header */}
         <div className="text-center mb-12 space-y-4">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
@@ -78,42 +90,34 @@ export default function BuletinClient() {
             className="text-gray-600 max-w-2xl mx-auto"
           >
             Kumpulan publikasi buletin analisis cuaca, iklim, dan kualitas udara. 
-            Silakan unduh atau baca secara daring.
+            Silakan pilih tahun terbitan untuk menemukan dokumen yang Anda butuhkan.
           </motion.p>
         </div>
 
-        {/* --- Filter Section --- */}
+        {/* Filter Section */}
         <div className="flex justify-center mb-10">
           <div className="flex items-center gap-3 bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-             
              <div className="pl-3 text-gray-400">
                 <Filter className="w-5 h-5" />
              </div>
-             
              <div className="relative">
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
                   className="appearance-none bg-transparent hover:bg-gray-50 text-gray-700 py-2 px-4 pr-8 rounded-lg font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors"
                 >
-                  {/* PERUBAHAN 4: Opsi Semua Tahun di paling atas */}
                   <option value="All">Semua Tahun</option>
-                  
                   {years.map((year) => (
                     <option key={year} value={year}>
                       Tahun {year}
                     </option>
                   ))}
                 </select>
-                
                 <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center px-2 text-gray-400">
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                  </svg>
+                   <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
                 </div>
             </div>
 
-            {/* Tombol Reset hanya muncul jika filter BUKAN "All" */}
             {selectedYear !== "All" && (
                 <>
                     <div className="w-px h-6 bg-gray-200"></div>
@@ -129,7 +133,7 @@ export default function BuletinClient() {
           </div>
         </div>
 
-        {/* --- Grid Data --- */}
+        {/* Grid Data */}
         {currentData.length > 0 ? (
            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             {currentData.map((item, index) => (
@@ -175,17 +179,14 @@ export default function BuletinClient() {
                     {selectedYear === "All" ? "Belum ada buletin." : `Belum ada buletin tahun ${selectedYear}`}
                 </p>
                 {selectedYear !== "All" && (
-                    <button 
-                        onClick={handleReset}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
-                    >
+                    <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
                         <RotateCcw className="w-4 h-4" /> Tampilkan Semua
                     </button>
                 )}
             </div>
         )}
 
-        {/* --- Pagination --- */}
+        {/* Pagination Controls */}
         {filteredData.length > ITEMS_PER_PAGE && (
             <div className="mt-12 flex justify-center items-center gap-4">
                 <button
@@ -208,7 +209,7 @@ export default function BuletinClient() {
             </div>
         )}
 
-        {/* --- MODAL PDF (SAMA SEPERTI SEBELUMNYA) --- */}
+        {/* Modal PDF Viewer */}
         <AnimatePresence>
           {selectedBuletin && (
             <motion.div
@@ -217,10 +218,7 @@ export default function BuletinClient() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[99999] flex items-center justify-center p-4 md:p-6"
             >
-              <div 
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                onClick={() => setSelectedBuletin(null)}
-              />
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedBuletin(null)} />
               <motion.div
                 layoutId={`card-${selectedBuletin.id}`}
                 className="bg-white w-full max-w-5xl h-[85vh] md:h-[90vh] rounded-2xl shadow-2xl relative flex flex-col overflow-hidden z-10"
@@ -231,33 +229,18 @@ export default function BuletinClient() {
                     <p className="text-xs text-gray-500">{selectedBuletin.edition}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a 
-                      href={selectedBuletin.pdfUrl}
-                      download 
-                      className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition"
-                    >
+                    <a href={selectedBuletin.pdfUrl} download className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
                       <Download className="w-4 h-4" /> Download
                     </a>
-                    <button 
-                      onClick={() => setSelectedBuletin(null)}
-                      className="p-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 transition"
-                    >
+                    <button onClick={() => setSelectedBuletin(null)} className="p-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 transition">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
                 <div className="flex-grow bg-gray-100 relative">
-                  <iframe
-                    src={`${selectedBuletin.pdfUrl}#toolbar=0&view=FitH`}
-                    className="w-full h-full"
-                    title="PDF Viewer"
-                  />
+                  <iframe src={`${selectedBuletin.pdfUrl}#toolbar=0&view=FitH`} className="w-full h-full" title="PDF Viewer" />
                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:hidden">
-                    <a 
-                       href={selectedBuletin.pdfUrl}
-                       target="_blank"
-                       className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white shadow-lg rounded-full font-semibold"
-                    >
+                    <a href={selectedBuletin.pdfUrl} target="_blank" className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white shadow-lg rounded-full font-semibold">
                       <ExternalLink className="w-4 h-4" /> Buka Fullscreen
                     </a>
                   </div>
@@ -266,7 +249,6 @@ export default function BuletinClient() {
             </motion.div>
           )}
         </AnimatePresence>
-
       </div>
     </div>
   );

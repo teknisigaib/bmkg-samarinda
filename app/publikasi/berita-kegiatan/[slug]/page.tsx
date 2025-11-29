@@ -1,89 +1,120 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, User, ArrowLeft, Share2, Clock } from "lucide-react";
-import { MOCK_NEWS } from "@/lib/data-dummy"; // Pastikan path ini sesuai
+import { Calendar, User, ArrowLeft, Share2, Clock, Home, ChevronRight } from "lucide-react";
+import prisma from "@/lib/prisma"; // 1. Import Prisma
+// HAPUS import MOCK_NEWS
 
-// TypeScript Interface untuk Params (Next.js 15)
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Fungsi untuk menghasilkan Metadata (Judul di Tab Browser) secara dinamis
-export async function generateMetadata({ params }: PageProps) {
+// Helper untuk format tanggal Indonesia
+const formatDate = (date: Date) => {
+  return new Date(date).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+// --- 1. GENERATE METADATA DARI DATABASE ---
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const news = MOCK_NEWS.find((item) => item.slug === slug);
+  
+  // Ambil data dari DB berdasarkan slug
+  const news = await prisma.post.findUnique({
+    where: { slug: slug },
+  });
 
   if (!news) {
-    return {
-      title: "Berita Tidak Ditemukan",
-    };
+    return { title: "Berita Tidak Ditemukan | BMKG Samarinda" };
   }
 
   return {
     title: `${news.title} | BMKG Samarinda`,
     description: news.excerpt,
+    openGraph: {
+      title: news.title,
+      description: news.excerpt,
+      url: `/publikasi/berita-kegiatan/${slug}`,
+      images: news.imageUrl ? [{ url: news.imageUrl }] : [],
+      type: "article",
+    },
   };
 }
 
+// --- 2. MAIN COMPONENT ---
 export default async function DetailBeritaPage({ params }: PageProps) {
-  // Di Next.js 15, params harus di-await
   const { slug } = await params;
 
-  // Cari berita berdasarkan slug
-  const news = MOCK_NEWS.find((item) => item.slug === slug);
+  // A. Ambil Berita Utama dari DB
+  const news = await prisma.post.findUnique({
+    where: { slug: slug },
+  });
 
-  // Jika tidak ketemu, arahkan ke halaman 404
+  // Jika tidak ketemu di DB -> 404
   if (!news) {
     notFound();
   }
 
-  // Cari berita lain untuk sidebar (rekomendasi)
-  const otherNews = MOCK_NEWS.filter((item) => item.slug !== slug).slice(0, 3);
+  // B. Ambil "Berita Lainnya" dari DB (Kecuali berita yang sedang dibuka)
+  const otherNews = await prisma.post.findMany({
+    where: {
+      slug: { not: slug }, // Jangan ambil berita yang sama
+    },
+    orderBy: { createdAt: "desc" },
+    take: 3, // Ambil 3 saja
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 pt-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         
-        {/* Breadcrumb & Back Button */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-          <Link href="/publikasi/berita-kegiatan" className="hover:text-blue-600 flex items-center gap-1 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Kembali
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 overflow-x-auto whitespace-nowrap pb-2">
+          <Link href="/" className="hover:text-blue-600 transition-colors">
+            <Home className="w-4 h-4" />
           </Link>
-          <span className="text-gray-300">/</span>
-          <span className="text-blue-600 font-medium line-clamp-1">
-            {news.category}
+          <ChevronRight className="w-4 h-4 text-gray-300" />
+          <span className="text-gray-500">Publikasi</span>
+          <ChevronRight className="w-4 h-4 text-gray-300" />
+          <Link href="/publikasi/berita-kegiatan" className="hover:text-blue-600 transition-colors">
+            Berita & Kegiatan
+          </Link>
+          <ChevronRight className="w-4 h-4 text-gray-300" />
+          <span className="text-blue-600 font-medium truncate max-w-[200px]">
+            {news.title}
           </span>
-        </div>
+        </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* --- Main Content (Kiri) --- */}
-          <article className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6 md:p-8">
-            
-            {/* Header Artikel */}
+          
+          {/* --- MAIN ARTICLE --- */}
+          <article className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6 md:p-10">
             <header className="mb-8">
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
-                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
+                    news.category === 'Kegiatan' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+                }`}>
                   {news.category}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" /> {news.date}
+                  <Calendar className="w-4 h-4" /> {formatDate(news.createdAt)}
                 </span>
                 <span className="flex items-center gap-1">
                   <User className="w-4 h-4" /> {news.author}
                 </span>
-                <span className="flex items-center gap-1 ml-auto">
-                  <Clock className="w-4 h-4" /> 3 min read
-                </span>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-6">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-8">
                 {news.title}
               </h1>
 
-              <div className="relative w-full h-[300px] md:h-[400px] rounded-xl overflow-hidden shadow-inner">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-inner bg-gray-100">
                 <Image
-                  src={news.image}
+                  src={news.imageUrl || "/placeholder.jpg"} // Handle gambar kosong
                   alt={news.title}
                   fill
                   className="object-cover"
@@ -92,88 +123,68 @@ export default async function DetailBeritaPage({ params }: PageProps) {
               </div>
             </header>
 
-            {/* Isi Berita (Render HTML string) */}
-            {/* Menggunakan typography styling manual agar rapi */}
-            <div 
-              className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed space-y-6"
-            >
-              {/* Jika ada properti content HTML, render di sini. 
-                  Jika belum ada di dummy, kita pakai text placeholder */}
-              {news.content ? (
-                <div dangerouslySetInnerHTML={{ __html: news.content }} />
-              ) : (
-                // Fallback content jika dummy data belum punya field 'content'
-                <>
-                  <p className="text-lg font-medium text-gray-800">
-                    {news.excerpt}
-                  </p>
-                  <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                  </p>
-                  <p>
-                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                  </p>
-                  <h3 className="text-xl font-bold text-gray-800 mt-6 mb-3">Analisis Lanjutan</h3>
-                  <p>
-                    Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-                  </p>
-                </>
-              )}
+            {/* Isi Konten */}
+            <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed space-y-6">
+              <div dangerouslySetInnerHTML={{ __html: news.content }} />
             </div>
 
-            {/* Share Button Section */}
-            <div className="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center">
-               <span className="text-gray-500 text-sm">Bagikan artikel ini:</span>
+            {/* Share Button */}
+            <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+               <span className="text-gray-500 text-sm font-medium">Bagikan informasi ini:</span>
                <div className="flex gap-3">
-                 <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition">
-                    <Share2 className="w-4 h-4" />
-                 </button>
+                 <a 
+                    href={`https://wa.me/?text=${encodeURIComponent(`${news.title} - Baca selengkapnya: https://bmkgaptpranoto.com/publikasi/berita-kegiatan/${slug}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition font-medium text-sm"
+                 >
+                    <Share2 className="w-4 h-4" /> WhatsApp
+                 </a>
                </div>
             </div>
           </article>
 
+          {/* --- SIDEBAR --- */}
+          <aside className="space-y-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-28">
+              <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-gray-800 border-l-4 border-blue-600 pl-3">
+                    Berita Lainnya
+                  </h3>
+                  <Link href="/publikasi/berita-kegiatan" className="text-xs font-semibold text-blue-600 hover:underline">
+                    Lihat Semua
+                  </Link>
+              </div>
 
-          {/* --- Sidebar (Kanan) --- */}
-          <aside className="space-y-6">
-            
-            {/* Widget Berita Terbaru */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 border-l-4 border-blue-600 pl-3">
-                Berita Lainnya
-              </h3>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {otherNews.map((item) => (
                   <Link 
                     key={item.id} 
                     href={`/publikasi/berita-kegiatan/${item.slug}`}
                     className="group flex gap-4 items-start"
                   >
-                    <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                    <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
                       <Image 
-                        src={item.image} 
+                        src={item.imageUrl || "/placeholder.jpg"} 
                         alt={item.title} 
                         fill 
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-bold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
                         {item.title}
                       </h4>
-                      <p className="text-xs text-gray-400 mt-1">{item.date}</p>
+                      <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> {formatDate(item.createdAt)}
+                      </p>
                     </div>
                   </Link>
                 ))}
               </div>
-              
-              <div className="mt-6 pt-4 border-t border-gray-100">
-                 <Link href="/publikasi/berita-kegiatan" className="text-sm text-blue-600 font-medium hover:underline flex items-center justify-center">
-                    Lihat Semua Berita
-                 </Link>
-              </div>
             </div>
-
           </aside>
+
         </div>
       </div>
     </div>

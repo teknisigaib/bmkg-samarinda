@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Scan } from "lucide-react"; // 🔍 ikon zoom
 
 const cbTypes = [
-  { label: "Ketinggian Dasar (CB Base)", file: "cb_base" },
-  { label: "Ketinggian Puncak (CB Top)", file: "cb_top" },
-  { label: "Tutupan Awan (CB Extent)", file: "cb_extend" },
+  { label: "CB Base", file: "cb_base" },
+  { label: "CB Top", file: "cb_top" },
+  { label: "CB Extent", file: "cb_extend" },
 ];
 
 const times = ["00", "06", "12", "18"];
