@@ -6,7 +6,8 @@ import {
   CloudSun, Activity, Wind, Droplets, ArrowRight, MapPin, Calendar, Waves,
   Sun, Cloud, CloudRain, CloudLightning, CloudFog 
 } from "lucide-react";
-import type { GempaData, CuacaData } from "@/lib/gempa-bmkg"; 
+import type { GempaData } from "@/lib/bmkg/gempa";
+import type { CuacaData } from "@/lib/bmkg/cuaca";
 
 interface InfoWidgetProps {
   dataGempa: GempaData | null;

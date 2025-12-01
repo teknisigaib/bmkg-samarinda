@@ -48,9 +48,8 @@ const NAV_ITEMS = [
     label: "Iklim",
     items: [
       { name: "Info Hari Tanpa Hujan", desc: "Pantauan hari tanpa hujan", href: "/iklim/hari-tanpa-hujan", icon: <DropletOff className="w-5 h-5 text-blue-500" /> },
-      { name: "Hujan Dasarian", desc: "Data hujan per 10 hari", href: "/iklim/hujan-dasarian", icon: <CalendarDays className="w-5 h-5 text-blue-500" /> },
-      { name: "Hujan Bulanan", desc: "Data hujan per bulan", href: "/iklim/hujan-bulanan", icon: <Calendar className="w-5 h-5 text-blue-500" /> },
-      { name: "Potensi Banjir", desc: "Informasi potensi banjir", href: "/iklim/potensi-banjir", icon: <Waves className="w-5 h-5 text-blue-500" /> },
+      { name: "Prakiraan Hujan", desc: "Prakiraan Hujan", href: "/iklim/prakiraan-hujan", icon: <CalendarDays className="w-5 h-5 text-blue-500" /> },
+      { name: "Analisis Hujan", desc: "Analisis Hujan", href: "/iklim/analisis-hujan", icon: <Calendar className="w-5 h-5 text-blue-500" /> },
     ]
   },
   {
@@ -82,7 +81,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-2 z-50">
             <Image src="/logo-bmkg.png" alt="Logo BMKG" width={40} height={40} priority className="w-8 h-8 md:w-12 md:h-10" />
             <div className="flex flex-col">
-              <span className="text-gray-800 font-bold text-xs md:text-md leading-tight">Badan Meteorologi Klimatologi & Geofisika</span>
+              <span className="text-gray-800 font-bold text-xs md:text-sm leading-tight">Badan Meteorologi Klimatologi & Geofisika</span>
               <span className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">Stasiun Meteorologi APT Pranoto Samarinda</span>
             </div>
           </Link>

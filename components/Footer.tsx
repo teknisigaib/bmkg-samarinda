@@ -31,7 +31,7 @@ export default function Footer() {
           {/* Kolom 2: Kontak */}
           <div className="space-y-4">
             <h4 className="text-white font-bold text-base mb-2">Hubungi Kami</h4>
-            <div className="flex items-start gap-3">
+            <div className="items-start gap-3">
                 <MapPin className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
                 <span>Kantor Operasional : Bandara APT Pranoto Jl. Poros Samarinda-Bontang, Samarinda, Kalimantan Timur</span>
             </div>

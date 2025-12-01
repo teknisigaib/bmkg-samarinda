@@ -4,7 +4,8 @@ import prisma from "@/lib/prisma";
 import { ArrowRight, Calendar, Download, FileText } from "lucide-react";
 import RunningText from "@/components/RunningText"; // Import Running Text
 import InfoWidget from "@/components/InfoWidget";   // Import Widget
-import { getGempaTerbaru, getCuacaSamarinda } from "@/lib/gempa-bmkg"; // Import fetcher gempa
+import { getGempaTerbaru } from "@/lib/bmkg/gempa"; // <-- Cek path ini
+import { getCuacaSamarinda } from "@/lib/bmkg/cuaca"; // <-- Cek path ini
 import AviationSection from "@/components/AviationSection";
 import ServiceSection from "@/components/ServiceSection"; // <--- Import
 import AppPromo from "@/components/AppPromo";             // <--- Import

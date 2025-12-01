@@ -12,8 +12,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL") // Opsional jika nanti butuh direct connection
+  url       = env("DATABASE_URL") // Ini akan baca Port 6543
+  directUrl = env("DIRECT_URL")   // Ini akan baca Port 5432
 }
 
 // ------------------------------------
@@ -53,4 +53,22 @@ model Publication {
   createdAt DateTime @default(now())
 
   @@map("publications")
+}
+
+// ------------------------------------
+// Tabel 3: Iklim
+// ------------------------------------
+model ClimateData {
+  id        String   @id @default(cuid())
+  type      String   // 'HTH', 'HujanDasarian', 'HujanBulanan', 'PotensiBanjir'
+  title     String   // Judul
+  period    String   // Detail Tanggal: "21 - 30 November 2024"
+  dasarian  String   // "Dasarian III"
+  bulan     String   // "November 2024"
+  content   String   @db.Text // Analisis
+  imageUrl  String   // Peta
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("climate_data")
 }
