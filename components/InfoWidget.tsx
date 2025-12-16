@@ -139,7 +139,7 @@ export default function InfoWidget({ dataGempa, dataCuaca }: InfoWidgetProps) {
                                         <MapPin className="w-3 h-3" /> Kedalaman: {dataGempa.Kedalaman}
                                     </span>
                                     <span className={`px-3 py-1 rounded font-bold text-xs border flex items-center gap-1 ${
-                                        dataGempa.Potensi.includes("tidak") || dataGempa.Potensi.includes("Tidak")
+                                        dataGempa?.Potensi?.includes("tidak") || dataGempa?.Potensi?.includes("Tidak")
                                         ? "bg-green-100 text-green-700 border-green-200" 
                                         : "bg-red-100 text-red-700 border-red-200 animate-pulse"
                                     }`}>

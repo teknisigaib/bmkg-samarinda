@@ -3,7 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 
 export default function AppPromo() {
   return (
-    <section className="py-20 bg-gradient-to-br from-slate-900 to-blue-900 text-white overflow-hidden relative">
+    <section className="py-20 bg-gradient-to-br from-slate-900 to-blue-900 text-white overflow-hidden rounded-xl relative">
       {/* Dekorasi Background */}
       <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
          <div className="absolute right-0 top-0 w-[500px] h-[500px] bg-blue-500 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>

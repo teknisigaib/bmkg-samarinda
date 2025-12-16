@@ -11,7 +11,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "BMKG Samarinda",
+  title: "BMKG APT Pranoto Samarinda",
   description: "Website Resmi Stasiun Meteorologi Aji Pangeran Tumenggung Pranoto - Samarinda",
 };
 

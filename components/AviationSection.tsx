@@ -37,7 +37,7 @@ export default async function AviationSection() {
   }) + " UTC";
 
   return (
-    <section className="bg-slate-900 text-white py-16 relative overflow-hidden">
+    <section className="bg-slate-900 text-white py-16 rounded-2xl  relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
         <Plane className="w-96 h-96" />
