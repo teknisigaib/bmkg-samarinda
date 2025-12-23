@@ -79,7 +79,7 @@ export default function Navbar() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 z-50">
-            <Image src="/logo-bmkg.png" alt="Logo BMKG" width={40} height={40} priority className="w-8 h-8 md:w-12 md:h-10" />
+            <Image src="/logo-bmkg.png" alt="Logo BMKG" width={40} height={40} priority className="w-9 h-8 md:w-12 md:h-10" />
             <div className="flex flex-col">
               <span className="text-gray-800 font-bold text-xs md:text-sm leading-tight">Badan Meteorologi Klimatologi & Geofisika</span>
               <span className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">Stasiun Meteorologi APT Pranoto Samarinda</span>

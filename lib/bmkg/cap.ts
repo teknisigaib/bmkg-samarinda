@@ -11,6 +11,7 @@ export interface CAPData {
   expires: string;
   polygons: [number, number][][]; // Array of Array of [Lat, Lng]
   areaDesc: string;
+  web: string | null;
 }
 
 export async function getCAPAlertDetail(url: string): Promise<CAPData | null> {
@@ -55,6 +56,7 @@ export async function getCAPAlertDetail(url: string): Promise<CAPData | null> {
       expires: info.expires,
       areaDesc: info.area?.areaDesc,
       polygons: cleanPolygons,
+      web: info.web || null
     };
 
   } catch (error) {

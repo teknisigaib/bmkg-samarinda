@@ -72,3 +72,56 @@ model ClimateData {
 
   @@map("climate_data")
 }
+
+
+// ------------------------------------
+// Tabel 4: Data Pegawai (BARU)
+// ------------------------------------
+model Employee {
+  id        String   @id @default(cuid())
+  name      String
+  position  String   // Jabatan
+  group     String   // 'Pimpinan', 'Struktural', 'Fungsional'
+  image     String?  // URL Foto profil
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("employees") // Nama tabel di Supabase nanti 'employees'
+}
+
+
+// ------------------------------------
+// Tabel 5: Dokumen Kinerja (Transparansi)
+// ------------------------------------
+model PerformanceDoc {
+  id        String   @id @default(cuid())
+  title     String   // Nama Dokumen (e.g. "Laporan Kinerja 2024")
+  category  String   // 'Renstra', 'RencanaKinerja', 'PerjanjianKinerja', 'LaporanKinerja'
+  year      String   // '2024'
+  fileUrl   String   // Link PDF dari Supabase
+  fileSize  String?  // Opsional: "2.5 MB" (Jika bisa didapat dari file object)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("performance_docs")
+}
+
+
+
+// ------------------------------------
+// Tabel 6: Data Hotspot (Karhutla)
+// ------------------------------------
+model Hotspot {
+  id          String   @id @default(cuid())
+  latitude    Float
+  longitude   Float
+  confidence  Int?     // Tingkat kepercayaan (8, 9, dst)
+  province    String   // KALIMANTAN TIMUR
+  district    String   // PASER
+  subDistrict String   // BATU SOPANG
+  satellite   String   // SNPP, NOAA20
+  date        DateTime // 2025-12-22
+  createdAt   DateTime @default(now())
+
+  @@map("hotspots")
+}

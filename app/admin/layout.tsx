@@ -38,6 +38,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/publikasi" className="flex items-center gap-3 p-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium">
               <FileText className="w-5 h-5" /> Kelola Publikasi
             </Link>
+            <Link href="/admin/pegawai" className="flex items-center gap-3 p-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium">
+              <FileText className="w-5 h-5" /> Kelola Pegawai
+            </Link>
+            <Link href="/admin/kinerja" className="flex items-center gap-3 p-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium">
+              <FileText className="w-5 h-5" /> Kelola Dok Kinerja
+            </Link>
+            <Link href="/admin/karhutla" className="flex items-center gap-3 p-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium">
+              <FileText className="w-5 h-5" /> Hotspot
+            </Link>
           </div>
 
           {/* GRUP 2: MENU IKLIM (DIPERBAIKI) */}

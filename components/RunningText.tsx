@@ -1,64 +1,101 @@
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Waves } from "lucide-react"; // Tambah icon Waves
 import { getPeringatanDiniKaltim } from "@/lib/bmkg/warnings";
+import { getMaritimeWarnings } from "@/lib/bmkg/maritim"; // Import fungsi baru tadi
 
 export default async function RunningText() {
-  const text = await getPeringatanDiniKaltim();
+  // 1. Fetch Data secara Paralel (Agar cepat)
+  const [weatherText, marineWarnings] = await Promise.all([
+    getPeringatanDiniKaltim(),
+    getMaritimeWarnings()
+  ]);
   
-  // Cek apakah kondisi Aman
-  const isSafe = text.includes("Tidak ada peringatan");
+  // 2. Cek Kondisi Masing-masing
+  const isWeatherSafe = weatherText.includes("Tidak ada peringatan");
+  const isMarineSafe = marineWarnings.length === 0;
+  
+  // Kondisi Global: Aman jika keduanya Aman
+  const isOverallSafe = isWeatherSafe && isMarineSafe;
 
-  // KONFIGURASI VISUAL
-  const styles = isSafe 
+  // 3. Susun Pesan Akhir
+  let finalText = "";
+
+  if (isOverallSafe) {
+    // Jika semua aman, tampilkan pesan default cuaca
+    finalText = weatherText;
+  } else {
+    // Susun pesan bahaya
+    const parts = [];
+    
+    // Masukkan peringatan cuaca (jika ada bahaya)
+    if (!isWeatherSafe) parts.push(weatherText);
+    
+    // Masukkan peringatan maritim (jika ada bahaya)
+    if (!isMarineSafe) {
+      const marineMsg = `WASPADA MARITIM: ${marineWarnings.join(" • ")}`;
+      parts.push(marineMsg);
+    }
+    
+    // Gabungkan dengan pemisah
+    finalText = parts.join("  |  ");
+  }
+
+  // 4. KONFIGURASI VISUAL
+  const styles = isOverallSafe 
     ? {
-        // Mode Aman (Biru & Tenang)
+        // Mode Aman (Biru/Hijau & Tenang)
         bg: "bg-green-600",
         border: "border-green-700",
         labelBg: "bg-green-700",
         textColor: "text-white",
         iconColor: "text-green-200",
         Icon: CheckCircle2,
-        label: "INFO CUACA:",
+        label: "INFO TERKINI:",
         maskGradient: "from-green-600",
-        // Speed: 40 detik (Sangat Lambat/Santai)
-        speed: "15s" 
+        speed: "25s" // Sedikit diperlambat agar terbaca
       }
     : {
-        // Mode Bahaya (Kuning/Merah & Cepat)
+        // Mode Bahaya (Kuning & Cepat)
         bg: "bg-yellow-400",
         border: "border-yellow-500",
         labelBg: "bg-yellow-500",
         textColor: "text-blue-900",
         iconColor: "text-red-600",
-        Icon: AlertTriangle,
+        Icon: AlertTriangle, // Icon default peringatan
         label: "PERINGATAN DINI:",
         maskGradient: "from-yellow-400",
-        // Speed: 15 detik (Cepat/Urgent)
-        speed: "60s"
+        speed: "45s" // Dipercepat karena urgent
       };
+
+  // Jika Bahaya Maritim dominan (tidak ada cuaca ekstrem tapi ada gelombang tinggi), ganti icon label jadi Ombak
+  // (Opsional, agar lebih spesifik)
+  const DisplayIcon = (!isMarineSafe && isWeatherSafe) ? Waves : styles.Icon;
 
   return (
     <div className={`${styles.bg} ${styles.border} ${styles.textColor} border-b text-sm font-semibold h-10 overflow-hidden relative flex items-center z-40 shadow-sm transition-colors duration-500`}>
       
       {/* Label Statis (Kiri) */}
       <div className={`absolute left-0 top-0 bottom-0 ${styles.labelBg} px-4 flex items-center gap-2 z-20 shadow-lg md:px-6`}>
-        {/* Icon berkedip hanya jika bahaya */}
-        <styles.Icon className={`w-4 h-4 ${isSafe ? "" : "animate-pulse"} ${styles.iconColor}`} />
+        <DisplayIcon className={`w-4 h-4 ${isOverallSafe ? "" : "animate-pulse"} ${styles.iconColor}`} />
         <span className="font-bold uppercase tracking-tight text-xs md:text-sm whitespace-nowrap">
           {styles.label}
         </span>
       </div>
       
-      {/* Gradient Masking (Agar teks muncul halus dari balik label) */}
+      {/* Gradient Masking */}
       <div className={`absolute left-[130px] md:left-[160px] top-0 bottom-0 w-16 bg-gradient-to-r ${styles.maskGradient} to-transparent z-10`}></div>
 
       {/* Teks Berjalan */}
       <div className="flex-1 overflow-hidden relative h-full flex items-center pl-[150px] md:pl-[180px]">
         <div 
-            className="animate-marquee whitespace-nowrap absolute"
-            // DI SINI KUNCINYA: Override durasi animasi lewat inline style
+            className="animate-marquee whitespace-nowrap absolute flex items-center gap-8"
             style={{ animationDuration: styles.speed }}
         >
-          {text}
+          {/* Render Text */}
+          <span>{finalText}</span>
+          
+          {/* Render Duplikat untuk efek looping mulus (jika teks pendek) */}
+          <span className="opacity-50 mx-4">•</span>
+          <span>{finalText}</span>
         </div>
       </div>
     </div>
