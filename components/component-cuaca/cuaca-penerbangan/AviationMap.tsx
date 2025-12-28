@@ -1,17 +1,18 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Tooltip, useMap, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip, useMap, Polyline, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
-import { ParsedMetar, getFlightCategory } from "@/lib/bmkg/aviation-utils";
+import { ParsedMetar } from "@/lib/bmkg/aviation-utils";
+import { Layers, RefreshCw, ChevronLeft, ChevronRight, Globe, Map as MapIcon } from "lucide-react";
 
-// --- 1. ICON PESAWAT (Static) ---
+// --- 1. ICON PESAWAT ---
 const createPlaneIcon = (color: string, rotation: number = 0) => {
     return L.divIcon({
       className: "custom-plane-icon",
       html: `
-        <div style="background-color: ${color}; width: 25px; height: 25px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; transform: rotate(${rotation}deg);">
+        <div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; transform: rotate(${rotation}deg);">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"/><path d="m5 12 3-5m11 5-3-5"/><path d="m4 19 3-2.5"/><path d="m20 19-3-2.5"/></svg>
         </div>
       `,
@@ -20,7 +21,7 @@ const createPlaneIcon = (color: string, rotation: number = 0) => {
     });
 };
 
-// --- 2. ICON DESTINASI (Pulsing Radar Effect) ---
+// --- 2. ICON RADAR BEACON ---
 const createRadarIcon = () => {
     return L.divIcon({
         className: "radar-beacon",
@@ -35,36 +36,60 @@ const createRadarIcon = () => {
     });
 };
 
-// --- 3. HELPER: MEMBUAT GARIS MELENGKUNG (Bezier Curve) ---
-// Ini membuat garis terlihat seperti rute penerbangan asli
+// --- 3. HELPER PATH ---
 const getCurvedPath = (start: [number, number], end: [number, number]) => {
     const lat1 = start[0];
     const lng1 = start[1];
     const lat2 = end[0];
     const lng2 = end[1];
-
-    // Titik Tengah
     const midLat = (lat1 + lat2) / 2;
     const midLng = (lng1 + lng2) / 2;
-
-    // Hitung jarak untuk menentukan seberapa melengkung garisnya
     const dist = Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
-    
-    // Offset lengkungan (makin jauh, makin melengkung ke atas)
-    // Curvature logic: if long distance, arc higher (add to lat)
     const curvature = dist * 0.15; 
-
-    const controlLat = midLat + curvature;
-    const controlLng = midLng;
-
-    // Generate titik-titik kurva (Quadratic Bezier)
     const path = [];
-    for (let t = 0; t <= 1; t += 0.02) { // 50 segmen garis agar halus
-        const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * controlLat + t * t * lat2;
-        const lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * controlLng + t * t * lng2;
-        path.push([lat, lng] as [number, number]);
+    for (let t = 0; t <= 1; t += 0.02) { 
+        path.push([
+            (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * (midLat + curvature) + t * t * lat2,
+            (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * midLng + t * t * lng2
+        ] as [number, number]);
     }
     return path;
+};
+
+// --- 4. DATE HELPERS ---
+const formatDateToRadar = (date: Date) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}`;
+};
+
+const formatDateToSatellite = (date: Date) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:00Z`;
+};
+
+const formatDisplayTime = (date: Date) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
+};
+
+const getInitialDate = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 10); 
+    now.setMinutes(now.getMinutes() - (now.getMinutes() % 10)); 
+    return now;
+};
+
+// --- 5. COLOR HELPER (NEW LOGIC) ---
+// Logika warna berdasarkan Visibility (Sama dengan Dashboard)
+const getVisibilityColor = (visibilityStr: string) => {
+    const vis = parseFloat(visibilityStr);
+    
+    if (isNaN(vis)) return '#64748b'; // Slate (No Data)
+
+    if (vis > 8) return '#22c55e';      // Green-500
+    if (vis >= 4.8) return '#06b6d4';   // Cyan-500
+    if (vis >= 1.6) return '#eab308';   // Yellow-500
+    return '#ef4444';                   // Red-500
 };
 
 const AutoZoom = ({ data }: { data: ParsedMetar[] }) => {
@@ -85,112 +110,222 @@ interface MapProps {
 }
 
 export default function AviationMap({ airports, onSelect, selectedIcao }: MapProps) {
+  // State Layers
+  const [showRadar, setShowRadar] = useState(false);
+  const [showSatellite, setShowSatellite] = useState(false);
+  const [showBoundary, setShowBoundary] = useState(true); 
   
-  const getColor = (cat: string) => {
-    if (cat === 'VFR') return '#10b981'; 
-    if (cat === 'MVFR') return '#3b82f6'; 
-    return '#ef4444'; 
+  // State Data
+  const [geoJsonData, setGeoJsonData] = useState<any>(null);
+  const [radarDate, setRadarDate] = useState<Date | null>(null);
+  const [satelliteDate, setSatelliteDate] = useState<Date | null>(null);
+
+  // Init Data & Waktu
+  useEffect(() => {
+      const initTime = getInitialDate();
+      setRadarDate(new Date(initTime));
+      setSatelliteDate(new Date(initTime));
+
+      fetch('/maps/indonesia.geojson')
+        .then(res => res.json())
+        .then(data => setGeoJsonData(data))
+        .catch(err => console.error("Gagal memuat GeoJSON:", err));
+  }, []);
+
+  const adjustRadarTime = (minutes: number) => {
+      if (!radarDate) return;
+      const newDate = new Date(radarDate);
+      newDate.setMinutes(newDate.getMinutes() + minutes);
+      setRadarDate(newDate);
+  };
+
+  const adjustSatelliteTime = (minutes: number) => {
+      if (!satelliteDate) return;
+      const newDate = new Date(satelliteDate);
+      newDate.setMinutes(newDate.getMinutes() + minutes);
+      setSatelliteDate(newDate);
   };
 
   const wals = airports.find(a => a.icao_id === 'WALS');
   const selected = airports.find(a => a.icao_id === selectedIcao);
-
-  // Generate Curved Path jika mode rute aktif
   const routePositions = (wals && selected && selectedIcao !== 'WALS') 
-    ? getCurvedPath(
-        [parseFloat(wals.latitude), parseFloat(wals.longitude)],
-        [parseFloat(selected.latitude), parseFloat(selected.longitude)]
-      )
-    : null;
+    ? getCurvedPath([parseFloat(wals.latitude), parseFloat(wals.longitude)], [parseFloat(selected.latitude), parseFloat(selected.longitude)]) : null;
+
+  const radarUrlString = radarDate ? formatDateToRadar(radarDate) : "";
+  const satelliteUrlString = satelliteDate ? formatDateToSatellite(satelliteDate) : "";
 
   return (
-    <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm z-0 relative bg-slate-900">
+    <div className="h-[600px] md:h-[750px] w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm z-0 relative bg-slate-900 group transition-all duration-500">
       
-      {/* CSS Animasi Khusus */}
       <style jsx global>{`
-        /* Animasi Garis Mengalir */
-        .flight-path-animated {
-            stroke-dasharray: 10, 10;
-            stroke-dashoffset: 200;
-            animation: dash 3s linear infinite;
-            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6)); /* Glow Effect */
-        }
-        
-        @keyframes dash {
-            to {
-                stroke-dashoffset: 0;
-            }
-        }
-
-        /* Hilangkan background map default agar filter dark mode lebih enak */
-        .leaflet-container {
-            background-color: #0f172a !important;
-        }
+        .flight-path-animated { stroke-dasharray: 10, 10; stroke-dashoffset: 200; animation: dash 3s linear infinite; filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6)); }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
+        .leaflet-container { background-color: #0f172a !important; }
       `}</style>
 
+      {/* --- FLOATING CONTROLS --- */}
+      <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-3">
+          
+          {/* Toggle Buttons Group */}
+          <div className="flex gap-2">
+            {/* Tombol Batas Wilayah */}
+            <button 
+                onClick={() => setShowBoundary(!showBoundary)} 
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold shadow-lg transition-all border ${showBoundary ? 'bg-slate-600 text-white border-slate-500' : 'bg-white text-slate-700 border-gray-200 hover:bg-gray-50'}`}
+                title="Tampilkan Batas Wilayah Indonesia"
+            >
+                <MapIcon className="w-3 h-3" /> {showBoundary ? 'Batas: ON' : 'Batas: OFF'}
+            </button>
+
+            {/* Tombol Satelit */}
+            <button 
+                onClick={() => setShowSatellite(!showSatellite)} 
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold shadow-lg transition-all border ${showSatellite ? 'bg-purple-600 text-white border-purple-500' : 'bg-white text-slate-700 border-gray-200 hover:bg-gray-50'}`}
+            >
+                <Globe className="w-3 h-3" /> {showSatellite ? 'Sat: ON' : 'Sat: OFF'}
+            </button>
+
+            {/* Tombol Radar */}
+            <button 
+                onClick={() => setShowRadar(!showRadar)} 
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold shadow-lg transition-all border ${showRadar ? 'bg-blue-600 text-white border-blue-500' : 'bg-white text-slate-700 border-gray-200 hover:bg-gray-50'}`}
+            >
+                <Layers className="w-3 h-3" /> {showRadar ? 'Radar: ON' : 'Radar: OFF'}
+            </button>
+          </div>
+
+          {/* Unified Control Card */}
+          {(showRadar || showSatellite) && (
+            <div className="bg-slate-900/95 backdrop-blur text-white rounded-xl border border-slate-700 shadow-2xl flex flex-col w-[260px] divide-y divide-slate-700 overflow-hidden animate-in fade-in slide-in-from-right-3">
+                
+                {/* --- RADAR CONTROLS --- */}
+                {showRadar && radarDate && (
+                    <div className="p-3">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 text-blue-400">
+                                <Layers className="w-3 h-3" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Rain Radar</span>
+                            </div>
+                            <button onClick={() => setRadarDate(getInitialDate())} className="text-slate-500 hover:text-white transition-colors" title="Reset"><RefreshCw className="w-3 h-3" /></button>
+                        </div>
+
+                        <div className="flex items-center justify-between bg-slate-800 rounded-lg p-1 border border-slate-700 mb-2">
+                            <button onClick={() => adjustRadarTime(-5)} className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+                            <div className="font-mono text-white font-bold text-xs">{formatDisplayTime(radarDate)}</div>
+                            <button onClick={() => adjustRadarTime(5)} className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"><ChevronRight className="w-4 h-4" /></button>
+                        </div>
+
+                        {/* Legend Radar (dBZ) */}
+                        <div>
+                            <div className="h-3 w-full rounded-sm mb-1 border border-white/10" style={{background: `linear-gradient(to right, #00FFFF 0%, #0080FF 8.3%, #0000FF 16.6%, #00FF00 25%, #80FF00 33.3%, #FFFF00 41.6%, #FFC000 50%, #FF8000 58.3%, #FF4000 66.6%, #FF0000 75%, #C00000 83.3%, #FF00FF 91.6%, #800080 100%)`}}></div>
+                            <div className="flex justify-between text-[8px] text-slate-300 font-mono font-bold px-0.5">
+                                <span>5</span><span>15</span><span>25</span><span>35</span><span>45</span><span>55</span><span>65</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* --- SATELLITE CONTROLS --- */}
+                {showSatellite && satelliteDate && (
+                    <div className="p-3 bg-slate-800/30">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 text-purple-400">
+                                <Globe className="w-3 h-3" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Himawari-9</span>
+                            </div>
+                            <button onClick={() => setSatelliteDate(getInitialDate())} className="text-slate-500 hover:text-white transition-colors" title="Reset"><RefreshCw className="w-3 h-3" /></button>
+                        </div>
+
+                        <div className="flex items-center justify-between bg-slate-800 rounded-lg p-1 border border-slate-700 mb-2">
+                            <button onClick={() => adjustSatelliteTime(-10)} className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+                            <div className="font-mono text-white font-bold text-xs">{formatDisplayTime(satelliteDate)}</div>
+                            <button onClick={() => adjustSatelliteTime(10)} className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"><ChevronRight className="w-4 h-4" /></button>
+                        </div>
+
+                        {/* Legend Satelit */}
+                        <div>
+                            <div className="h-3 w-full rounded-sm mb-1 border border-white/10" style={{background: `linear-gradient(to right, #FF0000 0%, #FF8000 15%, #FFFF00 30%, #80FF00 45%, #00FF00 60%, #00FFFF 75%, #0000FF 90%, #000080 100%)`}}></div>
+                            <div className="flex justify-between text-[8px] text-slate-300 font-mono font-bold px-0.5">
+                                <span>-100</span><span>-75</span><span>-50</span><span>-25</span><span>0</span><span>+20</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="px-3 py-1.5 bg-slate-950/50 text-[9px] text-slate-500 text-center italic border-t border-slate-800">
+                    *Geser waktu {"(<<)"} jika peta kosong
+                </div>
+            </div>
+          )}
+      </div>
+
       <MapContainer center={[0, 117]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
-        {/* Peta Mode Gelap/Saturnus agar garis rute terlihat kontras */}
-        <TileLayer 
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        />
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
+
+        {/* --- LAYER GEOJSON BATAS INDONESIA --- */}
+        {showBoundary && geoJsonData && (
+            <GeoJSON 
+                data={geoJsonData}
+                style={{
+                    color: '#ffffff',       // Warna Putih
+                    weight: 0.9,            // Sangat Tipis
+                    opacity: 1,           
+                    fillColor: 'transparent', // FIX: HARUS TRANSPARAN AGAR PETA TERLIHAT
+                }}
+            />
+        )}
+
+        {/* --- LAYER SATELIT --- */}
+        {showSatellite && satelliteUrlString && (
+            <TileLayer
+                key={`sat-${satelliteUrlString}`}
+                url={`/api/satellite-proxy?baserun=${satelliteUrlString}&z={z}&x={x}&y={y}`}
+                tms={true} 
+                opacity={0.6}
+                zIndex={5}    
+                maxZoom={10}
+                minZoom={3}
+                errorTileUrl="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+            />
+        )}
         
+        {/* --- LAYER RADAR --- */}
+        {showRadar && radarUrlString && (
+            <TileLayer
+                key={`radar-${radarUrlString}`}
+                url={`/api/radar-proxy?time=${radarUrlString}&z={z}&x={x}&y={y}&_t=${new Date().getTime()}`}
+                tms={true} 
+                opacity={0.8}
+                zIndex={10}    
+                maxZoom={10}
+                minZoom={4}
+                errorTileUrl="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+            />
+        )}
+
         <AutoZoom data={airports} />
 
-        {/* 1. GAMBAR RUTE (Polyline) */}
         {routePositions && (
             <>
-                {/* Garis Dasar (Shadow/Background Line) */}
-                <Polyline 
-                    positions={routePositions} 
-                    pathOptions={{ 
-                        color: '#1e3a8a', // Biru gelap
-                        weight: 4, 
-                        opacity: 0.5
-                    }} 
-                />
-                {/* Garis Animasi (Flowing Line) */}
-                <Polyline 
-                    positions={routePositions} 
-                    pathOptions={{ 
-                        color: '#60a5fa', // Biru terang neon
-                        weight: 2, 
-                        className: 'flight-path-animated' 
-                    }} 
-                />
-                {/* Marker Radar di Tujuan */}
-                {selected && (
-                    <Marker 
-                        position={[parseFloat(selected.latitude), parseFloat(selected.longitude)]}
-                        icon={createRadarIcon()}
-                        zIndexOffset={1000}
-                    />
-                )}
+                <Polyline positions={routePositions} pathOptions={{ color: '#1e3a8a', weight: 4, opacity: 0.5 }} />
+                <Polyline positions={routePositions} pathOptions={{ color: '#60a5fa', weight: 2, className: 'flight-path-animated' }} />
+                {selected && <Marker position={[parseFloat(selected.latitude), parseFloat(selected.longitude)]} icon={createRadarIcon()} zIndexOffset={1000} />}
             </>
         )}
 
-        {/* 2. TITIK BANDARA */}
         {airports.map((apt) => {
-            const cat = getFlightCategory(apt.visibility, apt.weather);
-            const isSelected = selectedIcao === apt.icao_id;
-            const isWals = apt.icao_id === 'WALS';
-
-            // Jangan render marker pesawat biasa di tujuan jika sedang mode rute (ganti radar)
-            // Tapi render marker default jika bukan tujuan
-            if (routePositions && isSelected) return null;
-
+            if (routePositions && selectedIcao === apt.icao_id) return null;
             return (
                 <Marker 
                     key={apt.icao_id}
                     position={[parseFloat(apt.latitude), parseFloat(apt.longitude)]}
-                    icon={createPlaneIcon(getColor(cat), 0)} // Rotation 0 for map view
+                    // IMPLEMENTASI WARNA BARU DISINI
+                    icon={createPlaneIcon(getVisibilityColor(apt.visibility), 0)}
                     eventHandlers={{ click: () => onSelect(apt.icao_id) }}
-                    opacity={selectedIcao && !isSelected && !isWals ? 0.3 : 1} // Fokuskan Origin & Dest
+                    opacity={selectedIcao && selectedIcao !== apt.icao_id && apt.icao_id !== 'WALS' ? 0.8 : 1}
                 >
-                    <Tooltip direction="top" offset={[0, -15]} opacity={1} permanent={isSelected || isWals}>
-                        <div className="text-center text-xs text-slate-800">
-                            {apt.icao_id}
-                        </div>
+                    <Tooltip direction="top" offset={[0, -15]} opacity={1} permanent={selectedIcao === apt.icao_id || apt.icao_id === 'WALS'}>
+                        <div className="text-center font-bold text-xs text-slate-800">{apt.icao_id}</div>
                     </Tooltip>
                 </Marker>
             );

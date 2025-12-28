@@ -113,7 +113,7 @@ export default async function PeringatanPage() {
                                             alt="Infografis Peringatan Dini BMKG" 
                                             fill
                                             className="object-contain"
-                                            unoptimized // Agar bisa load gambar dari nowcasting.bmkg.go.id tanpa ribet config
+                                            unoptimized 
                                         />
                                     </div>
                                     
