@@ -11,7 +11,7 @@ export async function getAllAirportsWeather(): Promise<ParsedMetar[]> {
   try {
     const url = `https://cuaca.bmkg.go.id/api/v1/aviation/latest/observation.json?api_token=${API_TOKEN}`;
     
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url, { next: { revalidate: 60 } });
     
     if (!res.ok) throw new Error("Failed to fetch airports data");
     

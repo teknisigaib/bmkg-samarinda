@@ -246,60 +246,147 @@ function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
     );
 }
 
-// --- ROUTE WEATHER CARD (REVISI: SOLID COLOR + CENTER ALIGN) ---
+/// --- HELPER FUNCTIONS ---
+
+const estimateDuration = (km: number) => {
+    const speed = 550; // Avg speed km/h
+    const timeInHours = km / speed;
+    const hours = Math.floor(timeInHours);
+    const minutes = Math.round((timeInHours - hours) * 60);
+    return `${hours}j ${minutes}m`;
+};
+
+// LOGIKA BARU: Status Berdasarkan Visibility (Sesuai Gambar Referensi)
+const getVisibilityStatus = (visibilityStr: string) => {
+    const vis = parseFloat(visibilityStr);
+
+    // Handle Data Error/Not Updated
+    if (isNaN(vis)) {
+        return {
+            label: 'No Data',
+            className: 'bg-slate-100 text-slate-500 border-slate-200',
+            dotColor: 'bg-slate-400'
+        };
+    }
+
+    // 1. Hijau (> 8 km)
+    if (vis > 8) {
+        return {
+            label: '> 8 km',
+            className: 'bg-green-50 text-green-700 border-green-200',
+            dotColor: 'bg-green-500'
+        };
+    } 
+    // 2. Cyan (4.8 - 8 km)
+    else if (vis >= 4.8) {
+        return {
+            label: '4.8 - 8 km',
+            className: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+            dotColor: 'bg-cyan-500'
+        };
+    } 
+    // 3. Kuning (1.6 - 4.8 km)
+    else if (vis >= 1.6) {
+        return {
+            label: '1.6 - 4.8 km',
+            className: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+            dotColor: 'bg-yellow-500'
+        };
+    } 
+    // 4. Merah (< 1.6 km)
+    else {
+        return {
+            label: '< 1.6 km',
+            className: 'bg-red-50 text-red-700 border-red-200',
+            dotColor: 'bg-red-500'
+        };
+    }
+};
+
+// --- ROUTE WEATHER CARD (CLEAN THEME + VISIBILITY STATUS) ---
 function RouteWeatherCard({ origin, destination }: { origin: ParsedMetar, destination: ParsedMetar }) {
     const distance = calculateDistance(
         parseFloat(origin.latitude), parseFloat(origin.longitude),
         parseFloat(destination.latitude), parseFloat(destination.longitude)
     );
+    const duration = estimateDuration(distance);
+
+    // Hitung status visibility
+    const originStatus = getVisibilityStatus(origin.visibility);
+    const destStatus = getVisibilityStatus(destination.visibility);
 
     return (
-        // Hilangkan gradasi, gunakan warna solid (bg-slate-900)
-        <div className="bg-slate-900 rounded-3xl shadow-xl overflow-hidden border border-slate-800 text-slate-200">
+        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative group">
             
-            <div className="relative z-10 p-6 md:p-8">
+            {/* Dekorasi Header (Garis Aksen di Atas) */}
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-slate-300 via-blue-400 to-slate-300"></div>
+
+            <div className="p-6 md:p-8">
                 
-                {/* 1. HEADER GRID 3 KOLOM (CENTER ALIGN SEMUA) */}
-                <div className="grid grid-cols-3 items-center mb-10 w-full text-center">
+                {/* 1. HEADER RUTE */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
                     
-                    {/* Origin (Center Align) */}
-                    <div className="flex flex-col items-center">
-                        <div className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">Origin</div>
-                        <div className="text-3xl md:text-5xl font-black font-mono text-white tracking-tighter leading-none">{origin.icao_id}</div>
-                        <div className="text-sm font-medium text-emerald-400 mt-2 truncate w-full">{origin.station_name.split('-')[0].trim()}</div>
-                    </div>
-
-                    {/* Path Visualizer (Center) */}
-                    <div className="flex flex-col items-center justify-center px-2 w-full">
-                        <div className="w-full flex items-center justify-center gap-2">
-                            <div className="h-[2px] w-full bg-slate-700 rounded-full"></div>
-                            <div className="shrink-0 flex flex-col items-center">
-                                <Plane className="w-6 h-6 text-slate-400 rotate-90" />
-                            </div>
-                            <div className="h-[2px] w-full bg-slate-700 rounded-full"></div>
+                    {/* Origin */}
+                    <div className="text-center md:text-left flex-1">
+                        {/* Status Visibility Badge */}
+                        <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1.5 ${originStatus.className}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${originStatus.dotColor}`}></span>
+                                {originStatus.label}
+                            </span>
                         </div>
-                        <span className="text-sm text-slate-400 mt-2 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">{distance} km</span>
+                        
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{origin.icao_id}</h2>
+                        <div className="flex items-center justify-center md:justify-start gap-2 mt-1">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">ORIGIN</span>
+                            <span className="text-slate-300">•</span>
+                            <p className="text-sm font-medium text-slate-500 truncate max-w-[150px]">{origin.station_name.split('-')[0].trim()}</p>
+                        </div>
                     </div>
 
-                    {/* Destination (Center Align) */}
-                    <div className="flex flex-col items-center">
-                        <div className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">Destination</div>
-                        <div className="text-3xl md:text-5xl font-black font-mono text-white tracking-tighter leading-none">{destination.icao_id}</div>
-                        <div className="text-sm font-medium text-blue-400 mt-2 truncate w-full">{destination.station_name.split('-')[0].trim()}</div>
+                    {/* Flight Path Visualizer */}
+                    <div className="flex-1 w-full md:max-w-xs flex flex-col items-center justify-center px-4">
+                        <div className="flex items-center justify-between w-full text-xs font-mono text-slate-400 mb-1">
+                            <span>{distance} km</span>
+                            <span>Est. {duration}</span>
+                        </div>
+                        <div className="relative w-full h-8 flex items-center">
+                            {/* Garis Putus-putus */}
+                            <div className="absolute w-full h-[2px] border-t-2 border-dashed border-slate-300"></div>
+                            {/* Icon Pesawat */}
+                            <div className="absolute left-1/2 -translate-x-1/2 bg-white p-1 rounded-full border border-slate-200 shadow-sm z-10">
+                                <Plane className="w-5 h-5 text-blue-600 rotate-90" />
+                            </div>
+                        </div>
                     </div>
 
+                    {/* Destination */}
+                    <div className="text-center md:text-right flex-1">
+                        {/* Status Visibility Badge */}
+                        <div className="flex items-center justify-center md:justify-end gap-2 mb-2">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1.5 ${destStatus.className}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${destStatus.dotColor}`}></span>
+                                {destStatus.label}
+                            </span>
+                        </div>
+
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{destination.icao_id}</h2>
+                        <div className="flex items-center justify-center md:justify-end gap-2 mt-1">
+                            <p className="text-sm font-medium text-slate-500 truncate max-w-[150px]">{destination.station_name.split('-')[0].trim()}</p>
+                            <span className="text-slate-300">•</span>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">DEST</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* 2. WEATHER COMPARISON (CENTER ALIGN SEMUA) */}
-                <div className="grid grid-cols-2 gap-8 md:gap-12 relative border-t border-slate-800 pt-8">
-                    {/* Divider Tengah */}
-                    <div className="absolute left-1/2 top-8 bottom-0 w-px bg-slate-800 -translate-x-1/2 hidden md:block"></div>
+                {/* Divider */}
+                <div className="h-px w-full bg-slate-100 mb-8"></div>
 
-                    {/* Origin Weather (Center) */}
-                    <WeatherColumn airport={origin} color="emerald" />
-
-                    {/* Destination Weather (Center) */}
-                    <WeatherColumn airport={destination} color="blue" />
+                {/* 2. WEATHER DETAILS GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-100 -translate-x-1/2 hidden md:block"></div>
+                    <WeatherColumn airport={origin} align="left" />
+                    <WeatherColumn airport={destination} align="right" />
                 </div>
 
             </div>
@@ -307,61 +394,42 @@ function RouteWeatherCard({ origin, destination }: { origin: ParsedMetar, destin
     );
 }
 
-// Sub-komponen WeatherColumn (Rata Tengah)
-function WeatherColumn({ airport, color }: { airport: ParsedMetar, color: 'emerald' | 'blue' }) {
+// --- SUB-COMPONENT: WEATHER COLUMN ---
+function WeatherColumn({ airport, align }: { airport: ParsedMetar, align: 'left' | 'right' }) {
     const { humanWeather } = getPublicSummary(airport.visibility, airport.weather);
     const iconUrl = `https://web-aviation.bmkg.go.id/images/weathers/${airport.symbol}.png`;
-    
-    // Warna teks aksen
-    const accentColor = color === 'emerald' ? 'text-emerald-400' : 'text-blue-400';
 
+    const flexDir = align === 'right' ? 'md:flex-row-reverse text-right' : 'md:flex-row text-left';
+    
     return (
-        // Tambahkan w-full agar grid bisa melebar
-        <div className="flex flex-col items-center text-center w-full">
-            
-            {/* Main Icon & Temp (Tetap di Tengah Atas) */}
-            <div className="flex flex-col items-center gap-2 mb-8">
-                <div className="w-20 h-20 relative filter drop-shadow-xl shrink-0">
+        <div className="flex flex-col gap-6">
+            <div className={`flex flex-col items-center ${flexDir} gap-4`}>
+                <div className="w-20 h-20 shrink-0 bg-slate-50 rounded-2xl p-2 border border-slate-100 shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={iconUrl} alt="Weather Icon" className="w-full h-full object-contain" />
+                    <img src={iconUrl} alt="Weather" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                    <div className="text-5xl font-black text-white leading-none mb-1 tracking-tight">{airport.temp}°</div>
-                    <div className={`text-sm font-bold uppercase ${accentColor} leading-tight`}>{humanWeather}</div>
+                    <div className="text-4xl font-black text-slate-800">{airport.temp}°<span className="text-xl text-slate-400 font-medium">C</span></div>
+                    <div className="text-sm font-bold text-slate-500 uppercase tracking-wide mt-1">{humanWeather}</div>
                 </div>
             </div>
 
-            {/* Data List: Mobile (1 Col) -> Desktop (3 Cols) */}
-            <div className="w-full text-sm grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-2 border-t border-slate-800/50 pt-6">
-                
-                {/* Wind */}
-                <div className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-2 text-slate-500 text-sm uppercase  font-bold mb-1">
-                        <Wind className="w-3 h-3"/> Angin
-                    </div>
-                    <div className="text-slate-200 font-bold whitespace-nowrap">{airport.wind_speed} <span className="text-sm text-slate-500 font-normal">km/j</span></div>
-                    <div className="text-sm text-emerald-400 uppercase font-bold">{airport.wind_direction}</div>
+            <div className="grid grid-cols-3 gap-3">
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center hover:border-blue-200 transition-colors">
+                    <div className="flex justify-center mb-1"><Wind className="w-4 h-4 text-blue-500" /></div>
+                    <div className="font-bold text-slate-700 text-sm">{airport.wind_speed}</div>
+                    <div className="text-[10px] text-slate-400 uppercase">km/j</div>
                 </div>
-
-                {/* Visibility */}
-                <div className="flex flex-col items-center gap-1 border-t md:border-t-0 md:border-l md:border-r border-slate-800/50 pt-4 md:pt-0">
-                    <div className="flex items-center gap-2 text-slate-500 text-sm uppercase font-bold mb-1">
-                        <Eye className="w-3 h-3"/> Visibilitas
-                    </div>
-                    <div className="text-slate-200 font-bold whitespace-nowrap">{airport.visibility} <span className="text-sm text-slate-500 font-normal">km</span></div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center hover:border-emerald-200 transition-colors">
+                    <div className="flex justify-center mb-1"><Eye className="w-4 h-4 text-emerald-500" /></div>
+                    <div className="font-bold text-slate-700 text-sm">{airport.visibility}</div>
+                    <div className="text-[10px] text-slate-400 uppercase">km</div>
                 </div>
-
-                {/* Pressure & Dew */}
-                <div className="flex flex-col items-center gap-1 border-t md:border-t-0 border-slate-800/50 pt-4 md:pt-0">
-                    <div className="flex items-center gap-2 text-slate-500 text-sm uppercase  font-bold mb-1">
-                        <Gauge className="w-3 h-3"/> QNH
-                    </div>
-                    <div className="text-slate-200 font-bold whitespace-nowrap">
-                        {airport.pressure} <span className="text-sm text-slate-500 font-normal">hPa</span>
-                    </div>
-                    <div className="text-sm text-blue-400 uppercase font-bold">Dewpoint {airport.dew_point}°</div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center hover:border-purple-200 transition-colors">
+                    <div className="flex justify-center mb-1"><Gauge className="w-4 h-4 text-purple-500" /></div>
+                    <div className="font-bold text-slate-700 text-sm">{airport.pressure}</div>
+                    <div className="text-[10px] text-slate-400 uppercase">hPa</div>
                 </div>
-
             </div>
         </div>
     );

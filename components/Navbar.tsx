@@ -116,8 +116,8 @@ export default function Navbar() {
 
           {/* Right Section */}
           <div className="flex items-center gap-3 ml-auto">
-            <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-blue-600 text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-blue-700 transition-all shadow-md hover:shadow-lg">Contact</Link>
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition" aria-label="Toggle Menu">
+            <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-white-600 text-blue-600 text-sm font-semibold px-5 py-2 rounded-xl border-1 hover:bg-blue-700 transition-all hover:shadow-lg hover:text-white">Kontak</Link>
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md transition" aria-label="Toggle Menu">
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
