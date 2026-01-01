@@ -6,7 +6,7 @@ export default function CuacaLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-gray-50 pt-6 pb-20">
       
       {/* Container Full Width Konsisten */}
-      <div className="max-w-[1600px] mx-auto px-0 sm:px-6 lg:px-8">
+      <div className="max-w-[1700px] mx-auto px-0 sm:px-6 lg:px-8">
         
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-gray-200 pb-6">
@@ -36,7 +36,7 @@ export default function CuacaLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* --- CONTENT WRAPPER --- */}
-        <div className="flex flex-col md:flex-row gap-8 lg:gap-10 items-start">
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-10">
           
           {/* Sidebar */}
           <CuacaSidebar />

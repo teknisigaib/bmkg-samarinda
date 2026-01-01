@@ -110,7 +110,7 @@ export default function MaritimePage() {
 
   return (
     <div className="min-h-screen ">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8 max-sm:max-w-xs ">
         
         {/* --- HEADER --- */}
         <div className="space-y-6 border-b border-gray-200 pb-8">

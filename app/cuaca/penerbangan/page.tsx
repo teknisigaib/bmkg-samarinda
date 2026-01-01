@@ -21,7 +21,7 @@ export default async function AviationPage() {
   const kaltimAirports = filterKaltimAirports(allAirports);
 
   return (
-    <div className="w-full space-y-10"> {/* Tambahkan space-y-10 agar ada jarak */}
+    <div className="w-full space-y-10 max-sm:max-w-xs"> {/* Tambahkan space-y-10 agar ada jarak */}
         
         {/* BAGIAN ATAS: DASHBOARD INTERAKTIF */}
         <AviationDashboard 

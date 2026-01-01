@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import { MapPin, CalendarDays, Droplets, Wind, Eye, Clock, Cloud, Navigation, Thermometer } from "lucide-react";
 import type { WeatherResponse, WeatherDataPoint } from "@/lib/bmkg/types";
-import LocationPicker from "./LocationPicker";
+import LocationPicker from "./LocationPickerss";
 // --- HELPERS ---
 const formatTime = (isoString: string) => {
   return new Date(isoString).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":");

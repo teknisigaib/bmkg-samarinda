@@ -171,9 +171,9 @@ export default function AviationCharts() {
             
             {/* TABS */}
             <div className="flex border-b border-gray-100 overflow-x-auto">
-                <button onClick={() => setActiveTab('wind')} className={`flex-1 py-4 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'wind' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-slate-500 hover:bg-slate-50'}`}><Wind className="w-4 h-4" /> Angin & Suhu</button>
-                <button onClick={() => setActiveTab('cb')} className={`flex-1 py-4 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'cb' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-slate-500 hover:bg-slate-50'}`}><CloudLightning className="w-4 h-4" /> Area CB</button>
-                <button onClick={() => setActiveTab('sigwx')} className={`flex-1 py-4 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'sigwx' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-slate-500 hover:bg-slate-50'}`}><Layers className="w-4 h-4" /> SIGWX</button>
+                <button onClick={() => setActiveTab('wind')} className={`flex-1 py-4 px-2 text-sm font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'wind' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-slate-500 hover:bg-slate-50'}`}><Wind className="w-4 h-4" /> Wind Temp</button>
+                <button onClick={() => setActiveTab('cb')} className={`flex-1 py-4 px-2 text-sm font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'cb' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-slate-500 hover:bg-slate-50'}`}><CloudLightning className="w-4 h-4" /> Area CB</button>
+                <button onClick={() => setActiveTab('sigwx')} className={`flex-1 py-4 px-2 text-sm font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'sigwx' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500' : 'text-slate-500 hover:bg-slate-50'}`}><Layers className="w-4 h-4" /> SIGWX</button>
             </div>
 
             {/* SUB-CONTROLS */}

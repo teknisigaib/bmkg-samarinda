@@ -87,7 +87,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-1 items-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="hidden lg:flex space-x-1 items-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
              {/* ... kode looping NAV_ITEMS ... */}
              <Link href="/" className="px-4 py-2 text-md font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">Home</Link>
              {NAV_ITEMS.map((menu) => (
@@ -117,7 +117,7 @@ export default function Navbar() {
           {/* Right Section */}
           <div className="flex items-center gap-3 ml-auto">
             <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-white-600 text-blue-600 text-sm font-semibold px-5 py-2 rounded-xl border-1 hover:bg-blue-700 transition-all hover:shadow-lg hover:text-white">Kontak</Link>
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md transition" aria-label="Toggle Menu">
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md transition" aria-label="Toggle Menu">
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -137,7 +137,7 @@ export default function Navbar() {
             {/* Drawer Content */}
             <motion.div
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 w-[85%] max-w-sm h-full bg-white shadow-2xl z-[10001] p-6 overflow-y-auto md:hidden border-l border-gray-100"
+              className="fixed top-0 right-0 w-[85%] max-w-sm h-full bg-white shadow-2xl backdrop-blur-md z-[10001] p-6 overflow-y-auto lg:hidden border-l border-gray-100"
             >
               {/* Header Drawer */}
               <div className="flex justify-between items-center mb-8">
