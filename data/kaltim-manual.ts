@@ -790,308 +790,965 @@ export const DATA_KALTIM: CityNode[] = [
                 id: "64.07.05",
                 name: "LONG IRAM",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.05.2008", name: "LINGGANG MUARA LEBAN" },
+                    { id: "64.07.05.2009", name: "LONG IRAM SEBERANG" },
+                    { id: "64.07.05.2010", name: "LONG IRAM ILIR" },
+                    { id: "64.07.05.2011", name: "ANAH" },
+                    { id: "64.07.05.2015", name: "LONG DALIQ" },
+                    { id: "64.07.05.2016", name: "LONG IRAM KOTA" },
+                    { id: "64.07.05.2017", name: "LONG IRAM BAYAN" },
+                    { id: "64.07.05.2018", name: "KELIWAI" },
+                    { id: "64.07.05.2019", name: "UJOH HALANG" },
+                    { id: "64.07.05.2021", name: "KELIAN LUAR" },
+                    { id: "64.07.05.2022", name: "SUKOMULYO" }
                 ]
             },
             {
                 id: "64.07.06",
                 name: "MELAK",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.06.2001", name: "EMPAS" },
+                    { id: "64.07.06.2002", name: "EMPAKUQ" },
+                    { id: "64.07.06.2003", name: "MUAR ABUNYUT" },
+                    { id: "64.07.06.1006", name: "MELAK ILIR" },
+                    { id: "64.07.06.1011", name: "MELAK ULU" },
+                    { id: "64.07.06.2012", name: "MUARA BENANGAQ" }
                 ]
             },
             {
                 id: "64.07.07",
                 name: "BARONG TONGKOK",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.07.1001", name: "BARONG TONGKOK" },
+                    { id: "64.07.07.2002", name: "MENCIMAI" },
+                    { id: "64.07.07.2003", name: "ENGKUNI PASEK" },
+                    { id: "64.07.07.2004", name: "PEPAS EHENG" },
+                    { id: "64.07.07.2006", name: "JUHAN ASA" },
+                    { id: "64.07.07.2007", name: "ASA" },
+                    { id: "64.07.07.2008", name: "PEPES ASA" },
+                    { id: "64.07.07.2009", name: "MUARA ASA" },
+                    { id: "64.07.07.2010", name: "ONGKO ASA" },
+                    { id: "64.07.07.2011", name: "JUAQ ASA" },
+                    { id: "64.07.07.2012", name: "OMBAU ASA" },
+                    { id: "64.07.07.2013", name: "NGENYAN ASA" },
+                    { id: "64.07.07.2014", name: "GEMUHAN ASA" },
+                    { id: "64.07.07.2015", name: "GELEO BARU" },
+                    { id: "64.07.07.2016", name: "GELEO ASA" },
+                    { id: "64.07.07.2017", name: "REJO BASUKI" },
+                    { id: "64.07.07.2018", name: "SUMBER SARI" },
+                    { id: "64.07.07.2019", name: "SENDAWAR" },
+                    { id: "64.07.07.2020", name: "BALOK ASA" },
+                    { id: "64.07.07.1021", name: "SIMPANG RAYA" },
+                    { id: "64.07.07.2022", name: "BELEMPUNG ULAQ" }
                 ]
             },
             {
                 id: "64.07.08",
                 name: "DAMAI",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.08.2001", name: "BESIQ" },
+                    { id: "64.07.08.2002", name: "BERMAI" },
+                    { id: "64.07.08.2003", name: "MUARA NILIQ" },
+                    { id: "64.07.08.2004", name: "MANTAR" },
+                    { id: "64.07.08.2005", name: "MUARA BOMBOY" },
+                    { id: "64.07.08.2006", name: "DAMAI SEBERANG" },
+                    { id: "64.07.08.2007", name: "MENDIKA" },
+                    { id: "64.07.08.2008", name: "DAMAI KOTA" },
+                    { id: "64.07.08.2009", name: "LUMPAT DAHUQ" },
+                    { id: "64.07.08.2010", name: "MUARA TOKONG" },
+                    { id: "64.07.08.2011", name: "JENGAN DANUM" },
+                    { id: "64.07.08.2012", name: "KEAY" },
+                    { id: "64.07.08.2013", name: "TAPULANG" },
+                    { id: "64.07.08.2014", name: "BENUNG" },
+                    { id: "64.07.08.2020", name: "MUARA NYAHING" },
+                    { id: "64.07.08.2021", name: "SEMPATAN" },
+                    { id: "64.07.08.2022", name: "KELIAN" }
                 ]
             },
             {
                 id: "64.07.09",
                 name: "MUARA LAWA",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.09.2001", name: "MUARA BEGAI" },
+                    { id: "64.07.09.2002", name: "LOTAQ" },
+                    { id: "64.07.09.2003", name: "PAYANG" },
+                    { id: "64.07.09.2004", name: "DINGIN" },
+                    { id: "64.07.09.2005", name: "MUARA LAWA" },
+                    { id: "64.07.09.2006", name: "LAMBING" },
+                    { id: "64.07.09.2007", name: "BENGGERIS" },
+                    { id: "64.07.09.2008", name: "CEMPEDES" }
                 ]
             },
             {
                 id: "64.07.10",
                 name: "MUARA PAHU",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.10.2015", name: "JERANG DAYAK" },
+                    { id: "64.07.10.2016", name: "MENDUNG" },
+                    { id: "64.07.10.2017", name: "JERANG MELAYU" },
+                    { id: "64.07.10.2018", name: "DASAQ" },
+                    { id: "64.07.10.2020", name: "TEPIAN ULAQ" },
+                    { id: "64.07.10.2021", name: "SEBELANG" },
+                    { id: "64.07.10.2022", name: "MUARA BAROH" },
+                    { id: "64.07.10.2023", name: "TELUK TEMPUDAU" },
+                    { id: "64.07.10.2024", name: "TANJUNG LAONG" },
+                    { id: "64.07.10.2025", name: "TANJUNG PAGAR" },
+                    { id: "64.07.10.2029", name: "GUNUNG BAYAN" },
+                    { id: "64.07.10.2030", name: "MUARA BELOAN" }
                 ]
             },
             {
                 id: "64.07.11",
                 name: "JEMPANG",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.11.2001", name: "PENTAT" },
+                    { id: "64.07.11.2002", name: "LEMBONAH" },
+                    { id: "64.07.11.2003", name: "MUARA NAYAN" },
+                    { id: "64.07.11.2004", name: "MANCONG" },
+                    { id: "64.07.11.2005", name: "PERIGIQ" },
+                    { id: "64.07.11.2006", name: "MUARA OHONG" },
+                    { id: "64.07.11.2007", name: "TANJUNG JONE" },
+                    { id: "64.07.11.2008", name: "TANJUNG ISUY" },
+                    { id: "64.07.11.2009", name: "TANJUNG JAN" },
+                    { id: "64.07.11.2010", name: "PULAU LANTING" },
+                    { id: "64.07.11.2011", name: "MUARA TAE" },
+                    { id: "64.07.11.2012", name: "BEKOKONG MAKMUR" }
                 ]
             },
             {
                 id: "64.07.12",
                 name: "BONGAN",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.12.2001", name: "GERUNGUNG" },
+                    { id: "64.07.12.2002", name: "PERENG TALIQ" },
+                    { id: "64.07.12.2003", name: "TANJUNG SOKE" },
+                    { id: "64.07.12.2004", name: "DERAYA" },
+                    { id: "64.07.12.2005", name: "LEMPER" },
+                    { id: "64.07.12.2006", name: "MUARA SIRAM" },
+                    { id: "64.07.12.2007", name: "RESAK" },
+                    { id: "64.07.12.2008", name: "JAMBUK" },
+                    { id: "64.07.12.2009", name: "MUARA GUSIK" },
+                    { id: "64.07.12.2010", name: "PENAWAI" },
+                    { id: "64.07.12.2011", name: "MUARA KEDANG" },
+                    { id: "64.07.12.2012", name: "JAMBUK MAKMUR" },
+                    { id: "64.07.12.2014", name: "SIRAM MAKMUR" },
+                    { id: "64.07.12.2015", name: "SIRAM JAYA" },
+                    { id: "64.07.12.2016", name: "BUKIT HARAPAN" },
+                    { id: "64.07.12.2019", name: "TANJUNG SARI" },
                 ]
             },
             {
                 id: "64.07.13",
                 name: "PENYINGGAHAN",
                 villages: [
-                    { id: "64.", name: "" },
+                    { "id": "64.07.13.2001", "name": "LOA DERAS" },
+                    { "id": "64.07.13.2002", "name": "MINTA" },
+                    { "id": "64.07.13.2003", "name": "TANJUNG HAUR" },
+                    { "id": "64.07.13.2004", "name": "PENYINGGAHAN ILIR" },
+                    { "id": "64.07.13.2005", "name": "PENYINGGAHAN ULU" },
+                    { "id": "64.07.13.2006", "name": "BAKUNG" }
                 ]
             },
             {
                 id: "64.07.14",
                 name: "BENTIAN BESAR",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.14.2001", name: "RANDA EMPAS" },
+                    { id: "64.07.14.2002", name: "TUKUQ" },
+                    { id: "64.07.14.2003", name: "TENDE" },
+                    { id: "64.07.14.2004", name: "SAMBUNG" },
+                    { id: "64.07.14.2005", name: "ANAN JAYA" },
+                    { id: "64.07.14.2006", name: "JELMU SIBAK" },
+                    { id: "64.07.14.2007", name: "SUAKONG" },
+                    { id: "64.07.14.2008", name: "PENARUNG" },
+                    { id: "64.07.14.2009", name: "DILANG PUTI" }
                 ]
             },
             {
                 id: "64.07.15",
                 name: "LINGGANG BIGUNG",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.15.2001", name: "LINGGANG MELAPEH BARU" },
+                    { id: "64.07.15.2002", name: "LINGGANG BIGUNG BARU" },
+                    { id: "64.07.15.2003", name: "LINGGANG TUTUNG" },
+                    { id: "64.07.15.2004", name: "LINGGANG MELAPEH" },
+                    { id: "64.07.15.2005", name: "LINGGANG MAPAN" },
+                    { id: "64.07.15.2006", name: "LINGGANG BIGUNG" },
+                    { id: "64.07.15.2007", name: "LINGGANG AMER" },
+                    { id: "64.07.15.2008", name: "LINGGANG BANGUNSARI" },
+                    { id: "64.07.15.2009", name: "LINGGANG PURWODADI" },
+                    { id: "64.07.15.2010", name: "LINGGANG MENCELEW" },
+                    { id: "64.07.15.2011", name: "LINGGANG KEBUT" }
                 ]
             },
             {
                 id: "64.07.16",
                 name: "NYUATAN",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.16.2001", name: "DEMPAR" },
+                    { id: "64.07.16.2002", name: "TEMULA" },
+                    { id: "64.07.16.2003", name: "JONTAI" },
+                    { id: "64.07.16.2004", name: "SEMBUAN" },
+                    { id: "64.07.16.2005", name: "INTU LINGAU" },
+                    { id: "64.07.16.2006", name: "MU'UT" },
+                    { id: "64.07.16.2007", name: "TERAJUK" },
+                    { id: "64.07.16.2008", name: "LAKAN BILEM" },
+                    { id: "64.07.16.2009", name: "SENTALAR" },
+                    { id: "64.07.16.2010", name: "AWAI" }
                 ]
             },
             {
                 id: "64.07.17",
                 name: "SILUQ NGURAI",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.17.2001", name: "TEBISAQ" },
+                    { id: "64.07.17.2002", name: "KALIQ" },
+                    { id: "64.07.17.2003", name: "TANAH MEA" },
+                    { id: "64.07.17.2004", name: "SANG-SANG" },
+                    { id: "64.07.17.2005", name: "MUHUR" },
+                    { id: "64.07.17.2006", name: "MUARA KELAWIT" },
+                    { id: "64.07.17.2007", name: "BENTAS" },
+                    { id: "64.07.17.2008", name: "BETUNG" },
+                    { id: "64.07.17.2009", name: "KIAQ" },
+                    { id: "64.07.17.2010", name: "TENDIQ" },
+                    { id: "64.07.17.2011", name: "PENAWANG" },
+                    { id: "64.07.17.2012", name: "LENDIAN LIANG NAYUQ" },
+                    { id: "64.07.17.2013", name: "KENYANYAN" },
+                    { id: "64.07.17.2014", name: "RIKONG" },
+                    { id: "64.07.17.2015", name: "KENDISIQ" },
+                    { id: "64.07.17.2016", name: "MUARA PONAQ" }
                 ]
             },
             {
                 id: "64.07.18",
                 name: "MOOK MANAAR BULATN",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.18.2001", name: "SAKAQ LOTOQ" },
+                    { id: "64.07.18.2002", name: "SAKAQ TADA" },
+                    { id: "64.07.18.2003", name: "GEMURUH" },
+                    { id: "64.07.18.2004", name: "KARANGAN" },
+                    { id: "64.07.18.2005", name: "MERAYAQ" },
+                    { id: "64.07.18.2006", name: "LINGGANG MARIMUN" },
+                    { id: "64.07.18.2007", name: "KELUMPANG" },
+                    { id: "64.07.18.2008", name: "GADUR" },
+                    { id: "64.07.18.2009", name: "LINGGANG MUARA BATUQ" },
+                    { id: "64.07.18.2010", name: "MUARA JAWAQ" },
+                    { id: "64.07.18.2011", name: "ABIT" },
+                    { id: "64.07.18.2012", name: "REMBAYAN" },
+                    { id: "64.07.18.2014", name: "GUNUNG RAMPAH" },
+                    { id: "64.07.18.2015", name: "JENGAN" },
+                    { id: "64.07.18.2016", name: "MUARA KALAQ" },
+                    { id: "64.07.18.2017", name: "TONDOH" }
                 ]
             },
             {
                 id: "64.07.19",
                 name: "TERING",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.19.2001", name: "TERING BARU" },
+                    { id: "64.07.19.2002", name: "TERING LAMA" },
+                    { id: "64.07.19.2003", name: "LINGGANG TERING SEBERANG" },
+                    { id: "64.07.19.2004", name: "TUKUL" },
+                    { id: "64.07.19.2005", name: "LINGGANG KELUBAQ" },
+                    { id: "64.07.19.2006", name: "LINGGANG PURWOREJO" },
+                    { id: "64.07.19.2007", name: "LINGGANG JELEMUQ" },
+                    { id: "64.07.19.2008", name: "KELIAN DALAM" },
+                    { id: "64.07.19.2009", name: "LINGGANG MUARA MUJAN" },
+                    { id: "64.07.19.2010", name: "MUYUB ULU" },
+                    { id: "64.07.19.2011", name: "MUYUB AKET" },
+                    { id: "64.07.19.2013", name: "LINGGANG MUYUB ILIR" },
+                    { id: "64.07.19.2014", name: "GABUNG BARU" },
+                    { id: "64.07.19.2015", name: "LINGGANG BANJAREJO" },
+                    { id: "64.07.19.2016", name: "TERING LAMA ULU" }
                 ]
             },
             {
                 id: "64.07.20",
                 name: "SEKOLAQ DARAT",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.07.20.2001", name: "SEKOLAQ JOLEQ" },
+                    { id: "64.07.20.2002", name: "SEKOLAQ MULIAQ" },
+                    { id: "64.07.20.2003", name: "SEKOLAQ ODAY" },
+                    { id: "64.07.20.2004", name: "SRIMULYO" },
+                    { id: "64.07.20.2005", name: "SEMBER BANGUN" },
+                    { id: "64.07.20.2006", name: "SUMBER REJO" },
+                    { id: "64.07.20.2007", name: "SEKOLAQ DARAT" },
+                    { id: "64.07.20.2008", name: "LELENG" }
                 ]
-            }
+            },
         ]
     },
     // KABUPATEN KUTAI TIMUR
     {
-        id: "64.02",
-        name: "KABUPATEN ",
+        id: "64.08",
+        name: "KABUPATEN KUTAI TIMUR",
         districts: [
             {
-                id: "64.02.01",
-                name: "",
+                id: "64.08.01",
+                name: "MUARA ANCALONG",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.08.01.2001", name: "SENYIUR" },
+                    { id: "64.08.01.2002", name: "KELINJAU ILIR" },
+                    { id: "64.08.01.2003", name: "KELINJAU ULU" },
+                    { id: "64.08.01.2004", name: "LONG NAH" },
+                    { id: "64.08.01.2006", name: "LONG TESAK" },
+                    { id: "64.08.01.2009", name: "GEMAR BARU" },
+                    { id: "64.08.01.2012", name: "LONG POQ BARU" },
+                    { id: "64.08.01.2013", name: "MUARA DUN" },
+                    { id: "64.08.01.2014", name: "TELUK BARU" }
                 ]
             },
             {
-                id: "64.",
-                name: "",
+                id: "64.08.02",
+                name: "MUARA WAHAU",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.08.02.2001", name: "JAK LUAY" },
+                    { id: "64.08.02.2002", name: "NEHES LIAH BING" },
+                    { id: "64.08.02.2003", name: "MUARA WAHAU" },
+                    { id: "64.08.02.2004", name: "DABEQ" },
+                    { id: "64.08.02.2005", name: "DIAQ LAY" },
+                    { id: "64.08.02.2006", name: "BENHES" },
+                    { id: "64.08.02.2007", name: "WANASARI" },
+                    { id: "64.08.02.2008", name: "WAHAU BARU" },
+                    { id: "64.08.02.2009", name: "KARYA BHAKTI" },
+                    { id: "64.08.02.2010", name: "LONG WEHEA" }
+                ]
+            },
+            {
+                id: "64.08.03",
+                name: "MUARA BENGKAL",
+                villages: [
+                    { id: "64.08.03.2001", name: "SENAMBAH" },
+                    { id: "64.08.03.2002", name: "NGAYAU" },
+                    { id: "64.08.03.2003", name: "MUARA BENGKAL ILIR" },
+                    { id: "64.08.03.2004", name: "MUARA BENGKAL ULU" },
+                    { id: "64.08.03.2005", name: "BENUA BARU" },
+                    { id: "64.08.03.2013", name: "MULUPAN" },
+                    { id: "64.08.03.2014", name: "BATU BALAI" }
+                ]
+            },
+            {
+                id: "64.08.04",
+                name: "SANGATTA UTARA",
+                villages: [
+                    { id: "64.08.04.2001", name: "SANGATTA UTARA" },
+                    { id: "64.08.04.1010", name: "TELUK LINGGA" },
+                    { id: "64.08.04.2011", name: "SINGA GEMBARA" },
+                    { id: "64.08.04.2012", name: "SWARGA BARA" }
+                ]
+            },
+            {
+                id: "64.08.05",
+                name: "SANGKULIRANG",
+                villages: [
+                    { id: "64.08.05.2001", name: "KERAYAAN" },
+                    { id: "64.08.05.2002", name: "TANJUNG MANIS" },
+                    { id: "64.08.05.2003", name: "PERIDAN" },
+                    { id: "64.08.05.2004", name: "SAKA" },
+                    { id: "64.08.05.2005", name: "MANDU DALAM" },
+                    { id: "64.08.05.2006", name: "BENUA BARU" },
+                    { id: "64.08.05.2011", name: "SEMPAYAU" },
+                    { id: "64.08.05.2012", name: "PELAWAN" },
+                    { id: "64.08.05.2013", name: "TEPIAN TERAP" },
+                    { id: "64.08.05.2015", name: "MALOY" },
+                    { id: "64.08.05.2016", name: "BENUA BARU ULU" },
+                    { id: "64.08.05.2017", name: "KOLEK" },
+                    { id: "64.08.05.2018", name: "PULAU MIANG" },
+                    { id: "64.08.05.2019", name: "PERUPUK" },
+                    { id: "64.08.05.2020", name: "MANDU PANTAI SEJAHTERA" }
+                ]
+            },
+            {
+                id: "64.08.06",
+                name: "BUSANG",
+                villages: [
+                    { id: "64.08.06.2001", name: "LONG BENTUQ" },
+                    { id: "64.08.06.2002", name: "LONG PEJENG" },
+                    { id: "64.08.06.2003", name: "LONG LEES" },
+                    { id: "64.08.06.2004", name: "MEKAR BARU" },
+                    { id: "64.08.06.2005", name: "RANTAU SENTOSA" },
+                    { id: "64.08.06.2006", name: "LONG NYELONG" }
+                ]
+            },
+            {
+                id: "64.08.07",
+                name: "TELEN",
+                villages: [
+                    { id: "64.08.07.2001", name: "MARAH HALOQ" },
+                    { id: "64.08.07.2002", name: "LUNG MELAH" },
+                    { id: "64.08.07.2003", name: "JUK AYAQ" },
+                    { id: "64.08.07.2004", name: "LONG SEGAR" },
+                    { id: "64.08.07.2005", name: "LONG NORAN" },
+                    { id: "64.08.07.2006", name: "MUARA PANTUN" },
+                    { id: "64.08.07.2007", name: "RANTAU PANJANG" },
+                    { id: "64.08.07.2008", name: "KERNYANYAN" }
+                ]
+            },
+            {
+                id: "64.08.08",
+                name: "KOMBENG",
+                villages: [
+                    { id: "64.08.08.2001", name: "MAKMUR JAYA" },
+                    { id: "64.08.08.2002", name: "MARGA MULYA" },
+                    { id: "64.08.08.2003", name: "SUKAMAJU" },
+                    { id: "64.08.08.2004", name: "SIDOMULYO" },
+                    { id: "64.08.08.2005", name: "SRI PANTUN" },
+                    { id: "64.08.08.2006", name: "KOMBENG INDAH" },
+                    { id: "64.08.08.2007", name: "MIAU BARU" }
+                ]
+            },
+            {
+                id: "64.08.09",
+                name: "BENGALON",
+                villages: [
+                    { id: "64.08.09.2001", name: "SEPASO" },
+                    { id: "64.08.09.2002", name: "SEKERAT" },
+                    { id: "64.08.09.2003", name: "KERAITAN" },
+                    { id: "64.08.09.2004", name: "TEPIAN LANGSAT" },
+                    { id: "64.08.09.2005", name: "TEBANGAN LEMBAK" },
+                    { id: "64.08.09.2006", name: "SEPASO TIMUR" },
+                    { id: "64.08.09.2007", name: "SEPASO SELATAN" },
+                    { id: "64.08.09.2008", name: "MUARA BENGALON" },
+                    { id: "64.08.09.2009", name: "TEPIAN BARU" },
+                    { id: "64.08.09.2010", name: "TEPIAN INDAH" },
+                    { id: "64.08.09.2011", name: "SEPASO BARAT" }
+                ]
+            },
+            {
+                id: "64.08.10",
+                name: "KALIORANG",
+                villages: [
+                    { id: "64.08.10.2001", name: "KALIORANG" },
+                    { id: "64.08.10.2006", name: "BUKIT MAKMUR" },
+                    { id: "64.08.10.2007", name: "BUKIT HARAPAN" },
+                    { id: "64.08.10.2008", name: "CITRA MANUNGGAL JAYA" },
+                    { id: "64.08.10.2009", name: "BANGUN JAYA" },
+                    { id: "64.08.10.2010", name: "BUMI SEJAHTERA" },
+                    { id: "64.08.10.2013", name: "SELANGKAU" }
+                ]
+            },
+            {
+                id: "64.08.11",
+                name: "SANDARAN",
+                villages: [
+                    { id: "64.08.11.2001", name: "SANDARAN" },
+                    { id: "64.08.11.2002", name: "MANUBAR" },
+                    { id: "64.08.11.2003", name: "TADOAN" },
+                    { id: "64.08.11.2004", name: "MARUKANGAN" },
+                    { id: "64.08.11.2005", name: "SUSUK LUAR" },
+                    { id: "64.08.11.2006", name: "SUSUK DALAM" },
+                    { id: "64.08.11.2007", name: "TANJUNG MANGKALIAT" },
+                    { id: "64.08.11.2008", name: "MANUBAR DALAM" },
+                    { id: "64.08.11.2009", name: "SUSUK TENGAH" }
+                ]
+            },
+            {
+                id: "64.08.12",
+                name: "SANGATTA SELATAN",
+                villages: [
+                    { id: "64.08.12.2001", name: "SANGATTA SELATAN" },
+                    { id: "64.08.12.1002", name: "SINGA GEWEH" },
+                    { id: "64.08.12.2003", name: "SANGKIMA" },
+                    { id: "64.08.12.2004", name: "TELUK SINGKAMA" }
+                ]
+            },
+            {
+                id: "64.08.13",
+                name: "TELUK PANDAN",
+                villages: [
+                    { id: "64.08.13.2001", name: "TELUK PANDAN" },
+                    { id: "64.08.13.2002", name: "SUKA RAHMAT" },
+                    { id: "64.08.13.2003", name: "SUKA DAMAI" },
+                    { id: "64.08.13.2004", name: "KANDOLO" },
+                    { id: "64.08.13.2005", name: "DANAU REDAN" },
+                    { id: "64.08.13.2006", name: "MARTADINATA" }
+                ]
+            },
+            {
+                id: "64.08.14",
+                name: "RANTAU PULUNG",
+                villages: [
+                    { id: "64.08.14.2001", name: "MUKTI JAYA" },
+                    { id: "64.08.14.2002", name: "PULUNG SARI" },
+                    { id: "64.08.14.2003", name: "MARGO MULYO" },
+                    { id: "64.08.14.2004", name: "RANTAU MAKMUR" },
+                    { id: "64.08.14.2005", name: "MANUNGGAL JAYA" },
+                    { id: "64.08.14.2006", name: "TANJUNG LABU" },
+                    { id: "64.08.14.2007", name: "KEBON AGUNG" },
+                    { id: "64.08.14.2008", name: "TEPIAN MAKMUR" },
+                    { id: "64.08.14.2009", name: "MASALAP RAYA" }
+                ]
+            },
+            {
+                id: "64.08.15",
+                name: "KAUBUN",
+                villages: [
+                    { id: "64.08.15.2001", name: "BUMI ETAM" },
+                    { id: "64.08.15.2002", name: "BUMI RAPAK" },
+                    { id: "64.08.15.2003", name: "BUMI JAYA" },
+                    { id: "64.08.15.2004", name: "CIPTA GRAHA" },
+                    { id: "64.08.15.2005", name: "KADUNGAN JAYA" },
+                    { id: "64.08.15.2006", name: "PENGADAN BARU" },
+                    { id: "64.08.15.2007", name: "MATA AIR" },
+                    { id: "64.08.15.2008", name: "BUKIT PERMATA" }
+                ]
+            },
+            {
+                id: "64.08.16",
+                name: "KARANGAN",
+                villages: [
+                    { id: "64.08.16.2001", name: "KARANGAN DALAM" },
+                    { id: "64.08.16.2002", name: "BATU LEPOQ" },
+                    { id: "64.08.16.2003", name: "PENGADAN" },
+                    { id: "64.08.16.2004", name: "BAAY" },
+                    { id: "64.08.16.2005", name: "MUKTI LESTARI" },
+                    { id: "64.08.16.2006", name: "KARANGAN SEBERANG" },
+                    { id: "64.08.16.2007", name: "KARANGAN HILIR" }
+                ]
+            },
+            {
+                id: "64.08.17",
+                name: "BATU AMPAR",
+                villages: [
+                    { id: "64.08.17.2001", name: "BATU TIMBAU" },
+                    { id: "64.08.17.2002", name: "BENO HARAPAN" },
+                    { id: "64.08.17.2003", name: "MUGI RAHAYU" },
+                    { id: "64.08.17.2004", name: "MAWAI INDAH" },
+                    { id: "64.08.17.2005", name: "HIMBA LESTARI" },
+                    { id: "64.08.17.2006", name: "TELAGA" },
+                    { id: "64.08.17.2007", name: "BATU TIMBAU ULU" }
+                ]
+            },
+            {
+                id: "64.08.18",
+                name: "LONG MESANGAT",
+                villages: [
+                    { id: "64.08.18.2001", name: "SIKA MAKMUR" },
+                    { id: "64.08.18.2002", name: "SEGOY MAKMUR" },
+                    { id: "64.08.18.2003", name: "MUKTI UTAMA" },
+                    { id: "64.08.18.2004", name: "SUMBER SARI" },
+                    { id: "64.08.18.2005", name: "MELAN" },
+                    { id: "64.08.18.2006", name: "TANAH ABANG" },
+                    { id: "64.08.18.2007", name: "SUMBER AGUNG" }
                 ]
             },
         ]
     },
     // KABUPATEN PENAJAM PASER UTARA
     {
-        id: "64.02",
-        name: "KABUPATEN ",
+        id: "64.09",
+        name: "KABUPATEN PENAJAM PASER UTARA",
         districts: [
             {
-                id: "64.02.01",
-                name: "",
+                id: "64.09.01",
+                name: "PENAJAM",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.09.01.1001", name: "TANJUNG TENGAH" },
+                    { id: "64.09.01.1002", name: "SALO LOANG" },
+                    { id: "64.09.01.1003", name: "PETUNG" },
+                    { id: "64.09.01.1004", name: "LAWE-LAWE" },
+                    { id: "64.09.01.1005", name: "PEJALA" },
+                    { id: "64.09.01.1006", name: "KAMPUNG BARU" },
+                    { id: "64.09.01.1007", name: "SESUMPU" },
+                    { id: "64.09.01.1008", name: "SUNGAI PARIT" },
+                    { id: "64.09.01.1009", name: "NIPAH-NIPAH" },
+                    { id: "64.09.01.1010", name: "NENANG" },
+                    { id: "64.09.01.1011", name: "PENAJAM" },
+                    { id: "64.09.01.1012", name: "GUNUNG SETELENG" },
+                    { id: "64.09.01.1013", name: "BULUMINUNG" },
+                    { id: "64.09.01.1014", name: "SOTEK" },
+                    { id: "64.09.01.1015", name: "SEPAN" },
+                    { id: "64.09.01.1016", name: "RIKO" },
+                    { id: "64.09.01.1017", name: "GERSIK" },
+                    { id: "64.09.01.1018", name: "JENEBORA" },
+                    { id: "64.09.01.1019", name: "PANTAI LANGO" },
+                    { id: "64.09.01.2020", name: "GIRI MUKTI" },
+                    { id: "64.09.01.2021", name: "BUKIT SUBUR" },
+                    { id: "64.09.01.2022", name: "SIDOREJO" },
+                    { id: "64.09.01.2023", name: "GIRI PURWA" }
                 ]
             },
             {
-                id: "64.",
-                name: "",
+                id: "64.09.02",
+                name: "WARU",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.09.02.2001", name: "API-API" },
+                    { id: "64.09.02.2002", name: "SESULU" },
+                    { id: "64.09.02.1003", name: "WARU" },
+                    { id: "64.09.02.2004", name: "BANGUN MULYA" }
                 ]
             },
+            {
+                id: "64.09.03",
+                name: "BABULU",
+                villages: [
+                    { id: "64.09.03.2001", name: "BABULU DARAT" },
+                    { id: "64.09.03.2002", name: "LABANGKA" },
+                    { id: "64.09.03.2003", name: "BABULU LAUT" },
+                    { id: "64.09.03.2004", name: "GUNUNG INTAN" },
+                    { id: "64.09.03.2005", name: "GUNUNG MAKMUR" },
+                    { id: "64.09.03.2006", name: "SEBAKUNG JAYA" },
+                    { id: "64.09.03.2007", name: "RAWA MULIA" },
+                    { id: "64.09.03.2008", name: "SRI RAHARJA" },
+                    { id: "64.09.03.2009", name: "SUMBER SARI" },
+                    { id: "64.09.03.2010", name: "RINTIK" },
+                    { id: "64.09.03.2011", name: "GUNUNG MULIA" },
+                    { id: "64.09.03.2012", name: "LABANGKA BARAT" }
+                ]
+            },
+            {
+                id: "64.09.04",
+                name: "SEPAKU",
+                villages: [
+                    { id: "64.09.04.2001", name: "TENGIN BARU" },
+                    { id: "64.09.04.2002", name: "BUKIT RAYA" },
+                    { id: "64.09.04.2003", name: "SUKA RAJA" },
+                    { id: "64.09.04.2004", name: "BUMI HARAPAN" },
+                    { id: "64.09.04.1005", name: "SEPAKU" },
+                    { id: "64.09.04.1006", name: "PEMALUAN" },
+                    { id: "64.09.04.1007", name: "MARIDAN" },
+                    { id: "64.09.04.1008", name: "MENTAWIR" },
+                    { id: "64.09.04.2009", name: "ARGO MULYO" },
+                    { id: "64.09.04.2010", name: "SEMOI DUA" },
+                    { id: "64.09.04.2011", name: "SUKO MULYO" },
+                    { id: "64.09.04.2012", name: "WONO SARI" },
+                    { id: "64.09.04.2013", name: "KARANG JINAWI" },
+                    { id: "64.09.04.2014", name: "BINUANG" },
+                    { id: "64.09.04.2015", name: "TELEMOW" }
+                ]
+            }
         ]
     },
     // KABUPATEN MAHAKAM ULU
     {
-        id: "64.02",
-        name: "KABUPATEN ",
+        id: "64.11",
+        name: "KABUPATEN MAHAKAM ULU",
         districts: [
             {
-                id: "64.02.01",
-                name: "",
+                id: "64.11.01",
+                name: "LONG BAGUN",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.11.01.2001", name: "LONG HURAI" },
+                    { id: "64.11.01.2002", name: "LONG MELAHAM" },
+                    { id: "64.11.01.2003", name: "MEMAHAK BESAR" },
+                    { id: "64.11.01.2004", name: "MEMAHAK ULU" },
+                    { id: "64.11.01.2005", name: "BATU MAJANG" },
+                    { id: "64.11.01.2006", name: "UJOH BILANG" },
+                    { id: "64.11.01.2007", name: "LONG BAGUN ILIR" },
+                    { id: "64.11.01.2008", name: "LONG BAGUN ULU" },
+                    { id: "64.11.01.2009", name: "BATOQ KELO" },
+                    { id: "64.11.01.2010", name: "LONG MERAH" },
+                    { id: "64.11.01.2011", name: "RUKUN DAMAI" }
                 ]
             },
             {
-                id: "64.",
-                name: "",
+                id: "64.11.02",
+                name: "LONG HUBUNG",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.11.02.2001", name: "LONG HUBUNG" },
+                    { id: "64.11.02.2002", name: "MEMAHAK TEBOQ" },
+                    { id: "64.11.02.2003", name: "LUTAN" },
+                    { id: "64.11.02.2004", name: "MATALIBAQ" },
+                    { id: "64.11.02.2005", name: "DATAH BILANG ILIR" },
+                    { id: "64.11.02.2006", name: "DATAH BILANG ULU" },
+                    { id: "64.11.02.2007", name: "TRI PARIQ MAKMUR" },
+                    { id: "64.11.02.2008", name: "WANA PARIQ" },
+                    { id: "64.11.02.2009", name: "DATAH BILANG BARU" },
+                    { id: "64.11.02.2010", name: "SIRAU" },
+                    { id: "64.11.02.2011", name: "LONG HUBUNG ULU" }
                 ]
             },
+            {
+                id: "64.11.03",
+                name: "LAHAM",
+                villages: [
+                    { id: "64.11.03.2001", name: "LAHAM" },
+                    { id: "64.11.03.2002", name: "LONG GELAWANG" },
+                    { id: "64.11.03.2003", name: "MUARA RATAH" },
+                    { id: "64.11.03.2004", name: "DANUM PAROY" },
+                    { id: "64.11.03.2005", name: "NYARIBUNGAN" }
+                ]
+            },
+            {
+                id: "64.11.04",
+                name: "LONG APARI",
+                villages: [
+                    { id: "64.11.04.2001", name: "LONG PENANEH I" },
+                    { id: "64.11.04.2002", name: "LONG KERIOQ" },
+                    { id: "64.11.04.2003", name: "LONG PENANEH II" },
+                    { id: "64.11.04.2004", name: "TIONG OHANG" },
+                    { id: "64.11.04.2005", name: "LONG PENANEH III" },
+                    { id: "64.11.04.2006", name: "TIONG BU'U" },
+                    { id: "64.11.04.2007", name: "NAHA BUAN" },
+                    { id: "64.11.04.2008", name: "NAHA TIFAB" },
+                    { id: "64.11.04.2009", name: "NAHA SILAT" },
+                    { id: "64.11.04.2010", name: "LONG APARI" }
+                ]
+            },
+            {
+                id: "64.11.05",
+                name: "LONG PAHANGAI",
+                villages: [
+                    { id: "64.11.05.2001", name: "DELANG KEROHONG" },
+                    { id: "64.11.05.2002", name: "LONG PAKAQ" },
+                    { id: "64.11.05.2003", name: "LONG LUNUK" },
+                    { id: "64.11.05.2004", name: "LONG ISUN" },
+                    { id: "64.11.05.2005", name: "NAHA ARU" },
+                    { id: "64.11.05.2006", name: "DATAH NAHA" },
+                    { id: "64.11.05.2007", name: "LIRUNG UBING" },
+                    { id: "64.11.05.2008", name: "LONG PAHANGAI I" },
+                    { id: "64.11.05.2009", name: "LONG PAHANGAI II" },
+                    { id: "64.11.05.2010", name: "LONG TUYOQ" },
+                    { id: "64.11.05.2011", name: "LIU MULANG" },
+                    { id: "64.11.05.2012", name: "LONG PAKAQ BARU" },
+                    { id: "64.11.05.2013", name: "LONG LUNUK BARU" }
+                ]
+            }
         ]
     },
     // KOTA BALIKPAPAN
     {
-        id: "64.02",
-        name: "KABUPATEN ",
+        id: "64.71",
+        name: "KOTA BALIKPAPAN",
         districts: [
             {
-                id: "64.02.01",
-                name: "",
+                id: "64.71.01",
+                name: "BALIKPAPAN TIMUR",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.71.01.1001", name: "MANGGAR" },
+                    { id: "64.71.01.1002", name: "LAMARU" },
+                    { id: "64.71.01.1003", name: "TERITIP" },
+                    { id: "64.71.01.1004", name: "MANGGAR BARU" }
                 ]
             },
             {
-                id: "64.",
-                name: "",
+                id: "64.71.02",
+                name: "BALIKPAPAN BARAT",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.71.02.1001", name: "BARU ILIR" },
+                    { id: "64.71.02.1002", name: "BARU TENGAH" },
+                    { id: "64.71.02.1003", name: "BARU ULU" },
+                    { id: "64.71.02.1004", name: "KARIANGAU" },
+                    { id: "64.71.02.1005", name: "MARGO MULYO" },
+                    { id: "64.71.02.1006", name: "MARGA SARI" }
                 ]
             },
+            {
+                id: "64.71.03",
+                name: "BALIKPAPAN UTARA",
+                villages: [
+                    { id: "64.71.03.1001", name: "BATU AMPAR" },
+                    { id: "64.71.03.1002", name: "GUNUNGSAMARINDA" },
+                    { id: "64.71.03.1003", name: "KARANG JOANG" },
+                    { id: "64.71.03.1004", name: "MUARARAPAK" },
+                    { id: "64.71.03.1005", name: "GUNUNGSAMARINDA BARU" },
+                    { id: "64.71.03.1006", name: "GRAHA INDAH" }
+                ]
+            },
+            {
+                id: "64.71.04",
+                name: "BALIKPAPAN TENGAH",
+                villages: [
+                    { id: "64.71.04.1001", name: "GUNUNGSARI ULU" },
+                    { id: "64.71.04.1002", name: "GUNUNGSARI ILIR" },
+                    { id: "64.71.04.1003", name: "KARANG REJO" },
+                    { id: "64.71.04.1004", name: "KARANG JATI" },
+                    { id: "64.71.04.1005", name: "MEKAR SARI" },
+                    { id: "64.71.04.1006", name: "SUMBER REJO" }
+                ]
+            },
+            {
+                id: "64.71.05",
+                name: "BALIKPAPAN SELATAN",
+                villages: [
+                    { id: "64.71.05.1002", name: "SEPINGGAN" },
+                    { id: "64.71.05.1006", name: "GUNUNGBAHAGIA" },
+                    { id: "64.71.05.1008", name: "SEPINGGAN BARU" },
+                    { id: "64.71.05.1009", name: "SEPINGGAN RAYA" },
+                    { id: "64.71.05.1010", name: "SUNGAINANGKA" },
+                    { id: "64.71.05.1011", name: "DAMAI BARU" },
+                    { id: "64.71.05.1012", name: "DAMAI BAHAGIA" }
+                ]
+            },
+            {
+                id: "64.71.06",
+                name: "BALIKPAPAN KOTA",
+                villages: [
+                    { id: "64.71.06.1001", name: "PRAPATAN" },
+                    { id: "64.71.06.1002", name: "TELAGA SARI" },
+                    { id: "64.71.06.1003", name: "KLANDASAN ULU" },
+                    { id: "64.71.06.1004", name: "KLANDASAN ILIR" },
+                    { id: "64.71.06.1005", name: "DAMAI" }
+                ]
+            }
         ]
     },
     // KOTA SAMARINDA
     {
-        id: "64.02",
-        name: "KABUPATEN ",
+        id: "64.72",
+        name: "KOTA SAMARINDA",
         districts: [
             {
-                id: "64.02.01",
-                name: "",
+                id: "64.72.01",
+                name: "PALARAN",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.72.01.1001", name: "RAWA MAKMUR" },
+                    { id: "64.72.01.1002", name: "HANDIL BAKTI" },
+                    { id: "64.72.01.1003", name: "BUKUAN" },
+                    { id: "64.72.01.1004", name: "SIMPANG PASIR" },
+                    { id: "64.72.01.1005", name: "BANTUAS" }
                 ]
             },
             {
-                id: "64.",
-                name: "",
+                id: "64.72.02",
+                name: "SAMARINDA SEBERANG",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.72.02.1001", name: "SUNGAI KELEDANG" },
+                    { id: "64.72.02.1002", name: "BAQA" },
+                    { id: "64.72.02.1003", name: "MESJID" },
+                    { id: "64.72.02.1009", name: "MANGKUPALAS" },
+                    { id: "64.72.02.1010", name: "TENUN SAMARINDA" },
+                    { id: "64.72.02.1011", name: "GUNUNG PANJANG" }
                 ]
             },
+            {
+                id: "64.72.03",
+                name: "SAMARINDA ULU",
+                villages: [
+                    { id: "64.72.03.1001", name: "TELUK LERONG ILIR" },
+                    { id: "64.72.03.1002", name: "JAWA" },
+                    { id: "64.72.03.1004", name: "AIR PUTIH" },
+                    { id: "64.72.03.1005", name: "SIDODADI" },
+                    { id: "64.72.03.1006", name: "AIR HITAM" },
+                    { id: "64.72.03.1007", name: "DADI MULYA" },
+                    { id: "64.72.03.1008", name: "GUNUNG KELUA" },
+                    { id: "64.72.03.1009", name: "BUKIT PINANG" }
+                ]
+            },
+            {
+                id: "64.72.04",
+                name: "SAMARINDA ILIR",
+                villages: [
+                    { id: "64.72.04.1001", name: "SELILI" },
+                    { id: "64.72.04.1002", name: "SUNGAI DAMA" },
+                    { id: "64.72.04.1003", name: "SIDOMULYO" },
+                    { id: "64.72.04.1013", name: "SIDODAMAI" },
+                    { id: "64.72.04.1014", name: "PELITA" }
+                ]
+            },
+            {
+                id: "64.72.05",
+                name: "SAMARINDA UTARA",
+                villages: [
+                    { id: "64.72.05.1002", name: "SEMPAJA SELATAN" },
+                    { id: "64.72.05.1003", name: "LEMPAKE" },
+                    { id: "64.72.05.1004", name: "SUNGAI SIRING" },
+                    { id: "64.72.05.1010", name: "SEMPAJA UTARA" },
+                    { id: "64.72.05.1011", name: "TANAH MERAH" },
+                    { id: "64.72.05.1012", name: "SEMPAJA BARAT" },
+                    { id: "64.72.05.1013", name: "SEMPAJA TIMUR" },
+                    { id: "64.72.05.1014", name: "BUDAYA PAMPANG" }
+                ]
+            },
+            {
+                id: "64.72.06",
+                name: "SUNGAI KUNJANG",
+                villages: [
+                    { id: "64.72.06.1001", name: "LOA BAKUNG" },
+                    { id: "64.72.06.1002", name: "LOA BUAH" },
+                    { id: "64.72.06.1003", name: "KARANG ASAM ULU" },
+                    { id: "64.72.06.1004", name: "LOK BAHU" },
+                    { id: "64.72.06.1005", name: "TELUK LERONG ULU" },
+                    { id: "64.72.06.1006", name: "KARANG ASAM ILIR" },
+                    { id: "64.72.06.1007", name: "KARANG ANYAR" }
+                ]
+            },
+            {
+                id: "64.72.07",
+                name: "SAMBUTAN",
+                villages: [
+                    { id: "64.72.07.1001", name: "SUNGAI KAPIH" },
+                    { id: "64.72.07.1002", name: "SAMBUTAN" },
+                    { id: "64.72.07.1003", name: "MAKROMAN" },
+                    { id: "64.72.07.1004", name: "SINDANG SARI" },
+                    { id: "64.72.07.1005", name: "PULAU ATAS" }
+                ]
+            },
+            {
+                id: "64.72.08",
+                name: "SUNGAI PINANG",
+                villages: [
+                    { id: "64.72.08.1001", name: "TEMINDUNG PERMAI" },
+                    { id: "64.72.08.1002", name: "SUNGAI PINANG DALAM" },
+                    { id: "64.72.08.1003", name: "GUNUNG LINGAI" },
+                    { id: "64.72.08.1004", name: "MUGIREJO" },
+                    { id: "64.72.08.1005", name: "BANDARA" }
+                ]
+            },
+            {
+                id: "64.72.09",
+                name: "SAMARINDA KOTA",
+                villages: [
+                    { id: "64.72.09.1001", name: "KARANG MUMUS" },
+                    { id: "64.72.09.1002", name: "PELABUHAN" },
+                    { id: "64.72.09.1003", name: "PASAR PAGI" },
+                    { id: "64.72.09.1004", name: "BUGIS" },
+                    { id: "64.72.09.1005", name: "SUNGAI PINANG LUAR" }
+                ]
+            },
+            {
+                id: "64.72.10",
+                name: "LOA JANAN ILIR",
+                villages: [
+                    { id: "64.72.10.1001", name: "SIMPANG TIGA" },
+                    { id: "64.72.10.1002", name: "TANI AMAN" },
+                    { id: "64.72.10.1003", name: "SENGKOTEK" },
+                    { id: "64.72.10.1004", name: "HARAPAN BARU" },
+                    { id: "64.72.10.1005", name: "RAPAK DALAM" }
+                ]
+            }
         ]
     },
     // KOTA BONTANG
     {
-        id: "64.02",
-        name: "KABUPATEN ",
+        id: "64.74",
+        name: "KOTA BONTANG",
         districts: [
             {
-                id: "64.02.01",
-                name: "",
+                id: "64.74.01",
+                name: "BONTANG UTARA",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.74.01.1001", name: "BONTANG KUALA" },
+                    { id: "64.74.01.1002", name: "BONTANG BARU" },
+                    { id: "64.74.01.1003", name: "LOK TUAN" },
+                    { id: "64.74.01.1004", name: "GUNTUNG" },
+                    { id: "64.74.01.1005", name: "GUNUNG ELAI" },
+                    { id: "64.74.01.1006", name: "API-API" }
                 ]
             },
             {
-                id: "64.",
-                name: "",
+                id: "64.74.02",
+                name: "BONTANG SELATAN",
                 villages: [
-                    { id: "64.", name: "" },
+                    { id: "64.74.02.1001", name: "TANJUNG LAUT" },
+                    { id: "64.74.02.1002", name: "BERBAS TENGAH" },
+                    { id: "64.74.02.1003", name: "BERBAS PANTAI" },
+                    { id: "64.74.02.1004", name: "SATIMPO" },
+                    { id: "64.74.02.1005", name: "BONTANG LESTARI" },
+                    { id: "64.74.02.1006", name: "TANJUNG LAUT INDAH" }
                 ]
             },
+            {
+                id: "64.74.03",
+                name: "BONTANG BARAT",
+                villages: [
+                    { id: "64.74.03.1001", name: "BELIMBING" },
+                    { id: "64.74.03.1002", name: "GUNUNG TELIHAN" },
+                    { id: "64.74.03.1003", name: "KANAAN" }
+                ]
+            }
         ]
-    },
-
-
-
-
-
-  {
-    id: "64.71",
-    name: "KOTA BALIKPAPAN",
-    districts: [
-      {
-        id: "64.71.01",
-        name: "BALIKPAPAN TIMUR",
-        villages: [
-          { id: "64.71.01.1001", name: "MANGGAR" },
-          { id: "64.71.01.1002", name: "MANGGAR BARU" },
-          { id: "64.71.01.1003", name: "LAMARU" },
-          { id: "64.71.01.1004", name: "TERITIP" }
-        ]
-      },
-      {
-        id: "64.71.02",
-        name: "BALIKPAPAN BARAT",
-        villages: [
-          { id: "64.71.02.1001", name: "BARU ULU" },
-          { id: "64.71.02.1002", name: "BARU TENGAH" },
-          { id: "64.71.02.1003", name: "BARU ILIR" },
-          { id: "64.71.02.1004", name: "KARIANGAU" },
-          { id: "64.71.02.1005", name: "MARGASARI" },
-          { id: "64.71.02.1006", name: "MARGA MULYO" }
-        ]
-      },
-      // Tambahkan kecamatan lain di Balikpapan...
-    ]
-  },
-  {
-    id: "64.72",
-    name: "KOTA SAMARINDA",
-    districts: [
-      {
-        id: "64.72.01",
-        name: "SAMARINDA ULU",
-        villages: [
-          { id: "64.72.01.1001", name: "AIR PUTIH" },
-          { id: "64.72.01.1002", name: "AIR HITAM" },
-          { id: "64.72.01.1003", name: "JAWA" },
-          { id: "64.72.01.1004", name: "SIDODADI" }
-        ]
-      },
-      // Tambahkan kecamatan lain di Samarinda...
-    ]
-  },
-  {
-    id: "64.02",
-    name: "KAB. KUTAI KARTANEGARA",
-    districts: [
-      {
-        id: "64.02.06",
-        name: "TENGGARONG",
-        villages: [
-          { id: "64.02.06.1001", name: "MELAYU" },
-          { id: "64.02.06.1002", name: "PANJI" },
-          // ...
-        ]
-      }
-    ]
-  }
+    }
 ];
 
 
@@ -1104,185 +1761,3 @@ export const DATA_KALTIM: CityNode[] = [
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// data/kaltim-manual.ts
-
-export interface Wilayah {
-  id: string; // Kode Administrasi (tanpa titik untuk ID internal, atau sesuai BMKG)
-  name: string;
-  parentId?: string; // Link ke induknya
-  bmkgCode?: string; // Kode spesifik untuk hit ke API BMKG (ADM4)
-}
-
-// 1. PROVINSI (Hanya Kaltim)
-export const PROVINSI: Wilayah[] = [
-  { id: "64", name: "KALIMANTAN TIMUR" }
-];
-
-// 2. KABUPATEN / KOTA (Parent: 64)
-export const KABUPATEN: Wilayah[] = [
-    { id: "64.01", parentId: "64", name: "KAB. PASER" },
-    { id: "64.02", parentId: "64", name: "KAB. KUTAI KARTANEGARA" },
-    { id: "64.03", parentId: "64", name: "KAB. BERAU" },
-    { id: "64.07", parentId: "64", name: "KAB. KUTAI BARAT" },
-    { id: "64.08", parentId: "64", name: "KAB. KUTAI TIMUR" },
-    { id: "64.09", parentId: "64", name: "KAB. PENAJAM PASER UTARA" },
-    { id: "64.11", parentId: "64", name: "KAB. MAHAKAM ULU" },
-    { id: "64.71", parentId: "64", name: "KOTA BALIKPAPAN" },
-    { id: "64.72", parentId: "64", name: "KOTA SAMARINDA" },
-    { id: "64.74", parentId: "64", name: "KOTA BONTANG" },
-];
-
-// 3. KECAMATAN 
-export const KECAMATAN: Wilayah[] = [
-    // --- KABUPATEN PASER (64.01) ---
-    { id: "64.01.01", parentId: "64.01", name: "BATU SOPANG" },
-    { id: "64.01.02", parentId: "64.01", name: "TANJUNG HARAPAN" },
-    { id: "64.01.03", parentId: "64.01", name: "PASER BELENGKONG" },
-    { id: "64.01.04", parentId: "64.01", name: "TANAH GROGOT" },
-    { id: "64.01.05", parentId: "64.01", name: "KUARO" },
-    { id: "64.01.06", parentId: "64.01", name: "LONG IKIS" },
-    { id: "64.01.07", parentId: "64.01", name: "MUARA KOMAM" },
-    { id: "64.01.08", parentId: "64.01", name: "LONG KALI" },
-    { id: "64.01.09", parentId: "64.01", name: "BATU ENGAU" },
-    { id: "64.01.10", parentId: "64.01", name: "MUARA SAMU" },
-
-    // --- KABUPATEN KUTAI KARTANEGARA (64.02) ---
-    { id: "64.02.01", parentId: "64.02", name: "MUARA MUNTAI" },
-    { id: "64.02.02", parentId: "64.02", name: "LOA KULU" },
-    { id: "64.02.03", parentId: "64.02", name: "LOA JANAN" },
-    { id: "64.02.04", parentId: "64.02", name: "ANGGANA" },
-    { id: "64.02.05", parentId: "64.02", name: "MUARA BADAK" },
-    { id: "64.02.06", parentId: "64.02", name: "TENGGARONG" },
-    { id: "64.02.07", parentId: "64.02", name: "SEBULU" },
-    { id: "64.02.08", parentId: "64.02", name: "KOTA BANGUN" },
-    { id: "64.02.09", parentId: "64.02", name: "KENOHAN" },
-    { id: "64.02.10", parentId: "64.02", name: "KEMBANG JANGGUT" },
-    { id: "64.02.11", parentId: "64.02", name: "MUARA KAMAN" },
-    { id: "64.02.12", parentId: "64.02", name: "TABANG" },
-    { id: "64.02.13", parentId: "64.02", name: "SAMBOJA" },
-    { id: "64.02.14", parentId: "64.02", name: "MUARA JAWA" },
-    { id: "64.02.15", parentId: "64.02", name: "SANGA SANGA" },
-    { id: "64.02.16", parentId: "64.02", name: "TENGGARONG SEBERANG" },
-    { id: "64.02.17", parentId: "64.02", name: "MARANG KAYU" },
-    { id: "64.02.18", parentId: "64.02", name: "MUARA WIS" },
-
-    // --- KABUPATEN BERAU (64.03) ---
-    { id: "64.03.01", parentId: "64.03", name: "KELAY" },
-    { id: "64.03.02", parentId: "64.03", name: "TALISAYAN" },
-    { id: "64.03.03", parentId: "64.03", name: "SAMBALIUNG" },
-    { id: "64.03.04", parentId: "64.03", name: "SEGAH" },
-    { id: "64.03.05", parentId: "64.03", name: "TANJUNG REDEB" },
-    { id: "64.03.06", parentId: "64.03", name: "GUNUNG TABUR" },
-    { id: "64.03.07", parentId: "64.03", name: "PULAU DERAWAN" },
-    { id: "64.03.08", parentId: "64.03", name: "BIDUK-BIDUK" },
-    { id: "64.03.09", parentId: "64.03", name: "TELUK BAYUR" },
-    { id: "64.03.10", parentId: "64.03", name: "TABALAR" },
-    { id: "64.03.11", parentId: "64.03", name: "MARATUA" },
-    { id: "64.03.12", parentId: "64.03", name: "BATU PUTIH" },
-    { id: "64.03.13", parentId: "64.03", name: "BIATAN" },
-
-    // --- KABUPATEN KUTAI BARAT (64.07) ---
-    { id: "64.07.05", parentId: "64.07", name: "LONG IRAM" },
-    { id: "64.07.06", parentId: "64.07", name: "MELAK" },
-    { id: "64.07.07", parentId: "64.07", name: "BARONG TONGKOK" },
-    { id: "64.07.08", parentId: "64.07", name: "DAMAI" },
-    { id: "64.07.09", parentId: "64.07", name: "MUARA LAWA" },
-    { id: "64.07.10", parentId: "64.07", name: "MUARA PAHU" },
-    { id: "64.07.11", parentId: "64.07", name: "JEMPANG" },
-    { id: "64.07.12", parentId: "64.07", name: "BONGAN" },
-    { id: "64.07.13", parentId: "64.07", name: "PENYINGGAHAN" },
-    { id: "64.07.14", parentId: "64.07", name: "BENTIAN BESAR" },
-    { id: "64.07.15", parentId: "64.07", name: "LINGGANG BIGUNG" },
-    { id: "64.07.16", parentId: "64.07", name: "NYUATAN" },
-    { id: "64.07.17", parentId: "64.07", name: "SILUQ NGURAI" },
-    { id: "64.07.18", parentId: "64.07", name: "MOOK MANAR BULATN" },
-    { id: "64.07.19", parentId: "64.07", name: "TERING" },
-    { id: "64.07.20", parentId: "64.07", name: "SEKOLAQ DARAT" },
-
-    // --- KABUPATEN KUTAI TIMUR (64.08) ---
-    { id: "64.08.01", parentId: "64.08", name: "MUARA ANCALONG" },
-    { id: "64.08.02", parentId: "64.08", name: "MUARA WAHAU" },
-    { id: "64.08.03", parentId: "64.08", name: "MUARA BENGKAL" },
-    { id: "64.08.04", parentId: "64.08", name: "SANGATTA UTARA" },
-    { id: "64.08.05", parentId: "64.08", name: "SANGKULIRANG" },
-    { id: "64.08.06", parentId: "64.08", name: "BUSANG" },
-    { id: "64.08.07", parentId: "64.08", name: "TELEN" },
-    { id: "64.08.08", parentId: "64.08", name: "KOMBENG" },
-    { id: "64.08.09", parentId: "64.08", name: "BENGALON" },
-    { id: "64.08.10", parentId: "64.08", name: "KALIORANG" },
-    { id: "64.08.11", parentId: "64.08", name: "SANDARAN" },
-    { id: "64.08.12", parentId: "64.08", name: "SANGATTA SELATAN" },
-    { id: "64.08.13", parentId: "64.08", name: "TELUK PANDAN" },
-    { id: "64.08.14", parentId: "64.08", name: "RANTAU PULUNG" },
-    { id: "64.08.15", parentId: "64.08", name: "KAUBUN" },
-    { id: "64.08.16", parentId: "64.08", name: "KARANGAN" },
-    { id: "64.08.17", parentId: "64.08", name: "BATU AMPAR" },
-    { id: "64.08.18", parentId: "64.08", name: "LONG MESANGAT" },
-    
-    // --- KABUPATEN PENAJAM PASER UTARA (64.09) ---
-    { id: "64.09.01", parentId: "64.09", name: "PENAJAM" },
-    { id: "64.09.02", parentId: "64.09", name: "WARU" },
-    { id: "64.09.03", parentId: "64.09", name: "BABULU" },
-    { id: "64.09.04", parentId: "64.09", name: "SEPAKU" },
-
-    // --- KABUPATEN MAHAKAM ULU (64.11) ---
-    { id: "64.11.01", parentId: "64.11", name: "LONG BAGUN" },
-    { id: "64.11.02", parentId: "64.11", name: "LONG HUBUNG" },
-    { id: "64.11.03", parentId: "64.11", name: "LAHAM" },
-    { id: "64.11.04", parentId: "64.11", name: "LONG APARI" },
-    { id: "64.11.05", parentId: "64.11", name: "LONG PAHANGAI" },
-
-    // --- KOTA BALIKPAPAN (64.71) ---
-    { id: "64.71.01", parentId: "64.71", name: "BALIKPAPAN TIMUR" },
-    { id: "64.71.02", parentId: "64.71", name: "BALIKPAPAN BARAT" },
-    { id: "64.71.03", parentId: "64.71", name: "BALIKPAPAN UTARA" },
-    { id: "64.71.04", parentId: "64.71", name: "BALIKPAPAN TENGAH" },
-    { id: "64.71.05", parentId: "64.71", name: "BALIKPAPAN SELATAN" },
-    { id: "64.71.06", parentId: "64.71", name: "BALIKPAPAN KOTA" },
-
-    // --- KOTA SAMARINDA (64.72) ---
-    { id: "64.72.01", parentId: "64.72", name: "PALARAN" },
-    { id: "64.72.02", parentId: "64.72", name: "SAMARINDA SEBERANG" },
-    { id: "64.72.03", parentId: "64.72", name: "SAMARINDA ULU" },
-    { id: "64.72.04", parentId: "64.72", name: "SAMARINDA ILIR" },
-    { id: "64.72.05", parentId: "64.72", name: "SAMARINDA UTARA" },
-    { id: "64.72.06", parentId: "64.72", name: "SUNGAI KUNJANG" },
-    { id: "64.72.07", parentId: "64.72", name: "SAMBUTAN" },
-    { id: "64.72.08", parentId: "64.72", name: "SUNGAI PINANG" },
-    { id: "64.72.09", parentId: "64.72", name: "SAMARINDA KOTA" },
-    { id: "64.72.10", parentId: "64.72", name: "LOA JANAN ILIR" },
-
-    // --- KOTA BONTANG (64.74) ---
-    { id: "64.74.01", parentId: "64.74", name: "BONTANG UTARA" },
-    { id: "64.74.02", parentId: "64.74", name: "BONTNAG SELATAN" },
-    { id: "64.74.03", parentId: "64.74", name: "BONTANG BARAT" },
-];
-
-// 4. KELURAHAN (TARGET AKHIR)
-
-export const KELURAHAN: Wilayah[] = [
-  // --- KEC. SAMARINDA ULU (64.72.01) ---
-  { id: "64.72.01.1001", parentId: "64.72.01", name: "AIR PUTIH", bmkgCode: "64.72.01.1001" },
-  { id: "64.72.01.1002", parentId: "64.72.01", name: "AIR HITAM", bmkgCode: "64.72.01.1002" },
-  { id: "64.72.01.1003", parentId: "64.72.01", name: "JAWA", bmkgCode: "64.72.01.1003" },
-  { id: "64.72.01.1004", parentId: "64.72.01", name: "SIDODADI", bmkgCode: "64.72.01.1004" },
-
-  // --- KEC. BALIKPAPAN TIMUR (64.71.01) ---
-  { id: "64.71.01.1001", parentId: "64.71.01", name: "MANGGAR", bmkgCode: "64.71.01.1001" },
-  { id: "64.71.01.1002", parentId: "64.71.01", name: "MANGGAR BARU", bmkgCode: "64.71.01.1002" },
-];

@@ -111,3 +111,34 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return Math.round(R * c); // Hasil dalam KM
 }
+
+
+
+// Tambahkan fungsi-fungsi ini ke dalam file aviation-utils.ts Anda
+
+export const estimateDuration = (km: number) => {
+    const speed = 550; // Avg speed km/h
+    const timeInHours = km / speed;
+    const hours = Math.floor(timeInHours);
+    const minutes = Math.round((timeInHours - hours) * 60);
+    return `${hours}j ${minutes}m`;
+};
+
+export const getVisibilityStatus = (visibilityStr: string) => {
+    if (!visibilityStr) return { label: 'No Data', className: 'bg-slate-100 text-slate-500 border-slate-200', dot: 'bg-slate-400' };
+
+    // Sanitasi input
+    const cleanString = visibilityStr.toString().replace(/[^0-9.]/g, '');
+    let vis = parseFloat(cleanString);
+
+    if (isNaN(vis)) return { label: 'No Data', className: 'bg-slate-100 text-slate-500 border-slate-200', dot: 'bg-slate-400' };
+
+    // Normalisasi (9999 = 10km, >50 = meter ke km)
+    if (vis === 9999) vis = 10;
+    else if (vis > 50) vis = vis / 1000;
+
+    if (vis > 8) return { label: 'VFR (> 8 km)', className: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-500' };
+    if (vis >= 4.8) return { label: 'MVFR (4.8-8 km)', className: 'bg-blue-50 text-blue-700 border-blue-100', dot: 'bg-blue-500' };
+    if (vis >= 1.6) return { label: 'IFR (1.6-4.8 km)', className: 'bg-amber-50 text-amber-700 border-amber-100', dot: 'bg-amber-500' };
+    return { label: 'LIFR (< 1.6 km)', className: 'bg-rose-50 text-rose-700 border-rose-100', dot: 'bg-rose-500' };
+};

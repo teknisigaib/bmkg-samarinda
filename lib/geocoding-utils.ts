@@ -1,0 +1,24 @@
+export async function searchCoordinates(query: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    // API Nominatim OpenStreetMap (Gratis)
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+    
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'CuacaMikroKaltim/1.0' }
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Geocoding error:", error);
+    return null;
+  }
+}

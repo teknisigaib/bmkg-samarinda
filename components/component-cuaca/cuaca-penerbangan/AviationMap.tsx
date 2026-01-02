@@ -3,9 +3,9 @@
 import { MapContainer, TileLayer, Marker, Tooltip, useMap, Polyline, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useMemo,useRef } from "react";
 import { ParsedMetar } from "@/lib/bmkg/aviation-utils";
-import { Layers, RefreshCw, ChevronLeft, ChevronRight, Globe, Map as MapIcon } from "lucide-react";
+import { Layers, RefreshCw, ChevronLeft, ChevronRight, Globe, Loader2, Map as MapIcon } from "lucide-react";
 
 // --- 1. ICON PESAWAT ---
 const createPlaneIcon = (color: string, rotation: number = 0) => {
@@ -79,17 +79,33 @@ const getInitialDate = () => {
     return now;
 };
 
-// --- 5. COLOR HELPER (NEW LOGIC) ---
-// Logika warna berdasarkan Visibility (Sama dengan Dashboard)
+// --- 5. COLOR HELPER (FIXED LOGIC) ---
 const getVisibilityColor = (visibilityStr: string) => {
-    const vis = parseFloat(visibilityStr);
-    
-    if (isNaN(vis)) return '#64748b'; // Slate (No Data)
+    // 1. Cek jika data kosong/undefined
+    if (!visibilityStr) return '#64748b'; // Slate (No Data)
 
-    if (vis > 8) return '#22c55e';      // Green-500
-    if (vis >= 4.8) return '#06b6d4';   // Cyan-500
-    if (vis >= 1.6) return '#eab308';   // Yellow-500
-    return '#ef4444';                   // Red-500
+    // 2. SANITASI: Hapus karakter non-angka (seperti >=, <, spasi)
+    // Contoh: ">=10" -> "10", "9999" -> "9999"
+    const cleanString = visibilityStr.toString().replace(/[^0-9.]/g, '');
+    let vis = parseFloat(cleanString);
+    
+    // 3. Validasi hasil parsing
+    if (isNaN(vis)) return '#64748b'; // Slate (Error parsing)
+
+    // 4. NORMALISASI: 
+    // Deteksi apakah satuan dalam Meter (9999, 8000) atau KM (10, 8).
+    // Batas aman 50. Jika > 50, anggap meter dan bagi 1000.
+    if (vis === 9999) {
+        vis = 10;
+    } else if (vis > 50) {
+        vis = vis / 1000; 
+    }
+
+    // 5. TENTUKAN WARNA (Threshold VFR/IFR)
+    if (vis > 8) return '#22c55e';       // Green-500 (VFR - Aman)
+    if (vis >= 4.8) return '#06b6d4';    // Cyan-500 (MVFR)
+    if (vis >= 1.6) return '#eab308';    // Yellow-500 (IFR - Waspada)
+    return '#ef4444';                    // Red-500 (LIFR - Bahaya)
 };
 
 const AutoZoom = ({ data }: { data: ParsedMetar[] }) => {
@@ -114,11 +130,46 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
   const [showRadar, setShowRadar] = useState(false);
   const [showSatellite, setShowSatellite] = useState(false);
   const [showBoundary, setShowBoundary] = useState(true); 
-  
+  const [isLayerLoading, setIsLayerLoading] = useState(false);
   // State Data
   const [geoJsonData, setGeoJsonData] = useState<any>(null);
   const [radarDate, setRadarDate] = useState<Date | null>(null);
   const [satelliteDate, setSatelliteDate] = useState<Date | null>(null);
+  const loadingCount = useRef(0);
+  // --- HANDLER EVENT TILE ---
+  // Fungsi ini akan dipanggil oleh TileLayer saat mulai/selesai fetch
+  const tileHandlers = useMemo(() => ({
+        loading: () => {
+            // Tambah counter
+            loadingCount.current += 1;
+            // Jika ini request pertama, nyalakan spinner
+            if (loadingCount.current === 1) {
+                setIsLayerLoading(true);
+            }
+        },
+        load: () => {
+            // Kurangi counter
+            loadingCount.current -= 1;
+            // Pastikan tidak negatif (safety)
+            if (loadingCount.current < 0) loadingCount.current = 0;
+            
+            // Jika counter 0, berarti SEMUA layer selesai -> matikan spinner
+            if (loadingCount.current === 0) {
+                setIsLayerLoading(false);
+            }
+        },
+        tileerror: () => {
+            // Anggap error sebagai selesai load agar counter tidak macet
+            loadingCount.current -= 1;
+            if (loadingCount.current < 0) loadingCount.current = 0;
+            if (loadingCount.current === 0) {
+                setIsLayerLoading(false);
+            }
+        }
+    }), []);
+
+    const radarBuster = radarDate ? radarDate.getTime() : 0;
+    const satBuster = satelliteDate ? satelliteDate.getTime() : 0;
 
   // Init Data & Waktu
   useEffect(() => {
@@ -205,6 +256,12 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                             <div className="flex items-center gap-2 text-blue-400">
                                 <Layers className="w-3 h-3" />
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Rain Radar</span>
+                                {isLayerLoading && (
+                                    <div className="flex items-center gap-1 bg-blue-500/20 px-1.5 py-0.5 rounded text-[9px] text-blue-300 animate-pulse">
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        <span>Fetching...</span>
+                                    </div>
+                                )}
                             </div>
                             <button onClick={() => setRadarDate(getInitialDate())} className="text-slate-500 hover:text-white transition-colors" title="Reset"><RefreshCw className="w-3 h-3" /></button>
                         </div>
@@ -232,6 +289,13 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                             <div className="flex items-center gap-2 text-purple-400">
                                 <Globe className="w-3 h-3" />
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Himawari-9</span>
+                                {/* --- INDIKATOR LOADING SATELIT --- */}
+                                {isLayerLoading && (
+                                    <div className="flex items-center gap-1 bg-purple-500/20 px-1.5 py-0.5 rounded text-[9px] text-purple-300 animate-pulse">
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        <span>Fetching...</span>
+                                    </div>
+                                )}
                             </div>
                             <button onClick={() => setSatelliteDate(getInitialDate())} className="text-slate-500 hover:text-white transition-colors" title="Reset"><RefreshCw className="w-3 h-3" /></button>
                         </div>
@@ -275,33 +339,35 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
             />
         )}
 
-        {/* --- LAYER SATELIT --- */}
-        {showSatellite && satelliteUrlString && (
-            <TileLayer
-                key={`sat-${satelliteUrlString}`}
-                url={`/api/satellite-proxy?baserun=${satelliteUrlString}&z={z}&x={x}&y={y}`}
-                tms={true} 
-                opacity={0.6}
-                zIndex={5}    
-                maxZoom={10}
-                minZoom={3}
-                errorTileUrl="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-            />
-        )}
+        {/* --- LAYER SATELIT  --- */}
+        {/* Layer Satelit */}
+            {showSatellite && satelliteUrlString && (
+                <TileLayer
+                    key={`sat-${satelliteUrlString}`} // Key berubah hanya jika waktu berubah
+                    url={`/api/satellite-proxy?baserun=${satelliteUrlString}&z={z}&x={x}&y={y}`}
+                    tms={true} 
+                    opacity={0.6}
+                    zIndex={5}    
+                    maxZoom={10}
+                    minZoom={3}
+                    eventHandlers={tileHandlers} // Handler stabil
+                />
+            )}
         
-        {/* --- LAYER RADAR --- */}
-        {showRadar && radarUrlString && (
-            <TileLayer
-                key={`radar-${radarUrlString}`}
-                url={`/api/radar-proxy?time=${radarUrlString}&z={z}&x={x}&y={y}&_t=${new Date().getTime()}`}
-                tms={true} 
-                opacity={0.8}
-                zIndex={10}    
-                maxZoom={10}
-                minZoom={4}
-                errorTileUrl="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-            />
-        )}
+        {/* Layer Radar */}
+            {showRadar && radarUrlString && (
+                <TileLayer
+                        key={`radar-${radarUrlString}`} // Key berubah hanya jika waktu berubah
+                    // PENTING: Gunakan variabel buster yang stabil, bukan inline function
+                    url={`/api/radar-proxy?time=${radarUrlString}&z={z}&x={x}&y={y}&_t=${radarBuster}`}
+                    tms={true} 
+                    opacity={0.8}
+                    zIndex={10}    
+                    maxZoom={10}
+                    minZoom={4}
+                    eventHandlers={tileHandlers} // Handler stabil
+                />
+            )}
 
         <AutoZoom data={airports} />
 

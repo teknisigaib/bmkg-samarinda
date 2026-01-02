@@ -1,6 +1,7 @@
 // lib/bmkg/types.ts
 
 export interface WeatherDataPoint {
+  tcc: number;
   datetime: string;
   local_datetime: string;
   t: number;       // Suhu

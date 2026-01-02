@@ -15,7 +15,7 @@ export interface BMKGWeatherItem {
 }
 
 export interface BMKGLocation {
-    adm1: string;
+  adm1: string;
   adm2: string;
   adm3: string; 
   adm4: string;
