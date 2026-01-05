@@ -1,175 +1,288 @@
-import { getMetarData } from "@/lib/aviation-api"; // Import fungsi fetcher
-import { Plane, Wind, Eye, Cloud, Thermometer, Navigation, ArrowUpRight, AlertCircle } from "lucide-react";
+import { getRawMetar, getRawTaf } from "@/lib/bmkg/aviation";
+import { parseRawMetar } from "@/lib/metar-parser";
+import { 
+  Plane, Wind, Eye, Thermometer, Navigation, 
+  ArrowDown, AlertCircle, FileText, Gauge,
+  CloudRain, Layers, CalendarClock, Info 
+} from "lucide-react";
 
 export default async function AviationSection() {
-  // 1. Ambil Data Real untuk WALS (Samarinda)
-  const data = await getMetarData("WALL");
+  const ICAO_CODE = "WALS";
+  const RUNWAY_ACTUAL_HEADING = 40; 
 
-  // Jika API Down/Data Kosong, gunakan Fallback (Mockup) atau tampilkan pesan error
-  if (!data) {
+  let data = null;
+  let latestRawString = null;
+  let latestTafString = null;
+  let errorMsg = null;
+
+  try {
+      const [rawMetars, rawTafs] = await Promise.all([
+        getRawMetar(ICAO_CODE).catch(() => []),
+        getRawTaf(ICAO_CODE).catch(() => [])
+      ]);
+
+      latestRawString = (rawMetars && rawMetars.length > 0) ? rawMetars[0].data_text : null;
+      latestTafString = (rawTafs && rawTafs.length > 0) ? rawTafs[0].data_text : null;
+
+      if (latestRawString) {
+          data = parseRawMetar(latestRawString);
+      } else {
+          errorMsg = "Data METAR tidak ditemukan dari sumber BMKG.";
+      }
+  } catch (err) {
+      errorMsg = "Terjadi kesalahan sistem saat mengambil data.";
+  }
+
+  if (!data || !latestRawString) {
     return (
-      <section className="bg-slate-900 text-white py-16 text-center">
-        <div className="flex flex-col items-center gap-2 opacity-50">
-            <AlertCircle className="w-10 h-10" />
-            <p>Data Penerbangan Tidak Tersedia Saat Ini</p>
+      <section className="bg-slate-50 text-slate-900 py-16 text-center rounded-[2.5rem] mx-4 border border-slate-200 shadow-lg">
+        <div className="flex flex-col items-center gap-4">
+            <AlertCircle className="w-12 h-12 text-red-600" />
+            <h3 className="font-bold text-2xl text-slate-900">Data Penerbangan Tidak Tersedia</h3>
+            <p className="text-slate-600 mt-2 text-sm">{errorMsg || "Menunggu data..."}</p>
         </div>
       </section>
     );
   }
 
-  // 2. Format & Konversi Data
-  const windDir = typeof data.wdir === 'number' ? data.wdir : 0; // Handle Variable wind
-  
-  // Konversi Visibility: Miles -> KM (1 Mile = 1.609 KM)
-  // Jika visib "+" (lebih dari), API kasih null/string kadang, jadi kita handle safe
-  const visibilityKm = data.visib ? (data.visib * 1.60934).toFixed(1) : "10+"; 
-  
-  // Ambil data awan pertama (jika ada)
-  const cloudInfo = data.clouds && data.clouds.length > 0 
-    ? `${data.clouds[0].cover} ${data.clouds[0].base ? (data.clouds[0].base * 100) : ''}ft` // base dikali 100 krn format NOAA
-    : "NSC / CAVOK"; // No Significant Cloud
-
-  // Format Jam (Report Time)
-  const reportTime = new Date(data.reportTime).toLocaleTimeString('id-ID', {
-    hour: '2-digit', 
-    minute: '2-digit', 
-    timeZone: 'UTC' // Penerbangan selalu pakai UTC (Zulu)
+  const reportTime = new Date(data.time).toLocaleTimeString('id-ID', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'UTC' 
   }) + " UTC";
 
+  const isVariableWind = data.wind.direction === "VRB";
+  const windDirValue = isVariableWind ? 0 : (data.wind.direction as number);
+  const hasTrends = data.trends.length > 0;
+  const hasRemarks = data.remarks.length > 0;
+
   return (
-    <section className="bg-slate-900 text-white py-16 rounded-2xl  relative overflow-hidden">
-      {/* Background Decoration */}
-      <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-        <Plane className="w-96 h-96" />
+    <section className="bg-slate-50 text-slate-900 py-16 rounded-[2.5rem] relative overflow-hidden shadow-xl shadow-slate-200/50 border border-slate-200">
+      
+      <div className="absolute -top-20 -right-20 p-10 opacity-[0.05] pointer-events-none text-slate-900">
+        <Plane className="w-[500px] h-[500px]" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
         
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4 border-b border-slate-700 pb-6">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-6 border-b border-slate-200 pb-8">
             <div>
-                <div className="flex items-center gap-2 text-yellow-400 font-bold tracking-wider text-sm mb-1">
+                <div className="flex items-center gap-2 text-blue-600 font-bold tracking-widest text-xs uppercase mb-2">
                     <Plane className="w-4 h-4" />
-                    AVIATION METEOROLOGY
+                    Aviation Meteorology
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">
-                    APT Pranoto Airport ({data.icaoId})
+                <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+                    APT Pranoto <span className="text-slate-500 font-medium text-2xl ml-2">({data.station})</span>
                 </h2>
-                <p className="text-slate-400 mt-1">Data Pengamatan Udara Permukaan (Real-time)</p>
+                <div className="flex items-center gap-2 mt-2">
+                    <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <p className="text-slate-600 text-sm font-medium">Live Data (Decoded)</p>
+                </div>
             </div>
-            <div className="text-right">
-                <p className="text-slate-400 text-sm">Observation Time:</p>
-                <p className="text-2xl font-mono font-bold text-yellow-400">{reportTime}</p>
+            <div className="text-right bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <p className="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">Observation Time</p>
+                <p className="text-3xl font-mono font-bold text-blue-600">{reportTime}</p>
             </div>
         </div>
+        
+        <div className="flex flex-col gap-6">
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* KOLOM 1: PARAMETER UTAMA */}
-            <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-                
-                {/* Wind Card */}
-                <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase mb-2">
-                        <Wind className="w-4 h-4" /> Wind
+            {/* BARIS 1: 4 METRIK UTAMA */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Wind */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-400 transition-colors group">
+                    <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-3 tracking-wider">
+                        <Wind className="w-3.5 h-3.5 text-blue-500" /> Wind
                     </div>
-                    <div className="flex items-end gap-1">
-                        <span className="text-3xl font-bold">{data.wspd}</span>
-                        <span className="text-sm font-medium mb-1">KT</span>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-slate-900">{data.wind.speed}</span>
+                        <span className="text-sm font-bold text-slate-400">{data.wind.unit}</span>
                     </div>
-                    <div className="text-sm text-yellow-400 mt-1 flex items-center gap-1">
-                        <Navigation className="w-3 h-3" style={{ transform: `rotate(${windDir}deg)` }} />
-                        {data.wdir === "VRB" ? "VRB" : `${windDir}°`}
+                    <div className="text-sm text-blue-600 mt-2 flex items-center gap-2 font-mono bg-blue-50 py-1 px-2 rounded w-fit border border-blue-100">
+                        {isVariableWind ? <Navigation className="w-3 h-3 animate-spin" /> : <Navigation className="w-3 h-3" style={{ transform: `rotate(${windDirValue}deg)` }} />}
+                        {isVariableWind ? "VRB" : `${windDirValue.toString().padStart(3, '0')}°`}
                     </div>
                 </div>
 
-                {/* Visibility Card */}
-                <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase mb-2">
-                        <Eye className="w-4 h-4" /> Visibility
+                {/* Visibility */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-green-400 transition-colors group">
+                    <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-3 tracking-wider">
+                        <Eye className="w-3.5 h-3.5 text-green-500" /> Visibility
                     </div>
-                    <div className="flex items-end gap-1">
-                        <span className="text-3xl font-bold">{visibilityKm}</span>
-                        <span className="text-sm font-medium mb-1">KM</span>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-slate-900 truncate">{data.visibility.text}</span>
                     </div>
-                    <div className="text-xs text-slate-400 mt-1">
-                        {parseFloat(visibilityKm as string) > 5 ? "Good Vis" : "Poor Vis"}
-                    </div>
-                </div>
-
-                {/* Weather Card */}
-                <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 md:col-span-2">
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase mb-2">
-                        <Cloud className="w-4 h-4" /> Weather & Clouds
-                    </div>
-                    {/* RawOb parsing is complex, better show Cloud info + Raw string below */}
-                    <div className="font-bold text-lg text-white">
-                        {cloudInfo}
-                    </div>
-                    <div className="text-sm text-slate-400 mt-1">
-                        Dew Point: {data.dewp}°C
-                    </div>
+                    <div className="text-xs text-green-600 mt-2 font-medium">{data.visibility.meters >= 10000 ? "Clear / CAVOK" : "Observed"}</div>
                 </div>
 
                 {/* Temp */}
-                <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase mb-2">
-                        <Thermometer className="w-4 h-4" /> Temp
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-orange-400 transition-colors group">
+                    <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-3 tracking-wider">
+                        <Thermometer className="w-3.5 h-3.5 text-orange-500" /> Temp
                     </div>
-                    <div className="text-2xl font-bold">{data.temp}°C</div>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-slate-900">{data.temperature ?? "--"}</span>
+                        <span className="text-sm font-bold text-slate-400">°C</span>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-2">Dew Point: <span className="text-slate-700 font-bold">{data.dewPoint ?? "--"}°C</span></div>
                 </div>
 
-                {/* QNH */}
-                <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase mb-2">
-                        QNH
+                {/* Pressure */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-violet-400 transition-colors group">
+                    <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-3 tracking-wider">
+                        <Gauge className="w-3.5 h-3.5 text-violet-500" /> Pressure
                     </div>
-                    {/* Altim di API NOAA biasanya inHg (cth: 29.92), perlu konversi ke hPa jika nilainya kecil */}
-                    {/* Tapi endpoint JSON kadang sudah kasih mb. Kita cek: jika < 1100 brti mb, jika < 40 brti inHg */}
-                    <div className="text-2xl font-bold">
-                        {data.altim > 800 ? Math.round(data.altim) : Math.round(data.altim * 33.8639)} 
-                        <span className="text-sm font-normal ml-1">hPa</span>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-slate-900">{data.qnh ?? "--"}</span>
+                        <span className="text-sm font-bold text-slate-400">hPa</span>
                     </div>
+                    <div className="text-xs text-slate-500 mt-2">QNH / Altimeter</div>
                 </div>
-
             </div>
 
-            {/* KOLOM 2: VISUALISASI */}
-            <div className="space-y-4">
+            {/* BARIS 2: VISUALISASI RUNWAY & WEATHER (DIPASTIKAN SEJAJAR) */}
+            {/* items-stretch pada grid memastikan kolom kiri & kanan tingginya sama */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
                 
-                {/* Visualisasi Runway (Interaktif sesuai data) */}
-                <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 flex flex-col items-center justify-center relative overflow-hidden h-48">
-                    <span className="absolute top-2 left-3 text-xs text-slate-500 font-bold">RUNWAY 04/22</span>
+                {/* KOLOM KIRI: Visualisasi Runway */}
+                {/* min-h-[20rem] memastikan minimal tinggi 320px, h-full memastikannya memanjang jika kolom kanan lebih tinggi */}
+                <div className="lg:col-span-3 bg-sky-100 rounded-2xl p-4 border border-sky-200 flex items-center justify-center relative overflow-hidden h-full min-h-[20rem] group shadow-md">
+                    <span className="absolute top-3 left-3 text-[9px] text-sky-800 font-bold tracking-widest bg-white/60 px-2 py-0.5 rounded border border-sky-200 z-30">RUNWAY 04/22</span>
                     
-                    {/* Runway */}
-                    <div className="w-24 h-full bg-slate-600 border-x-4 border-slate-500 relative flex flex-col justify-between items-center py-2">
-                        <span className="text-white font-bold text-xl rotate-180">22</span>
-                        <div className="h-full w-1 border-l-2 border-dashed border-white opacity-50"></div>
-                        <span className="text-white font-bold text-xl">04</span>
+                    {/* Compass */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
+                        <div className="w-56 h-56 border-2 border-dashed border-sky-400 rounded-full relative">
+                             <span className="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1">N</span>
+                        </div>
                     </div>
 
-                    {/* Wind Arrow (Hanya muncul jika arah angin valid/bukan VRB) */}
-                    {typeof data.wdir === 'number' && (
-                        <div 
-                            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                            style={{ transform: `rotate(${data.wdir}deg)` }}
-                        >
-                            <div className="flex flex-col items-center animate-pulse">
-                                <ArrowUpRight className="w-12 h-12 text-yellow-400 drop-shadow-lg" />
-                                <span className="bg-black/50 text-yellow-400 text-[10px] px-1 rounded transform -rotate-180">
-                                    {data.wspd} KT
-                                </span>
+                    {/* Strip */}
+                    <div className="absolute flex flex-col items-center justify-center py-4 transition-transform duration-500" style={{ transform: `rotate(${RUNWAY_ACTUAL_HEADING}deg)` }}>
+                        <div className="w-16 h-48 bg-slate-300 border-x-[3px] border-slate-400 relative flex flex-col justify-between items-center py-3 shadow-xl z-10">
+                            <div className="flex flex-col items-center">
+                                 <div className="flex gap-0.5 mb-1.5">{[...Array(3)].map((_,i) => <div key={i} className="w-1 h-3 bg-white"></div>)}</div>
+                                <span className="text-slate-700 font-black text-xl rotate-180 drop-shadow-sm">22</span>
+                            </div>
+                            <div className="h-full w-1 border-l-2 border-dashed border-slate-100 my-1"></div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-slate-700 font-black text-xl drop-shadow-sm">04</span>
+                                 <div className="flex gap-0.5 mt-1.5">{[...Array(3)].map((_,i) => <div key={i} className="w-1 h-3 bg-white"></div>)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Wind Arrow */}
+                    {isVariableWind ? (
+                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+                             <div className="bg-red-100 text-red-600 font-bold text-xs px-3 py-1.5 rounded-lg border border-red-200 shadow-sm animate-pulse">VRB</div>
+                         </div>
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-transform duration-1000 ease-out z-30" style={{ transform: `rotate(${windDirValue}deg)` }}>
+                            <div className="flex flex-col items-center relative -top-20">
+                                <div className="bg-white/90 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-200 shadow-sm mb-1 whitespace-nowrap">{data.wind.speed} KT</div>
+                                <ArrowDown className="w-12 h-12 text-blue-600 drop-shadow-lg filter" strokeWidth={3} />
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Raw METAR */}
-                <div className="bg-black/40 p-4 rounded-lg border border-slate-700 font-mono text-sm text-green-400 break-words shadow-inner">
-                    <span className="block text-slate-500 text-xs mb-1 select-none">RAW METAR:</span>
-                    {data.rawOb}
-                </div>
+                {/* KOLOM KANAN: Weather & Clouds */}
+                {/* h-full memastikan wrapper ini setinggi Runway. */}
+                <div className="lg:col-span-2 flex flex-col gap-4 h-full">
+                    
+                    {/* flex-1 memastikan kartu ini memenuhi ruang kosong. */}
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4 flex-1">
+                        <div>
+                            <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wider">
+                                <CloudRain className="w-3.5 h-3.5 text-red-500" /> Weather & Forecast
+                            </div>
+                            <div className="flex flex-wrap gap-2 items-start">
+                                {data.weatherConditions && data.weatherConditions.length > 0 ? (
+                                    data.weatherConditions.map((wx, i) => (
+                                        <span key={`wx-${i}`} className="bg-red-50 px-3 py-1.5 rounded-lg text-lg font-mono font-black text-red-600 border border-red-200">{wx}</span>
+                                    ))
+                                ) : (
+                                    <div className="flex items-center gap-2 opacity-70">
+                                        <span className="bg-slate-100 px-2 py-1 rounded text-xs font-mono text-slate-500 border border-slate-200">NSW</span>
+                                        <span className="text-xs text-slate-500 font-medium">No Significant Weather</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
 
+                        {(hasTrends || hasRemarks) && <div className="h-px bg-slate-100 w-full mt-auto"></div>}
+
+                        {(hasTrends || hasRemarks) && (
+                            <div className="flex flex-col gap-2">
+                                {data.trends.map((t, i) => (
+                                    <div key={i} className="bg-amber-50 rounded-lg p-3 border border-amber-100">
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <AlertCircle className="w-3 h-3 text-amber-600" />
+                                            <span className="text-[10px] font-bold text-amber-700 uppercase">{t.type}</span>
+                                        </div>
+                                        <p className="font-mono text-xs text-amber-900 leading-tight">{t.fullText}</p>
+                                    </div>
+                                ))}
+                                {data.remarks.length > 0 && (
+                                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <Info className="w-3 h-3 text-slate-500" />
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase">Remarks</span>
+                                        </div>
+                                        <p className="font-mono text-xs text-slate-600 leading-tight">{data.remarks.join(" ")}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* flex-1 memastikan kartu ini juga ikut meregang. */}
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center flex-1">
+                        <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wider">
+                            <Layers className="w-3.5 h-3.5 text-blue-500" /> Cloud Coverage
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {data.clouds.length > 0 ? (
+                                data.clouds.map((cloudStr, i) => {
+                                    const isThick = cloudStr.includes("OVC") || cloudStr.includes("BKN");
+                                    return (<span key={i} className={`px-2 py-1 rounded-lg text-xs font-mono font-bold border shadow-sm ${isThick ? "bg-slate-700 text-white border-slate-800" : "bg-blue-50 text-blue-700 border-blue-200"}`}>{cloudStr}</span>)
+                                })
+                            ) : (<span className="text-slate-500 text-xs italic">NSC / Clear</span>)}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* BARIS 3: RAW DATA (DIPASTIKAN SEJAJAR) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                            <FileText className="w-3 h-3 text-slate-500" />
+                            <span className="text-slate-600 text-[10px] font-bold uppercase tracking-wider">Raw METAR</span>
+                        </div>
+                        <span className="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded border border-blue-200">Observed</span>
+                    </div>
+                    <code className="block font-mono text-xs text-blue-900 font-medium break-words leading-relaxed flex-1">
+                        {latestRawString}
+                    </code>
+                </div>
+                
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                             <CalendarClock className="w-3 h-3 text-slate-500" />
+                             <span className="text-slate-600 text-[10px] font-bold uppercase tracking-wider">Forecast (TAF)</span>
+                        </div>
+                        <span className="text-[9px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded border border-slate-300">Predicted</span>
+                    </div>
+                    <code className="block font-mono text-xs text-slate-700 font-medium break-words leading-relaxed flex-1">
+                        {latestTafString || "Forecast not available."}
+                    </code>
+                </div>
             </div>
 
         </div>
