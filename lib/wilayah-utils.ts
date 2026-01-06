@@ -1,5 +1,5 @@
 // lib/wilayah-utils.ts
-import { DATA_KALTIM, CityNode, DistrictNode, VillageNode } from "@/data/kaltim-manual";
+import { DATA_KALTIM } from "@/data/kaltim-manual";
 
 // Tipe data yang dibutuhkan oleh komponen UI (tetap sama agar tidak merusak komponen lain)
 export interface Wilayah {
