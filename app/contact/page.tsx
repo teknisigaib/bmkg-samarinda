@@ -32,44 +32,42 @@ export default function ContactPage() {
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">Kantor Administrasi</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                    Jl. Pipit No. 99, Bandara APT Pranoto,<br />
-                    Kec. Sungai Siring, Samarinda<br />
-                    (Gedung Kantor Depan)
+                    Jl. Pipit No. 150, Eks Bandara Temindung,<br />
+                    Kec. Sungai Pinang, Samarinda<br />
                 </p>
             </div>
 
             {/* Card 2: Kantor Operasional (BARU) */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-lg transition-all group">
-                <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                     <Plane className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">Kantor Operasional</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                    Gedung Operasional Meteorologi,<br />
-                    Sisi Udara Bandara APT Pranoto<br />
-                    (Area Runway / Tower)
+                    Komplek Bandara APT Pranoto<br />
+                    Jl. Poros Samarinda-Bontang<br />
                 </p>
             </div>
 
             {/* Card 3: Kontak Digital */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-lg transition-all group">
-                <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                     <Mail className="w-7 h-7" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Kontak Digital</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Kontak</h3>
                 <div className="space-y-1 text-sm">
                     <a href="mailto:stamet.samarinda@bmkg.go.id" className="block text-gray-600 hover:text-blue-600 font-medium transition">
                         stamet.samarinda@bmkg.go.id
                     </a>
-                    <a href="tel:05411234567" className="block text-gray-600 hover:text-blue-600 font-medium transition">
-                        (0541) 123-4567 (Fax/Telp)
+                    <a href="tel:85350611416" className="block text-gray-600 hover:text-blue-600 font-medium transition">
+                        (+62) 85350611416 (WhatsApp/Telp)
                     </a>
                 </div>
             </div>
 
             {/* Card 4: Jam Operasional */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-lg transition-all group">
-                <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                     <Clock className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">Jam Operasional</h3>
@@ -85,10 +83,10 @@ export default function ContactPage() {
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-8 md:p-12 mb-12 text-center text-white shadow-xl">
             <h3 className="text-2xl font-bold mb-8">Ikuti Kami di Media Sosial</h3>
             <div className="flex flex-wrap justify-center gap-6">
-                <SocialButton href="#" icon={<Facebook className="w-6 h-6" />} label="Facebook" color="hover:bg-[#1877F2]" />
-                <SocialButton href="#" icon={<Instagram className="w-6 h-6" />} label="Instagram" color="hover:bg-[#E4405F]" />
-                <SocialButton href="#" icon={<Twitter className="w-6 h-6" />} label="Twitter / X" color="hover:bg-[#1DA1F2]" />
-                <SocialButton href="#" icon={<Youtube className="w-6 h-6" />} label="YouTube" color="hover:bg-[#FF0000]" />
+                <SocialButton href="https://www.facebook.com/bmkg.kotasamarinda/" icon={<Facebook className="w-6 h-6" />} label="Facebook" color="hover:bg-[#1877F2]" />
+                <SocialButton href="https://www.instagram.com/stamet.samarinda.bmkg?igsh=MWQwb3hlYzk5ZzdyNQ==" icon={<Instagram className="w-6 h-6" />} label="Instagram" color="hover:bg-[#E4405F]" />
+                <SocialButton href="https://x.com/BMKG_Samarinda?t=2adlrNpRoV46_BxZtN9yAg&s=09" icon={<Twitter className="w-6 h-6" />} label="X" color="hover:bg-[#1DA1F2]" />
+                <SocialButton href="www.youtube.com/@ceceproby" icon={<Youtube className="w-6 h-6" />} label="YouTube" color="hover:bg-[#FF0000]" />
                 <SocialButton href="https://bmkg.go.id" icon={<Globe className="w-6 h-6" />} label="Portal BMKG" color="hover:bg-green-600" />
             </div>
         </div>

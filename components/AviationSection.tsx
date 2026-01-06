@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 export default async function AviationSection() {
-  const ICAO_CODE = "WALS";
+  const ICAO_CODE = "WATU";
   const RUNWAY_ACTUAL_HEADING = 40; 
 
   let data = null;
@@ -68,22 +68,15 @@ export default async function AviationSection() {
             <div>
                 <div className="flex items-center gap-2 text-blue-600 font-bold tracking-widest text-xs uppercase mb-2">
                     <Plane className="w-4 h-4" />
-                    Aviation Meteorology
+                    Meteorologi Penerbangan
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
-                    APT Pranoto <span className="text-slate-500 font-medium text-2xl ml-2">({data.station})</span>
+                    Stasiun Meteorologi APT Pranoto <span className="text-slate-500 font-medium text-2xl ml-2">({data.station})</span>
                 </h2>
-                <div className="flex items-center gap-2 mt-2">
-                    <span className="flex h-2 w-2 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    <p className="text-slate-600 text-sm font-medium">Live Data (Decoded)</p>
-                </div>
             </div>
             <div className="text-right bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                 <p className="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">Observation Time</p>
-                <p className="text-3xl font-mono font-bold text-blue-600">{reportTime}</p>
+                <p className="text-3xl font-bold text-blue-600">{reportTime}</p>
             </div>
         </div>
         
@@ -107,20 +100,20 @@ export default async function AviationSection() {
                 </div>
 
                 {/* Visibility */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-green-400 transition-colors group">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-400 transition-colors group">
                     <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-3 tracking-wider">
-                        <Eye className="w-3.5 h-3.5 text-green-500" /> Visibility
+                        <Eye className="w-3.5 h-3.5 text-blue-500" /> Visibility
                     </div>
                     <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-slate-900 truncate">{data.visibility.text}</span>
+                        <span className="text-4xl font-bold text-slate-900 truncate">{data.visibility.text}</span>
                     </div>
-                    <div className="text-xs text-green-600 mt-2 font-medium">{data.visibility.meters >= 10000 ? "Clear / CAVOK" : "Observed"}</div>
+                    <div className="text-xs text-blue-600 mt-2 font-medium">{data.visibility.meters >= 10000 ? "Clear / CAVOK" : "Observed"}</div>
                 </div>
 
                 {/* Temp */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-orange-400 transition-colors group">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-400 transition-colors group">
                     <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-3 tracking-wider">
-                        <Thermometer className="w-3.5 h-3.5 text-orange-500" /> Temp
+                        <Thermometer className="w-3.5 h-3.5 text-blue-500" /> Temp
                     </div>
                     <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold text-slate-900">{data.temperature ?? "--"}</span>
@@ -130,9 +123,9 @@ export default async function AviationSection() {
                 </div>
 
                 {/* Pressure */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-violet-400 transition-colors group">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-400 transition-colors group">
                     <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-3 tracking-wider">
-                        <Gauge className="w-3.5 h-3.5 text-violet-500" /> Pressure
+                        <Gauge className="w-3.5 h-3.5 text-blue-500" /> Pressure
                     </div>
                     <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold text-slate-900">{data.qnh ?? "--"}</span>
@@ -143,13 +136,11 @@ export default async function AviationSection() {
             </div>
 
             {/* BARIS 2: VISUALISASI RUNWAY & WEATHER (DIPASTIKAN SEJAJAR) */}
-            {/* items-stretch pada grid memastikan kolom kiri & kanan tingginya sama */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
                 
                 {/* KOLOM KIRI: Visualisasi Runway */}
-                {/* min-h-[20rem] memastikan minimal tinggi 320px, h-full memastikannya memanjang jika kolom kanan lebih tinggi */}
-                <div className="lg:col-span-3 bg-sky-100 rounded-2xl p-4 border border-sky-200 flex items-center justify-center relative overflow-hidden h-full min-h-[20rem] group shadow-md">
-                    <span className="absolute top-3 left-3 text-[9px] text-sky-800 font-bold tracking-widest bg-white/60 px-2 py-0.5 rounded border border-sky-200 z-30">RUNWAY 04/22</span>
+                <div className="lg:col-span-3 bg-white rounded-2xl p-4 border border-slate-200 flex items-center justify-center relative overflow-hidden h-full min-h-[20rem] group shadow-md hover:border-blue-400">
+                    <span className="absolute top-3 left-3 text-[9px] text-sky-800 font-bold tracking-widest bg-white/60 px-2 py-0.5 rounded border border-slate-200 z-30">RUNWAY 04/22</span>
                     
                     {/* Compass */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
@@ -193,19 +184,19 @@ export default async function AviationSection() {
                 <div className="lg:col-span-2 flex flex-col gap-4 h-full">
                     
                     {/* flex-1 memastikan kartu ini memenuhi ruang kosong. */}
-                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4 flex-1">
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4 flex-1 hover:border-blue-400">
                         <div>
                             <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wider">
-                                <CloudRain className="w-3.5 h-3.5 text-red-500" /> Weather & Forecast
+                                <CloudRain className="w-3.5 h-3.5 text-blue-500" /> Weather & Forecast
                             </div>
                             <div className="flex flex-wrap gap-2 items-start">
                                 {data.weatherConditions && data.weatherConditions.length > 0 ? (
                                     data.weatherConditions.map((wx, i) => (
-                                        <span key={`wx-${i}`} className="bg-red-50 px-3 py-1.5 rounded-lg text-lg font-mono font-black text-red-600 border border-red-200">{wx}</span>
+                                        <span key={`wx-${i}`} className="bg-blue-50 px-3 py-1.5 rounded-lg text-md  font-black text-blue-600 border border-blue-200">{wx}</span>
                                     ))
                                 ) : (
                                     <div className="flex items-center gap-2 opacity-70">
-                                        <span className="bg-slate-100 px-2 py-1 rounded text-xs font-mono text-slate-500 border border-slate-200">NSW</span>
+                                        <span className="bg-slate-100 px-2 py-1 rounded text-xs  text-slate-500 border border-slate-200">NSW</span>
                                         <span className="text-xs text-slate-500 font-medium">No Significant Weather</span>
                                     </div>
                                 )}
@@ -222,7 +213,7 @@ export default async function AviationSection() {
                                             <AlertCircle className="w-3 h-3 text-amber-600" />
                                             <span className="text-[10px] font-bold text-amber-700 uppercase">{t.type}</span>
                                         </div>
-                                        <p className="font-mono text-xs text-amber-900 leading-tight">{t.fullText}</p>
+                                        <p className="text-xs text-amber-900 leading-tight">{t.fullText}</p>
                                     </div>
                                 ))}
                                 {data.remarks.length > 0 && (
@@ -231,7 +222,7 @@ export default async function AviationSection() {
                                             <Info className="w-3 h-3 text-slate-500" />
                                             <span className="text-[10px] font-bold text-slate-500 uppercase">Remarks</span>
                                         </div>
-                                        <p className="font-mono text-xs text-slate-600 leading-tight">{data.remarks.join(" ")}</p>
+                                        <p className="text-xs text-slate-600 leading-tight">{data.remarks.join(" ")}</p>
                                     </div>
                                 )}
                             </div>
@@ -239,7 +230,7 @@ export default async function AviationSection() {
                     </div>
 
                     {/* flex-1 memastikan kartu ini juga ikut meregang. */}
-                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center flex-1">
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col flex-1 hover:border-blue-400">
                         <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wider">
                             <Layers className="w-3.5 h-3.5 text-blue-500" /> Cloud Coverage
                         </div>
@@ -247,7 +238,7 @@ export default async function AviationSection() {
                             {data.clouds.length > 0 ? (
                                 data.clouds.map((cloudStr, i) => {
                                     const isThick = cloudStr.includes("OVC") || cloudStr.includes("BKN");
-                                    return (<span key={i} className={`px-2 py-1 rounded-lg text-xs font-mono font-bold border shadow-sm ${isThick ? "bg-slate-700 text-white border-slate-800" : "bg-blue-50 text-blue-700 border-blue-200"}`}>{cloudStr}</span>)
+                                    return (<span key={i} className={`px-2 py-1 rounded-lg text-md font-bold border shadow-sm ${isThick ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-blue-50 text-blue-600 border-blue-200"}`}>{cloudStr}</span>)
                                 })
                             ) : (<span className="text-slate-500 text-xs italic">NSC / Clear</span>)}
                         </div>
@@ -258,28 +249,28 @@ export default async function AviationSection() {
 
             {/* BARIS 3: RAW DATA (DIPASTIKAN SEJAJAR) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm flex flex-col h-full">
+                <div className="bg-slate-700 p-4 rounded-xl border border-slate-200 transition-colors shadow-sm flex flex-col h-full">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                            <FileText className="w-3 h-3 text-slate-500" />
-                            <span className="text-slate-600 text-[10px] font-bold uppercase tracking-wider">Raw METAR</span>
+                            <FileText className="w-3 h-3 text-white" />
+                            <span className="text-white text-[10px] font-bold uppercase tracking-wider">METAR</span>
                         </div>
                         <span className="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded border border-blue-200">Observed</span>
                     </div>
-                    <code className="block font-mono text-xs text-blue-900 font-medium break-words leading-relaxed flex-1">
+                    <code className="block text-md text-white font-medium break-words leading-relaxed flex-1">
                         {latestRawString}
                     </code>
                 </div>
                 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm flex flex-col h-full">
+                <div className="bg-slate-700 p-4 rounded-xl border border-slate-200 transition-colors shadow-sm flex flex-col h-full">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                             <CalendarClock className="w-3 h-3 text-slate-500" />
-                             <span className="text-slate-600 text-[10px] font-bold uppercase tracking-wider">Forecast (TAF)</span>
+                             <CalendarClock className="w-3 h-3 text-white" />
+                             <span className="text-white text-[10px] font-bold uppercase tracking-wider">TAF</span>
                         </div>
-                        <span className="text-[9px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded border border-slate-300">Predicted</span>
+                        <span className="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded border border-blue-200">Predicted</span>
                     </div>
-                    <code className="block font-mono text-xs text-slate-700 font-medium break-words leading-relaxed flex-1">
+                    <code className="block font-mono text-md text-white font-medium break-words leading-relaxed flex-1">
                         {latestTafString || "Forecast not available."}
                     </code>
                 </div>

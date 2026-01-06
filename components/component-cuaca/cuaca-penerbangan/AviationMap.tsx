@@ -6,26 +6,36 @@ import L from "leaflet";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { ParsedMetar } from "@/lib/bmkg/aviation-utils";
 import { 
-  Layers, RefreshCw, ChevronLeft, ChevronRight, Globe, Loader2, 
+  Layers, Globe, Loader2, 
   Map as MapIcon, AlertTriangle, Eye, EyeOff, ChevronsRight, Settings2,
-  Play, Pause
 } from "lucide-react";
 
 import { 
-  getPlaneIconHtml, getRadarIconHtml, getCurvedPath, 
-  formatDateToRadar, formatDateToSatellite, formatDisplayTime, 
+  getRadarIconHtml, getCurvedPath, 
+  formatDateToRadar, formatDateToSatellite, 
   getVisibilityColor, getSigmetStyle, getSigmetTooltipContent 
 } from "@/lib/bmkg/aviation-utils";
 
-// Import Hook Baru
-import { useTimeAnimation } from "@/hooks/use-time-animation";
+import { useTimeAnimation } from "@/components/hooks/use-time-animation";
+import TimeAnimationControl from "./TimeAnimationControl";
+import { RadarLegend, SatelliteLegend, SigmetLegend } from "./MapLegends"; // Pastikan import ini ada
 
 // --- CLIENT-SIDE ICONS ---
-const createPlaneIcon = (color: string, rotation: number = 0) => L.divIcon({
-    className: "custom-plane-icon",
-    html: getPlaneIconHtml(color, rotation),
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
+const createAirportDot = (color: string) => L.divIcon({
+    className: "airport-dot",
+    // HTML: Lingkaran warna dengan border putih tebal & efek glow
+    html: `
+        <div style="
+            background-color: ${color}; 
+            width: 14px; 
+            height: 14px; 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            transition: all 0.3s ease;
+        "></div>
+    `,
+    iconSize: [14, 14], // Ukuran kecil
+    iconAnchor: [7, 7], // Anchor di tengah (setengah dari size)
 });
 
 const createRadarIcon = () => L.divIcon({
@@ -34,73 +44,6 @@ const createRadarIcon = () => L.divIcon({
     iconSize: [24, 24],
     iconAnchor: [12, 12],
 });
-
-// --- SUB-COMPONENT: TIME CONTROL BAR (Reusable) ---
-interface TimeControlProps {
-    steps: Date[];
-    currentIndex: number;
-    isPlaying: boolean;
-    onPlayToggle: () => void;
-    onSeek: (index: number) => void;
-    label: string; 
-    color: string; // "blue" | "purple"
-}
-
-const TimeAnimationControl = ({ steps, currentIndex, isPlaying, onPlayToggle, onSeek, label, color }: TimeControlProps) => {
-    const currentTime = steps[currentIndex];
-    const percent = (currentIndex / (steps.length - 1)) * 100;
-    
-    // Tailwind dynamic colors helpers
-    const bgThumb = color === 'blue' ? 'bg-blue-500' : 'bg-purple-500';
-    const shadowThumb = color === 'blue' ? 'shadow-[0_0_8px_#3b82f6]' : 'shadow-[0_0_8px_#a855f7]';
-    const textCol = color === 'blue' ? 'text-blue-200' : 'text-purple-200';
-
-    return (
-        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-xl p-3 shadow-xl mb-2 last:mb-0 w-full animate-in slide-in-from-bottom-2">
-            <div className="flex items-center gap-3">
-                {/* Play Button */}
-                <button 
-                    onClick={onPlayToggle}
-                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all border border-white/10 ${isPlaying ? 'bg-white text-slate-900' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
-                >
-                    {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current ml-0.5" />}
-                </button>
-
-                {/* Info Label (Vertical Stack) */}
-                <div className="flex flex-col w-24 flex-shrink-0">
-                    <div className="flex items-center gap-1.5">
-                        <span className={`w-1.5 h-1.5 rounded-full ${bgThumb} ${shadowThumb}`}></span>
-                        <span className={`text-[10px] font-bold tracking-widest uppercase ${textCol}`}>{label}</span>
-                    </div>
-                    <span className="text-[10px] text-white font-mono font-bold leading-tight">
-                        {currentTime ? formatDisplayTime(currentTime) : "--:--"}
-                    </span>
-                </div>
-
-                {/* Slider */}
-                <div className="relative flex-1 h-6 flex items-center group">
-                    <div className="absolute left-0 right-0 h-1 bg-slate-700 rounded-full"></div>
-                    <div className="absolute left-0 h-1 bg-white/30 rounded-full" style={{ width: `${percent}%` }}></div>
-                    
-                    <input 
-                        type="range" 
-                        min={0} 
-                        max={steps.length - 1} 
-                        value={currentIndex}
-                        onChange={(e) => onSeek(parseInt(e.target.value))}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    />
-                    
-                    {/* Thumb */}
-                    <div 
-                        className={`absolute w-3 h-3 bg-white rounded-full border border-slate-900 shadow transition-transform pointer-events-none z-0 ${isPlaying ? 'scale-110' : ''}`}
-                        style={{ left: `calc(${percent}% - 6px)` }}
-                    ></div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // --- COMPONENT AUTO ZOOM ---
 const AutoZoom = ({ data }: { data: ParsedMetar[] }) => {
@@ -122,16 +65,14 @@ interface MapProps {
 }
 
 export default function AviationMap({ airports, onSelect, selectedIcao }: MapProps) {
-    // --- LAYER STATES (INDEPENDENT) ---
+    // --- LAYER STATES ---
     const [showRadar, setShowRadar] = useState(false);
     const [showSatellite, setShowSatellite] = useState(false);
     const [showBoundary, setShowBoundary] = useState(true);
     const [showSigmet, setShowSigmet] = useState(false); 
     
-    // --- ANIMATION HOOKS (INDEPENDENT) ---
-    // Radar: Interval 5 menit, Durasi 60 menit ke belakang
+    // --- ANIMATION HOOKS ---
     const radarAnim = useTimeAnimation(5, 60, 2500);
-    // Satelit: Interval 10 menit, Durasi 120 menit ke belakang
     const satAnim = useTimeAnimation(10, 120, 2500);
 
     // --- UI STATES ---
@@ -163,7 +104,6 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
     // URL Helpers
     const radarBuster = radarAnim.currentDate ? radarAnim.currentDate.getTime() : 0;
     const radarUrlString = radarAnim.currentDate ? formatDateToRadar(radarAnim.currentDate) : "";
-    
     const satelliteUrlString = satAnim.currentDate ? formatDateToSatellite(satAnim.currentDate) : "";
 
     // Tile Load Handlers
@@ -193,10 +133,12 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                 .custom-leaflet-tooltip { border: none; border-radius: 8px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); padding: 12px; min-width: 250px; }
             `}</style>
 
+            {/* --- (REMOVED) CONTAINER: LEGENDS KIRI ATAS SUDAH DIHAPUS --- */}
+
             {/* --- RIGHT PANEL (LAYERS) --- */}
             <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-2 font-sans transition-all duration-300">
                 {isPanelOpen ? (
-                    <div className="w-[260px] bg-slate-900/95 backdrop-blur-md rounded-xl border border-slate-700 shadow-2xl overflow-hidden divide-y divide-slate-800 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="w-[260px] bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700 shadow-2xl overflow-hidden divide-y divide-slate-800 animate-in fade-in zoom-in-95 duration-200">
                         <div className="bg-slate-800/50 p-3 flex items-center justify-between cursor-pointer" onClick={() => setIsPanelOpen(false)}>
                             <div className="flex items-center gap-2 text-slate-300 font-bold text-xs uppercase tracking-wider"><Settings2 className="w-3.5 h-3.5" /> Layers</div>
                             <div className="flex items-center gap-2">
@@ -212,26 +154,50 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                                     {showBoundary ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
                             </div>
+                            
                             {/* 2. SIGMET */}
                             <div className="p-2">
                                 <button onClick={() => setShowSigmet(!showSigmet)} className={`w-full flex items-center justify-between p-2 rounded-lg transition-all ${showSigmet ? 'bg-red-900/30 text-red-200 border border-red-900/50' : 'text-slate-400 hover:bg-slate-800 border border-transparent'}`}>
                                     <div className="flex items-center gap-3"><AlertTriangle className="w-4 h-4" /><span className="text-xs font-medium">SIGMET Hazards</span></div>
                                     {showSigmet ? <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
+
+                                {/* --- TAMBAHKAN LEGEND SIGMET DI SINI --- */}
+                                {showSigmet && (
+                                    <div className="mt-1 pl-1">
+                                        <SigmetLegend className="w-full bg-slate-800/50 border border-slate-700/50 animate-in slide-in-from-top-2" />
+                                    </div>
+                                )}
                             </div>
+
                             {/* 3. RADAR (INDEPENDENT) */}
                             <div className="p-2">
                                 <button onClick={() => setShowRadar(!showRadar)} className={`w-full flex items-center justify-between p-2 rounded-lg transition-all ${showRadar ? 'bg-blue-900/30 text-blue-200 border border-blue-900/50' : 'text-slate-400 hover:bg-slate-800 border border-transparent'}`}>
                                     <div className="flex items-center gap-3"><Layers className="w-4 h-4" /><span className="text-xs font-medium">Rain Radar</span></div>
                                     {showRadar ? <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
+                                
+                                {/* LEGEND RADAR (INSIDE PANEL) */}
+                                {showRadar && (
+                                    <div className="mt-2 pl-2">
+                                        <RadarLegend className="w-full bg-slate-800/50 border border-slate-700/50 p-2 rounded-lg animate-in slide-in-from-top-2" />
+                                    </div>
+                                )}
                             </div>
+
                             {/* 4. SATELLITE (INDEPENDENT) */}
                             <div className="p-2">
                                 <button onClick={() => setShowSatellite(!showSatellite)} className={`w-full flex items-center justify-between p-2 rounded-lg transition-all ${showSatellite ? 'bg-purple-900/30 text-purple-200 border border-purple-900/50' : 'text-slate-400 hover:bg-slate-800 border border-transparent'}`}>
                                     <div className="flex items-center gap-3"><Globe className="w-4 h-4" /><span className="text-xs font-medium">Himawari-9</span></div>
                                     {showSatellite ? <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></div> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
+
+                                {/* LEGEND SATELLITE (INSIDE PANEL) */}
+                                {showSatellite && (
+                                    <div className="mt-2 pl-2">
+                                        <SatelliteLegend className="w-full bg-slate-800/50 border border-slate-700/50 p-2 rounded-lg animate-in slide-in-from-top-2" />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -242,36 +208,48 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                 )}
             </div>
 
-            {/* --- BOTTOM FLOATING TIME CONTROLS (STACKED) --- */}
-            {/* Hanya tampil jika salah satu layer aktif */}
+            {/* --- BOTTOM FLOATING TIME CONTROLS (SMART LAYOUT) --- */}
             {(showRadar || showSatellite) && (
-                <div className="absolute bottom-6 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[500px] z-[1000] flex flex-col-reverse gap-2">
+                <div className="absolute bottom-8 left-4 right-4 z-[1000] pointer-events-none flex flex-col justify-end items-center">
                     
-                    {/* SATELLITE CONTROL (Ungu) */}
-                    {showSatellite && (
-                        <TimeAnimationControl 
-                            steps={satAnim.steps}
-                            currentIndex={satAnim.currentIndex}
-                            isPlaying={satAnim.isPlaying}
-                            onPlayToggle={satAnim.togglePlay}
-                            onSeek={satAnim.seek}
-                            label="SATELLITE"
-                            color="purple"
-                        />
-                    )}
+                    {/* LOGIC LAYOUT:
+                        - Jika keduanya aktif: 'grid grid-cols-2 gap-4 w-full max-w-5xl' (Kiri & Kanan)
+                        - Jika satu aktif: 'w-full max-w-[500px]' (Tengah)
+                    */}
+                    <div className={`
+                        pointer-events-auto transition-all duration-300
+                        ${(showRadar && showSatellite) 
+                            ? 'grid grid-cols-1 md:grid-cols-2 gap-6 w-full md:max-w-6xl' 
+                            : 'w-full max-w-[480px]'}
+                    `}>
+                        
+                        {/* SATELLITE CARD */}
+                        {showSatellite && (
+                            <TimeAnimationControl 
+                                steps={satAnim.steps}
+                                currentIndex={satAnim.currentIndex}
+                                isPlaying={satAnim.isPlaying}
+                                onPlayToggle={satAnim.togglePlay}
+                                onSeek={satAnim.seek}
+                                label="SATELLITE"
+                                className="w-full" // Isi penuh kolom grid/container
+                            />
+                        )}
 
-                    {/* RADAR CONTROL (Biru) - Di atas jika keduanya aktif agar lebih dekat ke peta */}
-                    {showRadar && (
-                        <TimeAnimationControl 
-                            steps={radarAnim.steps}
-                            currentIndex={radarAnim.currentIndex}
-                            isPlaying={radarAnim.isPlaying}
-                            onPlayToggle={radarAnim.togglePlay}
-                            onSeek={radarAnim.seek}
-                            label="RADAR"
-                            color="blue"
-                        />
-                    )}
+                        {/* RADAR CARD */}
+                        {showRadar && (
+                            <TimeAnimationControl 
+                                steps={radarAnim.steps}
+                                currentIndex={radarAnim.currentIndex}
+                                isPlaying={radarAnim.isPlaying}
+                                onPlayToggle={radarAnim.togglePlay}
+                                onSeek={radarAnim.seek}
+                                label="RADAR"
+                                className="w-full" // Isi penuh kolom grid/container
+                            />
+                        )}
+
+                    </div>
                 </div>
             )}
 
@@ -282,7 +260,6 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                 {showBoundary && geoJsonData && <GeoJSON data={geoJsonData} style={{ color: '#ffffff', weight: 0.9, opacity: 1, fillColor: 'transparent' }} />}
                 {showSigmet && sigmetData && <GeoJSON key="sigmet-layer" data={sigmetData} style={getSigmetStyle} onEachFeature={onEachSigmet} />}
 
-                {/* SATELLITE LAYER */}
                 {showSatellite && satelliteUrlString && (
                     <TileLayer 
                         key={`sat-${satelliteUrlString}`} 
@@ -291,7 +268,6 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                     />
                 )}
 
-                {/* RADAR LAYER */}
                 {showRadar && radarUrlString && (
                     <TileLayer 
                         key={`radar-${radarUrlString}`} 
@@ -313,7 +289,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                 {airports.map((apt) => {
                     if (routePositions && selectedIcao === apt.icao_id) return null;
                     return (
-                        <Marker key={apt.icao_id} position={[parseFloat(apt.latitude), parseFloat(apt.longitude)]} icon={createPlaneIcon(getVisibilityColor(apt.visibility), 0)} eventHandlers={{ click: () => onSelect(apt.icao_id) }} opacity={selectedIcao && selectedIcao !== apt.icao_id && apt.icao_id !== 'WALS' ? 0.8 : 1}>
+                        <Marker key={apt.icao_id} position={[parseFloat(apt.latitude), parseFloat(apt.longitude)]} icon={createAirportDot(getVisibilityColor(apt.visibility))} eventHandlers={{ click: () => onSelect(apt.icao_id) }} opacity={selectedIcao && selectedIcao !== apt.icao_id && apt.icao_id !== 'WALS' ? 0.8 : 1}>
                             <Tooltip direction="top" offset={[0, -15]} opacity={1} permanent={selectedIcao === apt.icao_id || apt.icao_id === 'WALS'}>
                                 <div className="text-center font-bold text-xs text-slate-800">{apt.icao_id}</div>
                             </Tooltip>

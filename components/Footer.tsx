@@ -31,7 +31,7 @@ export default function Footer() {
           {/* Kolom 2: Kontak */}
           <div className="space-y-4">
             <h4 className="text-white font-bold text-base mb-2">Hubungi Kami</h4>
-            <div className="items-start gap-3">
+            <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
                 <span>Kantor Operasional : Bandara APT Pranoto Jl. Poros Samarinda-Bontang, Samarinda, Kalimantan Timur</span>
             </div>
@@ -41,7 +41,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                <span>(0541) 123-4567</span>
+                <span>+62 85350611416</span>
             </div>
             <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-blue-500 flex-shrink-0" />
@@ -82,7 +82,6 @@ export default function Footer() {
 
         <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <p>© {new Date().getFullYear()} BMKG Stasiun Meteorologi APT Pranoto Samarinda. All rights reserved.</p>
-            <p>Developed with ❤️ for Indonesia.</p>
         </div>
       </div>
     </footer>

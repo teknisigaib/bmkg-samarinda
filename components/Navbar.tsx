@@ -7,11 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   CloudSun, AlertTriangle, Plane, Ship, ChevronDown, Users, ClipboardList,
   FileText, Target, Activity, Map, DropletOff, CalendarDays, Calendar,
-  Waves, Satellite, Flame, Newspaper, BookA, BookText, BookType, Menu, X
+  Satellite, Flame, Newspaper, BookA, BookText, Menu, X
 } from "lucide-react";
 
 // --- 1. Definisi Data Menu (Disatukan dalam Array Object) ---
-// Ini memudahkan jika nanti ingin menambah menu baru tanpa ubah logic code.
 const NAV_ITEMS = [
   {
     key: "profil",
@@ -116,7 +115,7 @@ export default function Navbar() {
 
           {/* Right Section */}
           <div className="flex items-center gap-3 ml-auto">
-            <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-blue-600 text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-blue-700 transition-all shadow-md hover:shadow-lg">Contact</Link>
+            <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-white text-blue-600 text-sm font-semibold px-5 py-2 rounded-xl hover:bg-blue-700 transition-all border-blue-600 border-1 hover:text-white">Kontak Kami</Link>
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition" aria-label="Toggle Menu">
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -169,7 +168,7 @@ export default function Navbar() {
                     </AnimatePresence>
                   </div>
                 ))}
-                <Link href="/contact" onClick={() => setMobileOpen(false)} className="block mt-4 px-4 py-3 text-center bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-md">Contact Us</Link>
+                <Link href="/contact" onClick={() => setMobileOpen(false)} className="block mt-4 px-4 py-3 text-center bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-md">Kontak Kami</Link>
               </div>
             </motion.div>
           </>

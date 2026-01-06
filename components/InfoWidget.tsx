@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-/* eslint-disable @next/next/no-img-element */
 import { 
   CloudSun, Activity, Wind, Droplets, ArrowRight, MapPin, Calendar, Waves,
   Sun, Cloud, CloudRain, CloudLightning, CloudFog 
@@ -68,7 +67,7 @@ export default function InfoWidget({ dataGempa, dataCuaca }: InfoWidgetProps) {
                 <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                     {dataCuaca ? (
                         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-x-8">
                                 {/* ICON UTAMA: Prioritas Gambar API, Fallback ke Lucide */}
                                 {dataCuaca.iconUrl ? (
                                     <div className="w-24 h-24 relative">
@@ -82,20 +81,18 @@ export default function InfoWidget({ dataGempa, dataCuaca }: InfoWidgetProps) {
                                     getFallbackIcon(dataCuaca.kodeCuaca)
                                 )}
 
-                                <div>
+                                <div className="justify-items-center space-y-0.5">
                                     <h3 className="text-gray-500 font-medium text-sm md:text-base">
                                         {dataCuaca.wilayah}
                                     </h3>
                                     <div className="text-4xl font-bold text-gray-800 my-1">
                                         {dataCuaca.suhu}°C
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
-                                            {dataCuaca.cuaca}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                            Pukul {dataCuaca.jam}
-                                        </span>
+                                    <div className="text-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+                                        {dataCuaca.cuaca}
+                                    </div>
+                                    <div className="text-center text-md text-gray-400">
+                                        {dataCuaca.jam}
                                     </div>
                                 </div>
                             </div>
@@ -127,7 +124,7 @@ export default function InfoWidget({ dataGempa, dataCuaca }: InfoWidgetProps) {
                 </div>
             )}
 
-            {/* KONTEN GEMPA (Sama seperti sebelumnya) */}
+            {/* KONTEN GEMPA */}
             {activeTab === "gempa" && (
                 <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                     {dataGempa ? (

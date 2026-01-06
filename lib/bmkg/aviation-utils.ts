@@ -280,6 +280,51 @@ export const generateTimeSteps = (intervalMinutes: number, totalDurationMinutes:
 };
 
 
+export const RADAR_DBZ_COLORS = [
+    '#00FFFF', // 5-10
+    '#0080FF', // 10-15
+    '#008080', // 15-20
+    '#00FF00', // 20-25
+    '#00C000', // 25-30
+    '#80FF00', // 30-35
+    '#FFFF00', // 35-40
+    '#FFC000', // 40-45
+    '#FF8000', // 45-50
+    '#FF0000', // 50-55
+    '#C00000', // 55-60
+    '#FF00FF', // 60-65
+    '#800080'  // >65
+];
 
+export const RADAR_DBZ_LABELS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65];
 
+// ... export SATELLITE_LEGEND_STOPS tetap ada ...
 
+// ... kode lama tetap ada ...
+
+// --- DATA LEGENDA SATELLITE BARU (DISCRETE IR ENHANCED) ---
+// Warna diambil dari referensi: Red (Cold/-100) -> Orange -> Green -> Blue -> Black (Warm/+60)
+export const SATELLITE_IR_COLORS = [
+    '#e93f33', // -100 (Red)
+    '#ea5456', // -80 (Peach)
+    '#f8d4b8', // -60 (Orange)
+    '#f6c38c', // -40 (Yellow)
+    '#f29f33', // -30 (Lime)
+    '#eb5a33', // -20 (Cyan-Green)
+    '#cd9b28', // -10 (Light Blue)
+    '#c5bb24', // 0 (Medium Blue)
+    '#9cd313', // +10 (Dark Blue)
+    '#76e787',
+    '#5fc192',
+    '#43affb',
+    '#4987fb',
+    '#3462b4',
+    '#0e4882',
+    '#000000',
+    '#000000'
+];
+
+// Label yang akan ditampilkan di bawah setiap segmen warna
+export const SATELLITE_IR_LABELS = [
+    '-100', '-80', '-60', '-40', '-30', '-20', '-10', '0', '10', '20','60'
+];
