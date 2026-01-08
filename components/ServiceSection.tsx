@@ -10,7 +10,6 @@ const services = [
     href: "/layanan/data", 
   },
   {
-    // --- ITEM BARU: MONITORING HUJAN ---
     title: "Monitoring Hujan",
     desc: "Pantauan intensitas dan sebaran hujan realtime dari Automatic Rain Gauge (ARG)",
     icon: <CloudRain className="w-6 h-6 text-white" />,
@@ -48,7 +47,7 @@ export default function ServiceSection() {
           <div className="max-w-2xl">
             <span className="text-blue-600 font-bold tracking-wider text-sm uppercase mb-2 block">Layanan Kami</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-              Produk & Layanan Publik <br/> BMKG APT Pranoto Samarinda
+              Produk & Layanan <br/> Stasiun Meteorologi APT Pranoto Samarinda
             </h2>
           </div>
           <p className="text-gray-500 max-w-md text-sm md:text-base leading-relaxed text-right md:text-left">

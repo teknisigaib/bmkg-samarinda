@@ -14,7 +14,7 @@ export default function Footer() {
                 <Image src="/logo-bmkg.png" alt="Logo BMKG" width={40} height={40} />
                 <div>
                     <h3 className="text-white font-bold text-lg leading-tight">BMKG</h3>
-                    <p className="text-xs text-slate-400">Stasiun Meteorologi Aji Pangeran Tumenggung Pranoto - Samarinda</p>
+                    <p className="text-xs text-slate-400">Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto - Samarinda</p>
                 </div>
             </div>
             <p className="leading-relaxed text-slate-400">
@@ -41,7 +41,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                <span>+62 85350611416</span>
+                <span>(+62) 85350611416</span>
             </div>
             <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-blue-500 flex-shrink-0" />
@@ -67,7 +67,7 @@ export default function Footer() {
             {/* Embed Google Maps (Iframe) */}
             <div className="w-full h-40 bg-slate-800 rounded-lg overflow-hidden relative">
                 <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.691702587636!2d117.15!3d-0.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMMKwMzAnMDAuMCJTIDExN8KwMDknMDAuMCJF!5e0!3m2!1sen!2sid!4v1620000000000!5m2!1sen!2sid" 
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1186.1379552060862!2d117.1564689643275!3d-0.4828927583131965!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df67f415f49114b%3A0x467b4b65732a47b4!2sAdministrasi%20BMKG%20Samarinda!5e0!3m2!1sen!2sid!4v1767771326501!5m2!1sen!2sid" 
                     width="100%" 
                     height="100%" 
                     style={{ border: 0 }} 

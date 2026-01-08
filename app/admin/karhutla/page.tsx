@@ -39,7 +39,7 @@ export default function AdminKarhutlaPage() {
        <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Input Data Hotspot</h1>
-          <p className="text-gray-500 text-sm">Copy data dari Excel/Sipongi lalu Paste di sini.</p>
+          <p className="text-gray-500 text-sm">Copy data dari Excel lalu Paste di sini.</p>
         </div>
         <button onClick={handleClear} className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors">
           <Trash2 className="w-4 h-4" /> Reset Database

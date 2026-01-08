@@ -16,16 +16,6 @@ export default async function GempaTerbaruPage() {
       {/* --- 1. HERO: GEMPA MUTAKHIR --- */}
       {autoGempa && (
         <section>
-          {/* Header */}
-          <div className="border-b text-center border-gray-200 pb-6 mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Gempa Bumi Terbaru</h1>
-            <div className="bg-orange-50 border border-orange-300 p-4 rounded-xl flex gap-3 items-start">
-              <p className="text-sm md:text-base text-gray-600">
-                Informasi gempabumi terkini yang terjadi di wilayah Indonesia disertai peta guncangan (ShakeMap). Intensitas guncangan diukur dalam Skala MMI (Modified Mercalli Intensity)
-              </p>
-            </div>
-          </div>
-
           <div className="bg-gradient-to-br from-red-50 to-white border border-red-100 rounded-3xl p-5 md:p-8 flex flex-col lg:flex-row gap-8 items-center shadow-sm">
                 
                 {/* Peta Shakemap (Responsive Aspect Ratio) */}

@@ -40,18 +40,6 @@ export default async function AnalisisHujanPage() {
 
   return (
     <div className="w-full space-y-8">
-      
-      {/* Header */}
-      <div className="border-b text-center border-gray-200 pb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-            Analisis Hujan
-        </h1>
-        <div className="bg-green-50 border border-green-100 p-4 rounded-xl max-w-4xl mx-auto">
-            <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-                Informasi hasil analisis curah hujan historis (yang sudah terjadi) di wilayah Kalimantan Timur, meliputi analisis intensitas, sifat hujan, dan distribusi hari hujan.
-            </p>
-        </div>
-      </div>
 
       {/* Tabs Client */}
       <AnalisisTabs 

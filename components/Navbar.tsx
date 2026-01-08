@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   CloudSun, AlertTriangle, Plane, Ship, ChevronDown, Users, ClipboardList,
   FileText, Target, Activity, Map, DropletOff, CalendarDays, Calendar,
-  Satellite, Flame, Newspaper, BookA, BookText, Menu, X
+  Satellite, Flame, Newspaper, BookA, BookText, Menu, X, CircleAlert
 } from "lucide-react";
 
 // --- 1. Definisi Data Menu (Disatukan dalam Array Object) ---
@@ -49,6 +49,7 @@ const NAV_ITEMS = [
       { name: "Info Hari Tanpa Hujan", desc: "Pantauan hari tanpa hujan", href: "/iklim/hari-tanpa-hujan", icon: <DropletOff className="w-5 h-5 text-blue-500" /> },
       { name: "Prakiraan Hujan", desc: "Prakiraan Hujan", href: "/iklim/prakiraan-hujan", icon: <CalendarDays className="w-5 h-5 text-blue-500" /> },
       { name: "Analisis Hujan", desc: "Analisis Hujan", href: "/iklim/analisis-hujan", icon: <Calendar className="w-5 h-5 text-blue-500" /> },
+      { name: "PDIE", desc: "Peringatan Dini Iklim Ekstrem", href: "/iklim/peringatan-dini", icon: <CircleAlert className="w-5 h-5 text-blue-500" /> },
     ]
   },
   {
@@ -102,7 +103,7 @@ export default function Navbar() {
                             {menu.items.map((item) => (
                               <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 transition group">
                                 <div className="p-2 bg-blue-50 rounded-lg shrink-0 text-blue-600 group-hover:bg-white group-hover:shadow-sm transition">{item.icon}</div>
-                                <div><p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700">{item.name}</p><p className="text-xs text-gray-500 leading-snug">{item.desc}</p></div>
+                                <div><p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 tracking-wide">{item.name}</p><p className="text-xs text-gray-500 leading-snug">{item.desc}</p></div>
                               </Link>
                             ))}
                           </div>
@@ -115,7 +116,7 @@ export default function Navbar() {
 
           {/* Right Section */}
           <div className="flex items-center gap-3 ml-auto">
-            <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-white text-blue-600 text-sm font-semibold px-5 py-2 rounded-xl hover:bg-blue-700 transition-all border-blue-600 border-1 hover:text-white">Kontak Kami</Link>
+            <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-white text-slate-600 text-sm font-semibold px-5 py-2 rounded-xl hover:bg-blue-700 transition-all border-slate-600 border-1 hover:text-white">Kontak Kami</Link>
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition" aria-label="Toggle Menu">
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -168,7 +169,7 @@ export default function Navbar() {
                     </AnimatePresence>
                   </div>
                 ))}
-                <Link href="/contact" onClick={() => setMobileOpen(false)} className="block mt-4 px-4 py-3 text-center bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-md">Kontak Kami</Link>
+                <Link href="/contact" onClick={() => setMobileOpen(false)} className="block mt-4 px-4 py-3 text-center bg-white text-slate-600 font-semibold border-1 border-slate-600 rounded-xl hover:bg-blue-700 hover:text-white transition ">Kontak Kami</Link>
               </div>
             </motion.div>
           </>

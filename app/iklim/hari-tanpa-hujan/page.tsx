@@ -35,18 +35,6 @@ export default async function HTHPage() {
 
   return (
     <div className="w-full space-y-10">
-      
-      {/* Header Statis (Server Side Rendered) */}
-      <div className="border-b text-center border-gray-200 pb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-            Monitoring Hari Tanpa Hujan
-        </h1>
-        <div className="bg-green-50 border border-green-200 p-4 rounded-xl flex flex-col items-center gap-2 max-w-4xl mx-auto">
-            <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-                Peta distribusi Hari Tanpa Hujan (HTH) berturut-turut. Informasi ini diperbarui setiap dasarian (10 harian) untuk memantau potensi kekeringan meteorologis di wilayah Kalimantan Timur.
-            </p>
-        </div>
-      </div>
 
       {/* Konten Dinamis */}
       {data.length > 0 ? (

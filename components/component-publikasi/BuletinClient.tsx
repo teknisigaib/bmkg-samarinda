@@ -1,21 +1,17 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Eye, 
   Download, 
   FileText, 
-  Filter, 
   X, 
-  ExternalLink, 
   ChevronLeft, 
   ChevronRight,
-  RotateCcw
+  Search
 } from "lucide-react";
 
-// --- Definisi Tipe Data (Sesuai dengan yang dikirim dari page.tsx) ---
 export type BuletinItem = {
   id: string;
   title: string;
@@ -34,208 +30,186 @@ const ITEMS_PER_PAGE = 8;
 export default function BuletinClient({ initialData }: BuletinClientProps) {
   const [selectedBuletin, setSelectedBuletin] = useState<BuletinItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedYear, setSelectedYear] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // 1. Ambil daftar tahun unik dari data database
-  const years = useMemo(() => {
-    const uniqueYears = Array.from(new Set(initialData.map((item) => item.year)));
-    return uniqueYears.sort((a, b) => Number(b) - Number(a));
-  }, [initialData]);
-
-  // 2. Filter Logic
+  // 1. Filter Logic (Hanya Search)
   const filteredData = initialData.filter((item) => {
-    return selectedYear === "All" || item.year === selectedYear;
+    return item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+           item.edition.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  // 3. Pagination Logic
+  // 2. Pagination Logic
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const currentData = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset halaman saat filter berubah
+  // Reset halaman saat search berubah
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedYear]);
+  }, [searchQuery]);
 
-  // Handler Ganti Halaman
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Handler Reset Filter
-  const handleReset = () => {
-    setSelectedYear("All");
-    setCurrentPage(1);
+    document.getElementById("buletin-grid")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
     <div className="w-full space-y-8">
-        
-        {/* Header */}
-      <div className="border-b text-center border-gray-200 pb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Buletin</h1>
-          <p className="text-gray-500">Kumpulan publikasi buletin analisis cuaca, iklim, dan kualitas udara. 
-            Silakan pilih tahun terbitan untuk menemukan dokumen yang Anda butuhkan.</p>
-      </div>
 
-        {/* Filter Section */}
-        <div className="flex justify-center mb-10">
-          <div className="flex items-center gap-3 bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-             <div className="pl-3 text-gray-400">
-                <Filter className="w-5 h-5" />
-             </div>
-             <div className="relative">
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  className="appearance-none bg-transparent hover:bg-gray-50 text-gray-700 py-2 px-4 pr-8 rounded-lg font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors"
-                >
-                  <option value="All">Semua Tahun</option>
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      Tahun {year}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center px-2 text-gray-400">
-                   <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
-                </div>
+        {/* --- 1. SEARCH BAR ONLY --- */}
+        <div className="max-w-md mx-auto relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
             </div>
-
-            {selectedYear !== "All" && (
-                <>
-                    <div className="w-px h-6 bg-gray-200"></div>
-                    <button 
-                        onClick={handleReset}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Tampilkan Semua"
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                    </button>
-                </>
-            )}
-          </div>
+            <input 
+                type="text" 
+                placeholder="Cari edisi atau judul buletin..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm hover:shadow-md"
+            />
         </div>
 
-        {/* Grid Data */}
-        {currentData.length > 0 ? (
-           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-            {currentData.map((item, index) => (
-              <motion.div
-                key={item.id}
-                layoutId={`card-${item.id}`}
-                onClick={() => setSelectedBuletin(item)}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-                className="group relative flex flex-col bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden cursor-pointer"
-              >
-                <div className="relative aspect-[3/4] bg-gray-200 overflow-hidden border-b border-gray-100">
-                  <Image
-                    src={item.cover}
-                    alt={item.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-blue-900/0 group-hover:bg-blue-900/60 transition-colors duration-300 flex items-center justify-center">
-                      <span className="opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 text-white font-semibold flex items-center gap-2 border border-white/50 px-4 py-2 rounded-full backdrop-blur-sm">
-                          <Eye className="w-5 h-5" /> Lihat
-                      </span>
-                  </div>
-                </div>
-                <div className="p-4 flex flex-col flex-grow">
-                  <div className="text-xs text-gray-500 mb-2">Tahun {item.year}</div>
-                  <h3 className="text-sm md:text-base font-bold text-gray-800 line-clamp-2 mb-1 group-hover:text-blue-600 transition-colors">
-                      {item.title}
-                  </h3>
-                  <p className="text-xs text-blue-600 font-medium mt-auto pt-2">
-                      Edisi: {item.edition}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-             /* Empty State */
-             <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-                <FileText className="w-16 h-16 text-gray-300 mb-4" />
-                <p className="text-gray-500 font-medium mb-3">
-                    {selectedYear === "All" ? "Belum ada buletin." : `Belum ada buletin tahun ${selectedYear}`}
-                </p>
-                {selectedYear !== "All" && (
-                    <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
-                        <RotateCcw className="w-4 h-4" /> Tampilkan Semua
-                    </button>
-                )}
-            </div>
-        )}
+        {/* --- 2. GRID DATA --- */}
+        <div id="buletin-grid">
+           {currentData.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+                {currentData.map((item, index) => (
+                    <motion.div
+                        layoutId={`card-${item.id}`}
+                        key={item.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.05 }}
+                        className="group flex flex-col items-center text-center cursor-pointer h-full"
+                        onClick={() => setSelectedBuletin(item)}
+                    >
+                        {/* --- FIXED SIZE CONTAINER ---
+                           1. h-[280px]: Tinggi fix (sekitar ukuran A4 diperkecil). 
+                              Ubah angka ini jika ingin lebih tinggi/pendek.
+                           2. w-full max-w-[210px]: Lebar menyesuaikan, tapi mentok di 210px.
+                           3. mx-auto: Posisi di tengah-tengah kolom grid.
+                        */}
+                        <div className="relative w-[210px] h-[280px] mx-auto rounded-md overflow-hidden shadow-lg shadow-slate-300 mb-5 transform group-hover:-translate-y-2 transition-all duration-300 bg-slate-200 border border-slate-100">
+                            
+                            <Image
+                                src={item.cover}
+                                alt={item.title}
+                                fill
+                                // object-cover akan memotong gambar agar pas di kotak 210x280 tanpa gepeng
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                sizes="(max-width: 768px) 150px, 210px"
+                            />
+                            
+                            {/* Overlay Hover */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                            
+                            {/* Badge Tahun */}
+                            <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow-sm z-10">
+                                {item.year}
+                            </div>
+                        </div>
 
-        {/* Pagination Controls */}
+                        {/* Text Info */}
+                        <div className="w-full max-w-[210px] mx-auto flex flex-col flex-grow">
+                            <h3 className="text-sm font-bold text-slate-800 leading-snug mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                {item.title}
+                            </h3>
+                            <p className="text-xs text-slate-500 uppercase tracking-wide font-medium mt-auto">
+                                {item.edition}
+                            </p>
+                        </div>
+
+                    </motion.div>
+                ))}
+            </div>
+           ) : (
+             /* Empty State */
+             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                <FileText className="w-12 h-12 mb-3 opacity-20" />
+                <p className="text-sm font-medium">Tidak ada buletin ditemukan.</p>
+                <button 
+                    onClick={() => setSearchQuery("")}
+                    className="mt-2 text-xs text-blue-600 hover:underline"
+                >
+                    Hapus Pencarian
+                </button>
+             </div>
+           )}
+        </div>
+
+        {/* --- 3. PAGINATION --- */}
         {filteredData.length > ITEMS_PER_PAGE && (
-            <div className="mt-12 flex justify-center items-center gap-4">
+            <div className="flex justify-center gap-2 pt-8">
                 <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-gray-600"
+                    className="p-2 rounded-full border border-gray-100 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:shadow-none transition bg-white"
                 >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="w-4 h-4 text-slate-600" />
                 </button>
-                <span className="text-sm font-medium text-gray-600">
-                    Halaman <span className="text-blue-600 font-bold">{currentPage}</span> dari {totalPages}
-                </span>
+                <div className="flex items-center px-4 text-xs font-bold text-slate-600 bg-white rounded-full border border-gray-100">
+                    {currentPage} / {totalPages}
+                </div>
                 <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-gray-600"
+                    className="p-2 rounded-full border border-gray-100 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:shadow-none transition bg-white"
                 >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-4 h-4 text-slate-600" />
                 </button>
             </div>
         )}
 
-        {/* Modal PDF Viewer */}
+        {/* --- 4. MODAL PDF VIEWER --- */}
         <AnimatePresence>
           {selectedBuletin && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[99999] flex items-center justify-center p-4 md:p-6"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6"
             >
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedBuletin(null)} />
+              <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-sm" onClick={() => setSelectedBuletin(null)} />
+              
               <motion.div
                 layoutId={`card-${selectedBuletin.id}`}
-                className="bg-white w-full max-w-5xl h-[85vh] md:h-[90vh] rounded-2xl shadow-2xl relative flex flex-col overflow-hidden z-10"
+                className="bg-white w-full h-full md:max-w-5xl md:h-[90vh] md:rounded-2xl shadow-2xl relative flex flex-col overflow-hidden z-10"
               >
-                <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
-                  <div>
-                    <h3 className="font-bold text-gray-800 line-clamp-1">{selectedBuletin.title}</h3>
-                    <p className="text-xs text-gray-500">{selectedBuletin.edition}</p>
+                {/* Header Modal */}
+                <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 bg-white">
+                  <div className="flex items-center gap-3">
+                      <div className="hidden sm:block w-8 h-10 relative rounded overflow-hidden bg-slate-200">
+                          <Image src={selectedBuletin.cover} alt="Cover" fill className="object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-slate-800 line-clamp-1 text-sm md:text-base">{selectedBuletin.title}</h3>
+                        <p className="text-[10px] md:text-xs font-medium text-slate-500 uppercase">{selectedBuletin.edition}</p>
+                      </div>
                   </div>
+
                   <div className="flex items-center gap-2">
-                    <a href={selectedBuletin.pdfUrl} download className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
-                      <Download className="w-4 h-4" /> Download
+                    <a 
+                        href={selectedBuletin.pdfUrl} 
+                        download 
+                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-full hover:bg-slate-800 transition"
+                    >
+                      <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
                     </a>
-                    <button onClick={() => setSelectedBuletin(null)} className="p-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 transition">
-                      <X className="w-5 h-5" />
+                    <button onClick={() => setSelectedBuletin(null)} className="p-1.5 hover:bg-gray-100 rounded-full transition">
+                      <X className="w-5 h-5 text-slate-500" />
                     </button>
                   </div>
                 </div>
-                <div className="flex-grow bg-gray-100 relative">
-                  <iframe src={`${selectedBuletin.pdfUrl}#toolbar=0&view=FitH`} className="w-full h-full" title="PDF Viewer" />
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:hidden">
-                    <a href={selectedBuletin.pdfUrl} target="_blank" className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white shadow-lg rounded-full font-semibold">
-                      <ExternalLink className="w-4 h-4" /> Buka Fullscreen
-                    </a>
-                  </div>
+
+                <div className="flex-grow bg-slate-100 relative">
+                  <iframe src={`${selectedBuletin.pdfUrl}#toolbar=0&view=FitH`} className="w-full h-full border-none" title="PDF Viewer" />
                 </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+    </div>
   );
 }

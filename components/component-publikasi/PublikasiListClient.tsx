@@ -58,12 +58,6 @@ export default function PublikasiListClient({ initialData }: PublikasiListProps)
 
   return (
     <div className="w-full space-y-8">
-        
-        {/* Header */}
-        <div className="border-b text-center border-gray-200 pb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Artikel & Makalah</h1>
-          <p className="text-gray-500">Repositori pengetahuan BMKG Samarinda. Kumpulan dokumen kajian teknis dan informasi populer.</p>
-        </div>
 
         {/* Controls */}
         <div className="space-y-6 mb-10">

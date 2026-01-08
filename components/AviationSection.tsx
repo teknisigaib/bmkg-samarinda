@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 export default async function AviationSection() {
-  const ICAO_CODE = "WATU";
+  const ICAO_CODE = "WALS";
   const RUNWAY_ACTUAL_HEADING = 40; 
 
   let data = null;
@@ -93,7 +93,7 @@ export default async function AviationSection() {
                         <span className="text-4xl font-bold text-slate-900">{data.wind.speed}</span>
                         <span className="text-sm font-bold text-slate-400">{data.wind.unit}</span>
                     </div>
-                    <div className="text-sm text-blue-600 mt-2 flex items-center gap-2 font-mono bg-blue-50 py-1 px-2 rounded w-fit border border-blue-100">
+                    <div className="text-sm text-blue-600 mt-2 flex items-center gap-2 bg-blue-50 py-1 px-2 rounded w-fit border border-blue-100">
                         {isVariableWind ? <Navigation className="w-3 h-3 animate-spin" /> : <Navigation className="w-3 h-3" style={{ transform: `rotate(${windDirValue}deg)` }} />}
                         {isVariableWind ? "VRB" : `${windDirValue.toString().padStart(3, '0')}°`}
                     </div>

@@ -8,15 +8,6 @@ export default async function GempaDirasakanPage() {
 
   return (
     <div className="w-full space-y-8">
-      
-      {/* HEADER BARU */}
-      <div className="border-b text-center border-gray-200 pb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gempa Bumi Dirasakan</h1>
-          <div className="bg-orange-50 border border-orange-300 p-4 rounded-xl flex gap-3 items-start">
-            <p className="text-gray-500">Daftar 15 gempabumi terakhir yang dirasakan oleh masyarakat. Intensitas guncangan diukur dalam Skala MMI (Modified Mercalli Intensity).</p>
-          </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-6">
         {data.map((item, idx) => (
             <div key={idx} className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all p-6 flex flex-col md:flex-row gap-6">

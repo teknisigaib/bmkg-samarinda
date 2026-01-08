@@ -94,8 +94,8 @@ export default function ContactPage() {
         {/* --- MAP SECTION --- */}
         <div className="w-full h-[500px] bg-gray-200 rounded-3xl overflow-hidden shadow-md border-4 border-white relative group">
             <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.6963203494793!2d117.24942367496677!3d-0.4481636995473722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df5d9095697f469%3A0x8673f3f503375329!2sBandara%20Aji%20Pangeran%20Tumenggung%20Pranoto!5e0!3m2!1sid!2sid!4v1708920000000!5m2!1sid!2sid" // Ganti dengan link embed maps asli Kantor
-                width="100%" 
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3453.2606505314493!2d117.25393150266467!3d-0.3724284457308565!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df5d9c63ea06c0d%3A0xd599c6e1587a385f!2sSamarinda%20Airport%20Meteorological%20Office!5e0!3m2!1sen!2sid!4v1767771756216!5m2!1sen!2sid"
+                width="100%"
                 height="100%" 
                 style={{ border: 0 }} 
                 allowFullScreen 
