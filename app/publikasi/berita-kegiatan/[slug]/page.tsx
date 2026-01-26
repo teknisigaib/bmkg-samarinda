@@ -39,7 +39,7 @@ export default async function DetailBeritaPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-white pt-4 pb-16"> 
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto px-0 sm:px-2 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
             {/* --- MAIN CONTENT (Span 8) --- */}

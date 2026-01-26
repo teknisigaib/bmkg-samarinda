@@ -16,6 +16,12 @@ import {
   PortData, 
   OverviewData 
 } from "@/lib/bmkg/maritim";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cuaca Maritim | BMKG Samarinda",
+  description: "Informasi cuaca perairan dan pelabuhan untuk wilayah Kalimantan Timur.",
+};
 
 const MaritimeMap = dynamic(() => import("@/components/component-cuaca/cuaca-maritim/MaritimeMap"), {
   ssr: false,
@@ -109,11 +115,11 @@ export default function MaritimePage() {
   };
 
   return (
-    <div className="min-h-screen ">
-      <div className="max-w-6xl mx-auto space-y-8 max-sm:max-w-xs ">
+    <div className="min-h-screen">
+      <div className="w-full mx-auto space-y-8 max-sm:max-w-xs ">
         
         {/* --- UNIFIED CONTROL BAR (NEW DESIGN) --- */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-2 flex flex-col lg:flex-row items-center justify-between gap-4 sticky top-4 z-40 backdrop-blur-md bg-white/90">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-2 flex flex-col lg:flex-row items-center justify-between gap-4 sticky top-4 z-40 backdrop-blur-md">
             
             {/* 1. Mode Switcher (Kiri) */}
             <div className="bg-gray-100 p-1.5 rounded-2xl flex w-full lg:w-auto">

@@ -3,6 +3,12 @@ import { getLinkPeringatanDiniKaltim } from "@/lib/bmkg/warnings";
 import { getCAPAlertDetail } from "@/lib/bmkg/cap";
 import MapLoader from "@/components/component-cuaca/peringatan-dini/MapLoader";
 import Image from "next/image"; // Jangan lupa import Image
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Peringatan Dini Cuaca | BMKG Samarinda",
+  description: "Informasi peringatan dini terjadinya hujan lebat di wilayah Kalimantan Timur.",
+};
 
 // Helper format tanggal
 const formatDate = (isoStr: string) => {

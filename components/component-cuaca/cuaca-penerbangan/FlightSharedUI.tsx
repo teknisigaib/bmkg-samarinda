@@ -87,16 +87,7 @@ export function SmallAirportCard({ airport }: { airport: ParsedMetar }) {
                 </div>
             </div>
 
-            {/* Footer: Badge Status Visibilitas (Full Width) */}
-            <div className={`mt-auto pt-3 border-t border-dashed border-gray-100`}>
-                <div className={`flex items-center justify-between px-2 py-1.5 rounded-md text-xs font-bold border ${visStatus.className}`}>
-                    <span className="flex items-center gap-1.5">
-                        <Eye className="w-3.5 h-3.5 opacity-70"/>
-                        Visibilitas
-                    </span>
-                    <span>{visStatus.label.split(' ')[0]}</span> 
-                </div>
-            </div>
+            
         </div>
     );
 }

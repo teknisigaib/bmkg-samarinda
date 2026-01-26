@@ -19,10 +19,6 @@ export default function GempaLayout({ children }: { children: React.ReactNode })
                     Pantauan aktivitas kegempaan terkini dan historis di wilayah Indonesia.
                 </p>
             </div>
-            <div className="hidden md:block text-right">
-                <span className="block text-xs text-gray-400 uppercase tracking-wider font-bold">Sumber Data</span>
-                <span className="text-sm font-medium text-gray-700">BMKG Pusat (Open Data)</span>
-            </div>
         </div>
 
         {/* Content Layout */}

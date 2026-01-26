@@ -5,7 +5,7 @@ export default function PublikasiLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-50 pt-10 pb-20"> {/* pt-10 sesuai request */}
       
-      <div className="max-w-[1600px] mx-auto px-0 sm:px-4 lg:px-6">
+      <div className="mw-full md:w-[1600px] mx-auto px-0 sm:px-4 lg:px-6">
         
         {/* --- HEADER BARU --- */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-gray-200 pb-6">

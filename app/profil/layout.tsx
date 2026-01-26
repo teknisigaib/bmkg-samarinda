@@ -29,13 +29,6 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
                     Informasi lengkap mengenai Visi Misi, Tugas, dan Struktur Organisasi Stasiun Meteorologi APT Pranoto.
                 </p>
             </div>
-
-            {/* Hiasan Kanan */}
-            <div className="hidden md:block text-right">
-                <span className="block text-xs text-gray-400 uppercase tracking-wider font-bold">Update Terakhir</span>
-                <span className="text-sm font-medium text-gray-700">Desember 2024</span>
-            </div>
-
         </div>
 
         {/* --- LAYOUT UTAMA --- */}

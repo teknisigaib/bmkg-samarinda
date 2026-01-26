@@ -21,10 +21,6 @@ export default function CuacaLayout({ children }: { children: React.ReactNode })
                               Prakiraan cuaca publik, maritim dan penerbangan untuk wilayah Kalimantan Timur.
                           </p>
                       </div>
-                      <div className="hidden md:block text-right">
-                          <span className="block text-xs text-gray-400 uppercase tracking-wider font-bold">Update Berkala</span>
-                          <span className="text-sm font-medium text-gray-700">Per Dasarian / Bulan</span>
-                      </div>
                   </div>
 
         {/* --- CONTENT WRAPPER --- */}

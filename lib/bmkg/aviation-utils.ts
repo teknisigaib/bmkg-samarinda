@@ -137,10 +137,10 @@ export const getVisibilityStatus = (visibilityStr: string) => {
     if (vis === 9999) vis = 10;
     else if (vis > 50) vis = vis / 1000;
 
-    if (vis > 8) return { label: 'VFR (> 8 km)', className: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-500' };
-    if (vis >= 4.8) return { label: 'MVFR (4.8-8 km)', className: 'bg-blue-50 text-blue-700 border-blue-100', dot: 'bg-blue-500' };
-    if (vis >= 1.6) return { label: 'IFR (1.6-4.8 km)', className: 'bg-amber-50 text-amber-700 border-amber-100', dot: 'bg-amber-500' };
-    return { label: 'LIFR (< 1.6 km)', className: 'bg-rose-50 text-rose-700 border-rose-100', dot: 'bg-rose-500' };
+    if (vis > 8) return { label: '(> 8 km)', className: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-500' };
+    if (vis >= 4.8) return { label: '(4.8-8 km)', className: 'bg-blue-50 text-blue-700 border-blue-100', dot: 'bg-blue-500' };
+    if (vis >= 1.6) return { label: '(1.6-4.8 km)', className: 'bg-amber-50 text-amber-700 border-amber-100', dot: 'bg-amber-500' };
+    return { label: '(< 1.6 km)', className: 'bg-rose-50 text-rose-700 border-rose-100', dot: 'bg-rose-500' };
 };
 
 
