@@ -38,7 +38,7 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
   const [featuredPost, ...otherPosts] = posts;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-slate-50">
+    <section className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-4 py-16 bg-slate-50">
       
       {/* === HEADER SECTION (NEW STYLE) === */}
       {/* Tombol "Lihat Semua Berita" dipindah ke sini */}

@@ -6,7 +6,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Peringatan Dini Cuaca | BMKG Samarinda",
+  title: "Peringatan Dini Cuaca | BMKG APT Pranoto Samarinda",
   description: "Informasi peringatan dini terjadinya hujan lebat di wilayah Kalimantan Timur.",
 };
 
