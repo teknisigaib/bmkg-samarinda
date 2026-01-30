@@ -22,13 +22,13 @@ export default function CurrentWeather({ data }: { data: WeatherData }) {
               {isRange ? (
                  // Tampilan Range (Font sedikit lebih kecil agar muat)
                  <span className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tighter">
-                   {data.tempRange}°
+                   {data.tempRange} ° C
                  </span>
               ) : (
                  // Tampilan Single (Normal)
                  <>
                    <span className="text-7xl md:text-8xl font-bold text-slate-900 tracking-tighter">
-                     {data.temp}
+                     {data.temp} ° C
                    </span>
                    <span className="text-4xl md:text-5xl font-medium text-slate-400 mt-2">°</span>
                  </>

@@ -44,9 +44,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/kinerja" className="flex items-center gap-3 p-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium">
               <FileText className="w-5 h-5" /> Kelola Dok Kinerja
             </Link>
-            <Link href="/admin/karhutla" className="flex items-center gap-3 p-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium">
-              <FileText className="w-5 h-5" /> Hotspot
-            </Link>
             <Link href="/admin/flyer" className="flex items-center gap-3 p-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium">
               <FileText className="w-5 h-5" /> FLyers
             </Link>

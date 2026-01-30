@@ -108,25 +108,6 @@ model PerformanceDoc {
 
 
 // ------------------------------------
-// Tabel 6: Data Hotspot (Karhutla)
-// ------------------------------------
-model Hotspot {
-  id          String   @id @default(cuid())
-  latitude    Float
-  longitude   Float
-  confidence  Int?     // Tingkat kepercayaan (8, 9, dst)
-  province    String   // KALIMANTAN TIMUR
-  district    String   // PASER
-  subDistrict String   // BATU SOPANG
-  satellite   String   // SNPP, NOAA20
-  date        DateTime // 2025-12-22
-  createdAt   DateTime @default(now())
-
-  @@map("hotspots")
-}
-
-
-// ------------------------------------
 // Tabel 7: Flyer
 // ------------------------------------
 model Flyer {
