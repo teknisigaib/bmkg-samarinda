@@ -12,7 +12,7 @@ export default function CuacaLayout({ children }: { children: React.ReactNode })
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-gray-200 pb-6">
                       <div>
                           <div className="-mb-4">
-                              <Breadcrumbs items={[{ label: "Iklim" }]} />
+                              <Breadcrumbs items={[{ label: "Cuaca" }]} />
                           </div>
                           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
                               Layanan Informasi Cuaca
