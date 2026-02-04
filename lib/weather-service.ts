@@ -43,12 +43,11 @@ export const fetchBMKGData = async (locationId: string): Promise<WeatherData | n
   const cached = CACHE.get(locationId);
   const now = Date.now();
   
-  // Cek Cache
+  // 1. Cek In-Memory Cache dulu (Layer 1)
   if (cached && (now - cached.timestamp < CACHE_DURATION)) {
     return cached.data;
   }
 
-  // Tentukan URL berdasarkan panjang ID
   const parts = locationId.split('.');
   let url = '';
   if (parts.length === 1) url = `https://cuaca.bmkg.go.id/api/df/v1/forecast/adm?adm1=${locationId}`;
@@ -57,13 +56,17 @@ export const fetchBMKGData = async (locationId: string): Promise<WeatherData | n
   else if (parts.length === 4) url = `https://cuaca.bmkg.go.id/api/df/v1/forecast/adm?adm4=${locationId}`;
 
   try {
-    const res = await fetch(url, { cache: 'no-store' });
+    // --- PERBAIKAN DI SINI ---
+    // HAPUS: { cache: 'no-store' } -> Menyebabkan error build
+    // GANTI: { next: { revalidate: 60 } } -> Data dianggap fresh selama 60 detik
+    const res = await fetch(url, { next: { revalidate: 60 } });
+
     if (!res.ok) throw new Error("Gagal mengambil data BMKG");
     
     const json: BMKGResponse = await res.json();
     const data = transformToUIData(json, locationId);
     
-    // Simpan Cache
+    // 2. Simpan ke In-Memory Cache (Layer 2)
     CACHE.set(locationId, { data, timestamp: Date.now() });
     
     return data;
