@@ -41,7 +41,7 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 mb-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-20 mb-12">
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col md:flex-row min-h-[250px]">
         
         {/* --- TAB NAVIGASI --- */}

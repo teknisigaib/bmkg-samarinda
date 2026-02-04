@@ -16,6 +16,7 @@ export interface BMKGLocation {
 }
 
 export interface BMKGWeatherItem {
+  weather: any;
   wd_to: string;
   datetime: string;
   utc_datetime: string;

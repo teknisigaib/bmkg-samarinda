@@ -46,6 +46,7 @@ export interface WeatherData {
   description: string;
   windSpeed: number;
   humidity: number;
+  iconUrl: string;
   
   // --- PASTIKAN INI TCC, BUKAN PRESSURE ---
   tcc: number; 

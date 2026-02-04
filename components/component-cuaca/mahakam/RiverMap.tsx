@@ -4,89 +4,47 @@ import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, useMap, Marker, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { 
-  Cloud, CloudRain, Sun, CloudLightning, 
-  Wind, Droplets, Maximize, CloudDrizzle, AlignJustify
-} from 'lucide-react';
 import { MahakamLocation } from '@/lib/mahakam-data';
 import { renderToString } from 'react-dom/server';
+import { Maximize, X } from 'lucide-react';
 
 interface RiverMapProps {
   initialData: MahakamLocation[];
   onViewDetail?: (loc: MahakamLocation) => void;
 }
 
-// --- SMART ICON GENERATOR ---
-const getWeatherStyle = (condition: string) => {
-    const c = condition.toLowerCase();
-    
-    if (c.includes('petir') || c.includes('hebat')) {
-        return { 
-            icon: <CloudLightning size={20} className="text-white" />, 
-            bg: 'bg-purple-600 border-purple-300 shadow-purple-500/50',
-            pulse: true
-        };
-    }
-    if (c.includes('hujan')) {
-        return { 
-            icon: <CloudRain size={20} className="text-white" />, 
-            bg: 'bg-blue-600 border-blue-300 shadow-blue-500/50',
-            pulse: false 
-        };
-    }
-    if (c.includes('gerimis') || c.includes('ringan')) {
-        return { 
-            icon: <CloudDrizzle size={20} className="text-white" />, 
-            bg: 'bg-cyan-500 border-cyan-200 shadow-cyan-500/50',
-            pulse: false 
-        };
-    }
-    if (c.includes('cerah') || c.includes('terik')) {
-        return { 
-            icon: <Sun size={20} className="text-white" />, 
-            bg: 'bg-orange-500 border-orange-200 shadow-orange-500/50',
-            pulse: false 
-        };
-    }
-    return { 
-        icon: <Cloud size={20} className="text-white" />, 
-        bg: 'bg-slate-500 border-slate-300 shadow-slate-500/50',
-        pulse: false 
-    };
-};
-
+// --- CUSTOM ICON GENERATOR (TETAP SAMA) ---
 const createCustomWeatherIcon = (loc: MahakamLocation, isActive: boolean) => {
-  const style = getWeatherStyle(loc.weather);
-  
   const iconHtml = renderToString(
     <div className={`
       relative flex items-center justify-center transition-all duration-300
       ${isActive ? 'scale-125 z-50' : 'hover:scale-110 z-10'}
     `}>
       <div className={`
-        relative w-10 h-10 rounded-xl flex items-center justify-center 
-        border-2 shadow-lg backdrop-blur-sm transition-colors
-        ${style.bg}
-        ${isActive ? 'ring-4 ring-white/30' : ''}
+        relative w-12 h-12 rounded-2xl flex items-center justify-center 
+        bg-white/90 backdrop-blur-md shadow-lg border-2 border-white
+        ${isActive ? 'ring-4 ring-blue-400/30' : ''}
       `}>
-         {style.icon}
-         {style.pulse && (
-            <span className="absolute -inset-1 rounded-xl bg-inherit opacity-50 animate-ping"></span>
+         {loc.iconUrl ? (
+            <img 
+                src={loc.iconUrl} 
+                alt={loc.weather}
+                className="w-10 h-10 object-contain drop-shadow-sm filter contrast-125" 
+            />
+         ) : (
+             <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse"></div>
          )}
       </div>
-      <div className={`
-        absolute -bottom-1.5 w-3 h-3 rotate-45 border-r-2 border-b-2
-        ${style.bg}
-      `}></div>
+      <div className="absolute -bottom-1.5 w-3 h-3 rotate-45 bg-white border-r-2 border-b-2 border-slate-100"></div>
     </div>
   );
 
   return L.divIcon({
     html: iconHtml,
     className: 'custom-leaflet-icon',
-    iconSize: [40, 40],
-    iconAnchor: [20, 45],
-    popupAnchor: [0, -45]
+    iconSize: [48, 48],
+    iconAnchor: [24, 52], 
+    popupAnchor: [0, -50]
   });
 };
 
@@ -120,65 +78,84 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
     }
   }, [initialData]);
 
-  if (!isMounted) return <div className="h-[500px] md:h-[600px] w-full bg-slate-100 animate-pulse md:rounded-[2.5rem]" />;
+  if (!isMounted) return <div className="h-[500px] w-full bg-slate-100 animate-pulse rounded-[2.5rem]" />;
 
   const riverGlowStyle = { color: '#60a5fa', weight: 8, opacity: 0.5, lineCap: 'round' as const, lineJoin: 'round' as const };
   const riverCoreStyle = { color: '#2563eb', weight: 3, opacity: 1, lineCap: 'round' as const, lineJoin: 'round' as const };
 
   return (
-    /* PERUBAHAN: Div terluar dihapus. Class utama dipindah ke sini.
-       - h-[500px] untuk mobile, h-[600px] untuk desktop.
-       - rounded-none di mobile agar full bleed, rounded-[2.5rem] di desktop.
-    */
-    <div className="h-[500px] md:h-[600px] w-full md:rounded-[2.5rem] overflow-hidden border-y md:border border-slate-200 shadow-xl relative group bg-slate-100 font-sans z-0">
+    <div className="w-full relative z-0 font-sans">
+      
+      <div className="h-[500px] w-full rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-xl relative group bg-slate-100">
         
-        {/* --- FLOATING INFO CARD --- */}
-        {selectedLoc && (
-            <div className="absolute top-4 right-4 z-[1000] w-[calc(100%-2rem)] md:w-80 animate-in slide-in-from-top-4 fade-in duration-500">
-                 <div className="bg-white/95 backdrop-blur-md border border-white/50 rounded-3xl p-5 shadow-2xl relative overflow-hidden">
+        {/* --- FLOATING INFO CARD (STYLING DARI SNIPPET ANDA) --- */}
+        {selectedLoc ? (
+            <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300 animate-in slide-in-from-top-2 fade-in">
+                
+                {/* Header Title & Close Button */}
+                <div className="flex justify-between items-start mb-1">
+                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        WILAYAH PERAIRAN
+                    </h4>
+                    <button 
+                        onClick={() => setSelectedLoc(null)}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
+                
+                {/* Location Name */}
+                <div className="text-blue-900 font-bold leading-tight text-sm mb-3">
+                    {selectedLoc.name}
+                </div>
+                
+                {/* Data Rows (Menggunakan Style Snippet: bg-gray-50, rounded, border) */}
+                <div className="space-y-2">
                     
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <div className="flex items-center gap-1.5 mb-1">
-                                <span className={`w-2 h-2 rounded-full ${selectedLoc.weather.toLowerCase().includes('hujan') ? 'bg-blue-500' : 'bg-orange-500'}`}></span>
-                                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-                                    {selectedLoc.regency}
-                                </p>
-                            </div>
-                            <h4 className="font-black text-xl text-slate-800 leading-tight">{selectedLoc.name}</h4>
-                        </div>
-                        <div className="text-right">
-                            <span className="text-4xl font-black text-slate-800">{selectedLoc.temp}°</span>
-                        </div>
+                    {/* Cuaca */}
+                    <div className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
+                        <span className="text-gray-500">Cuaca:</span>
+                        <span className="font-bold px-2 py-0.5 rounded text-white bg-blue-500 capitalize">
+                            {selectedLoc.weather}
+                        </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                            <Wind size={18} className="text-blue-500" />
-                            <div>
-                                <div className="text-[9px] text-slate-400 uppercase font-bold">Angin</div>
-                                <div className="text-xs font-bold text-slate-700">{selectedLoc.windSpeed} km/j</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                            <Droplets size={18} className="text-teal-500" />
-                            <div>
-                                <div className="text-[9px] text-slate-400 uppercase font-bold">RH %</div>
-                                <div className="text-xs font-bold text-slate-700">{selectedLoc.humidity}%</div>
-                            </div>
-                        </div>
+                    {/* Suhu */}
+                    <div className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
+                        <span className="text-gray-500">Suhu:</span>
+                        <span className="font-bold px-2 py-0.5 ">
+                            {selectedLoc.temp}°C
+                        </span>
                     </div>
-                    
-                    {onViewDetail && (
-                        <button 
-                            onClick={() => onViewDetail(selectedLoc)}
-                            className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95"
-                        >
-                            <Maximize size={14} />
-                            LIHAT DETAIL HARIAN
-                        </button>
-                    )}
 
+                    {/* Angin */}
+                    <div className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
+                        <span className="text-gray-500">Angin:</span>
+                        <span className="font-bold px-2 py-0.5 ">
+                            {selectedLoc.windSpeed} km/j
+                        </span>
+                    </div>
+
+                </div>
+
+                {/* Tombol Action (Opsional, disesuaikan agar muat di w-64) */}
+                {onViewDetail && (
+                    <button 
+                        onClick={() => onViewDetail(selectedLoc)}
+                        className="w-full mt-3 bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
+                    >
+                        <Maximize size={12} />
+                        DETAIL LENGKAP
+                    </button>
+                )}
+
+            </div>
+        ) : (
+            // Placeholder jika tidak ada yang dipilih (Opsional)
+            <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50">
+                 <div className="text-gray-400 text-xs italic text-center">
+                    Klik titik stasiun pada peta untuk melihat informasi cuaca.
                  </div>
             </div>
         )}
@@ -193,7 +170,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
         >
             <TileLayer
                 attribution='&copy; CARTO'
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
 
             {riverGeoJson && (
@@ -220,12 +197,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
             })}
         </MapContainer>
         
-        <div className="absolute bottom-6 left-6 z-[999]">
-             <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl shadow-md border border-slate-200 text-slate-500 cursor-pointer hover:text-slate-900 transition-colors">
-                 <AlignJustify size={20} />
-             </div>
-        </div>
-
+      </div>
     </div>
   );
 }

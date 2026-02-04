@@ -1,65 +1,72 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import RiverMap from './RiverMap';
-import SingleStationView from './SingleStationView';
+import dynamic from 'next/dynamic';
 import { MahakamLocation } from '@/lib/mahakam-data';
-import { Map } from 'lucide-react';
+import RouteForecastView from './RouteForecastView';
+import StationDetailView from './StationDetailView'; // Import baru
+
+// Dynamic Map
+const RiverMap = dynamic(
+  () => import('./RiverMap'),
+  { 
+    ssr: false,
+    loading: () => <div className="h-[500px] w-full bg-slate-100 animate-pulse rounded-[2.5rem]"/>
+  }
+);
 
 interface Props {
   data: MahakamLocation[];
 }
 
 export default function MahakamDashboard({ data }: Props) {
-  // State untuk menyimpan lokasi yang sedang dilihat detailnya
-  const [detailLoc, setDetailLoc] = useState<MahakamLocation | null>(null);
   
-  // Ref untuk auto-scroll
+  // STATE: Menyimpan lokasi mana yang sedang diklik (selected)
+  const [selectedStation, setSelectedStation] = useState<MahakamLocation | null>(null);
+  
+  // REF: Untuk auto-scroll ke bawah saat diklik
   const detailRef = useRef<HTMLDivElement>(null);
 
-  const handleViewDetail = (loc: MahakamLocation) => {
-    setDetailLoc(loc);
-    // Tunggu render sebentar, lalu scroll ke bawah
-    setTimeout(() => {
-        detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-  };
-
-  const handleCloseDetail = () => {
-    setDetailLoc(null);
+  // Handler saat kolom di tabel atas diklik
+  const handleStationSelect = (loc: MahakamLocation) => {
+    // Jika diklik lagi, tutup. Jika beda, ganti.
+    if (selectedStation?.id === loc.id) {
+        setSelectedStation(null);
+    } else {
+        setSelectedStation(loc);
+        // Scroll halus ke tampilan detail
+        setTimeout(() => {
+            detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 pb-20">
          
-         {/* BAGIAN 1: PETA */}
+         {/* 1. PETA */}
          <section>
-            <RiverMap 
-                initialData={data} 
-                onViewDetail={handleViewDetail} 
-            />
+            <RiverMap initialData={data} />
          </section>
 
-         {/* BAGIAN 2: PANEL DETAIL (Muncul Conditional) */}
-         <section ref={detailRef} className="scroll-mt-24 min-h-[100px]">
-            {detailLoc ? (
-                <SingleStationView 
-                    data={detailLoc} 
-                    onClose={handleCloseDetail} 
-                />
-            ) : (
-                // Placeholder jika belum ada yang dipilih (Opsional)
-                <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-12 text-center flex flex-col items-center justify-center text-slate-400">
-                    <div className="bg-white p-4 rounded-full shadow-sm mb-4">
-                        <Map size={32} className="text-slate-300"/>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-500">Belum ada lokasi dipilih</h3>
-                    <p className="text-sm mt-1">
-                        Silakan klik salah satu titik stasiun pada peta di atas, lalu tekan tombol <span className="font-bold text-blue-500">"Lihat Detail Lengkap"</span>.
-                    </p>
-                </div>
-            )}
+         {/* 2. TABEL RUTE (MASTER) */}
+         <section className="relative z-20">
+             <RouteForecastView 
+                data={data} 
+                onSelect={handleStationSelect} // Pass fungsi klik
+                activeId={selectedStation?.id} // Pass ID aktif untuk highlight
+             />
          </section>
+
+         {/* 3. TABEL DETAIL (DETAIL) - Muncul jika ada selectedStation */}
+         {selectedStation && (
+             <section ref={detailRef} className="scroll-mt-6">
+                <StationDetailView 
+                    data={selectedStation} 
+                    onClose={() => setSelectedStation(null)} 
+                />
+             </section>
+         )}
 
     </div>
   );

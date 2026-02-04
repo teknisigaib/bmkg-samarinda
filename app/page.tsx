@@ -1,7 +1,11 @@
+// src/app/page.tsx
+
 import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { ArrowRight } from "lucide-react";
+
+// --- COMPONENTS ---
 import RunningText from "@/components/RunningText";
 import InfoWidget from "@/components/InfoWidget";
 import AviationSection from "@/components/AviationSection";
@@ -9,7 +13,12 @@ import ServiceSection from "@/components/ServiceSection";
 import AppPromo from "@/components/AppPromo";
 import NewsBulletinSection from "@/components/NewsBulletinSection";
 import FlyerSection from "@/components/FlyerSection";
-// Data Fetching Helpers
+
+// --- NEW COMPONENT: AWS WIDGET ---
+import CityObservationPanel from '@/components/component-cuaca/aws/CityObservationPanel';
+import AwsStatusBar from '@/components/component-cuaca/aws/AwsStatusBar';
+
+// --- DATA FETCHING ---
 import { getGempaTerbaru } from "@/lib/bmkg/gempa";
 import { getKaltimWeather } from "@/lib/weather-service"; 
 
@@ -40,19 +49,15 @@ export default async function HomePage() {
     orderBy: { createdAt: "desc" },
   });
 
-  // --- MAPPING DATA (SOLUTION) ---
-  // Kita sesuaikan data dari Prisma agar cocok 100% dengan Interface di Component
+  // --- MAPPING DATA BULLETIN ---
   const formattedBulletin = rawBulletin ? {
     id: rawBulletin.id,
     title: rawBulletin.title,
-    // Prisma return 'null' jika kosong, tapi component opsional (?) minta 'undefined'
-    // Logika: Jika null, ganti jadi undefined.
     edition: rawBulletin.edition || undefined, 
-    year: rawBulletin.year, // Prisma String -> Component String (Cocok)
-    coverUrl: rawBulletin.coverUrl, // Nama kolom Prisma sudah sesuai
-    pdfUrl: rawBulletin.pdfUrl,     // Nama kolom Prisma sudah sesuai
+    year: rawBulletin.year,
+    coverUrl: rawBulletin.coverUrl,
+    pdfUrl: rawBulletin.pdfUrl,
   } : null;
-  // -------------------------------
 
   // 4. AMBIL DATA GEMPA & CUACA
   const [gempaData, listCuacaKaltim] = await Promise.all([
@@ -75,44 +80,38 @@ export default async function HomePage() {
       {/* 2. HERO SECTION */}
       {heroPost && (
         <section className="relative bg-blue-900 text-white overflow-hidden pb-24">
+          {/* ... (Isi Hero Section tetap sama) ... */}
           <div className="absolute inset-0 z-0">
-            <Image
-              src={heroPost.imageUrl || "/placeholder.jpg"}
-              alt="Hero Background"
-              fill
-              className="object-cover opacity-20"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-transparent to-transparent" />
+             {/* ... Gambar ... */}
+             <Image src={heroPost.imageUrl || "/placeholder.jpg"} alt="" fill className="object-cover opacity-20" priority />
+             <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-transparent to-transparent" />
           </div>
 
           <div className="relative z-10 w-full mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 flex flex-col justify-center min-h-[50vh]">
-            <span className="inline-block bg-yellow-400 text-blue-900 font-bold px-3 py-1 rounded-full text-xs w-fit mb-4 uppercase tracking-wider shadow-lg">
-              Berita Utama
-            </span>
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4 max-w-4xl drop-shadow-md">
-              {heroPost.title}
-            </h1>
-            <p className="text-blue-100 text-lg mb-8 max-w-2xl line-clamp-2 drop-shadow-sm">
-              {heroPost.excerpt}
-            </p>
-            <div className="flex gap-4">
-              <Link
-                href={`/publikasi/berita-kegiatan/${heroPost.slug}`}
-                className="bg-white text-blue-900 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition flex items-center gap-2 shadow-lg"
-              >
-                Baca Selengkapnya <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+             {/* ... Konten Teks Hero ... */}
+             <span className="inline-block bg-yellow-400 text-blue-900 font-bold px-3 py-1 rounded-full text-xs w-fit mb-4 uppercase tracking-wider shadow-lg">Berita Utama</span>
+             <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4 max-w-4xl drop-shadow-md">{heroPost.title}</h1>
+             <p className="text-blue-100 text-lg mb-8 max-w-2xl line-clamp-2 drop-shadow-sm">{heroPost.excerpt}</p>
+             <div className="flex gap-4">
+               <Link href={`/publikasi/berita-kegiatan/${heroPost.slug}`} className="bg-white text-blue-900 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition flex items-center gap-2 shadow-lg">
+                 Baca Selengkapnya <ArrowRight className="w-4 h-4" />
+               </Link>
+             </div>
           </div>
         </section>
       )}
 
-      {/* 3. WIDGET CUACA & GEMPA */}
-      <InfoWidget 
-        dataGempa={gempaData} 
-        listCuaca={listCuacaKaltim} 
-      />
+      {/* --- [BARU] 2.5 AWS REALTIME PANEL --- */}
+      {/* Panel ini akan 'menempel' di bawah Hero, memberikan transisi visual yang bagus */}
+
+      {/* 3. WIDGET CUACA & GEMPA (INFO WIDGET) */}
+      {/* Tambahkan sedikit margin-top agar tidak terlalu rapat dengan panel AWS */}
+      <div className="-mt-4">
+         <InfoWidget 
+           dataGempa={gempaData} 
+           listCuaca={listCuacaKaltim} 
+         />
+      </div>
 
       {/* 4. AVIATION SECTION */}
       <AviationSection />
