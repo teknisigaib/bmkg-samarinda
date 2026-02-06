@@ -103,7 +103,7 @@ export default function Navbar() {
                         <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2 }} className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black/5">
                           <div className="py-2">
                             {menu.items.map((item) => (
-                              <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 transition group">
+                              <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className="flex items-start gap-1 px-4 py-3 hover:bg-blue-50 transition group">
                                 <div className="p-2 bg-blue-50 rounded-lg shrink-0 text-blue-600 group-hover:bg-white group-hover:shadow-sm transition">{item.icon}</div>
                                 <div><p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 tracking-wide">{item.name}</p><p className="text-xs text-gray-500 leading-snug">{item.desc}</p></div>
                               </Link>

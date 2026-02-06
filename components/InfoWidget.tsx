@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   CloudSun, Activity, Wind, Droplets, ArrowRight, MapPin, Calendar, Waves,
-  Sun, Cloud, CloudRain, CloudLightning, CloudFog 
+  Sun, Cloud, CloudRain, CloudLightning, CloudFog, Radio
 } from "lucide-react";
 import type { GempaData } from "@/lib/bmkg/gempa";
 import type { CuacaData } from "@/lib/bmkg/cuaca";
+
+// Import Komponen UI Baru
+import AwsWidgetContent, { AwsData } from "@/components/component-cuaca/aws/AwsWidgetContent";
 
 interface InfoWidgetProps {
   dataGempa: GempaData | null;
@@ -15,7 +18,7 @@ interface InfoWidgetProps {
 }
 
 export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
-  const [activeTab, setActiveTab] = useState<"cuaca" | "gempa">("cuaca");
+  const [activeTab, setActiveTab] = useState<"cuaca" | "gempa" | "aws">("cuaca");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -28,6 +31,19 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
   }, [listCuaca, isPaused, activeTab]);
 
   const currentCuaca = listCuaca && listCuaca.length > 0 ? listCuaca[currentIndex] : null;
+
+  // --- DATA AWS (Bisa diganti fetch API nantinya) ---
+  const awsData: AwsData = {
+    temp: 29.2,
+    humidity: 78,
+    rain: 0.0,
+    windSpeed: 12.5,
+    windDir: "Tenggara",
+    solarRad: 850,
+    lastUpdate: "09:30 WITA",
+    isOnline: true
+  };
+  // --------------------------------------------------
 
   const getFallbackIcon = (code: string, sizeClass: string = "w-20 h-20") => {
     const c = parseInt(code);
@@ -42,50 +58,60 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-20 mb-12">
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col md:flex-row min-h-[250px]">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col md:flex-row min-h-[220px]">
         
-        {/* --- TAB NAVIGASI --- */}
+        {/* --- TAB NAVIGASI (SIDEBAR) --- */}
         <div className="md:w-1/4 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 flex md:flex-col">
+          
           <button 
             onClick={() => setActiveTab("cuaca")}
-            className={`flex-1 p-4 md:p-6 flex items-center justify-center md:justify-start gap-3 transition-all ${
+            className={`flex-1 p-4 md:p-5 flex items-center justify-center md:justify-start gap-3 transition-all ${
                 activeTab === 'cuaca' ? 'bg-white text-blue-600 font-bold shadow-sm md:border-l-4 md:border-l-blue-600' : 'text-gray-500 hover:bg-gray-100'
             }`}
           >
             {currentCuaca?.iconUrl ? (
-                 <img src={currentCuaca.iconUrl} alt="icon" className="w-8 h-8 object-contain" />
+                 <img src={currentCuaca.iconUrl} alt="icon" className="w-6 h-6 object-contain" />
             ) : <CloudSun className="w-6 h-6" />}
-            <span>Cuaca</span>
+            <span className="text-sm">Cuaca Kaltim</span>
           </button>
           
           <button 
             onClick={() => setActiveTab("gempa")}
-            className={`flex-1 p-4 md:p-6 flex items-center justify-center md:justify-start gap-3 transition-all ${
+            className={`flex-1 p-4 md:p-5 flex items-center justify-center md:justify-start gap-3 transition-all ${
                 activeTab === 'gempa' ? 'bg-white text-red-600 font-bold shadow-sm md:border-l-4 md:border-l-red-600' : 'text-gray-500 hover:bg-gray-100'
             }`}
           >
             <Activity className="w-6 h-6" /> 
-            <span>Gempa Bumi</span>
+            <span className="text-sm">Gempa Bumi</span>
           </button>
+
+          <button 
+            onClick={() => setActiveTab("aws")}
+            className={`flex-1 p-4 md:p-5 flex items-center justify-center md:justify-start gap-3 transition-all ${
+                activeTab === 'aws' ? 'bg-white text-blue-600 font-bold shadow-sm md:border-l-4 md:border-l-blue-600' : 'text-gray-500 hover:bg-gray-100'
+            }`}
+          >
+            <Radio className={`w-6 h-6 ${awsData.isOnline ? 'animate-pulse' : ''}`} /> 
+            <span className="text-sm">Live Data</span>
+          </button>
+
         </div>
 
-        {/* --- KONTEN TAB --- */}
+        {/* --- KONTEN UTAMA --- */}
         <div 
-            className="flex-1 p-6 md:p-8 flex flex-col justify-center relative"
+            className="flex-1 p-6 md:p-8 flex flex-col justify-center relative bg-white"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
             
-            {/* KONTEN CUACA */}
+            {/* 1. KONTEN CUACA */}
             {activeTab === "cuaca" && (
-                // 1. HAPUS 'h-full' disini agar konten tidak dipaksa meregang
-                <div className="w-full flex flex-col"> 
+                <div className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300"> 
                     {currentCuaca ? (
-                        // 2. HAPUS 'flex-1' disini agar div ini tidak mendorong dots ke bawah
-                        <div key={currentCuaca.wilayah} className="animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div key={currentCuaca.wilayah}>
                             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                                 <div className="flex items-center gap-x-8">
-                                    {/* ICON UTAMA */}
+                                    {/* ICON */}
                                     {currentCuaca.iconUrl ? (
                                         <div className="w-24 h-24 relative">
                                             <img 
@@ -143,24 +169,18 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
                         </div>
                     )}
 
-                    {/* --- PAGINATION DOTS --- */}
+                    {/* DOTS PAGINATION */}
                     {listCuaca && listCuaca.length > 1 && (
-                        // 3. Ubah mt-6 jadi mt-4 agar lebih rapat
                         <div className="flex justify-center items-center gap-1.5 mt-4 w-full">
                             {listCuaca.map((_, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => setCurrentIndex(idx)}
                                     className="p-1 focus:outline-none"
-                                    aria-label={`Slide ${idx + 1}`}
                                 >
-                                    <div 
-                                        className={`h-1.5 rounded-full transition-all duration-500 ${
-                                            idx === currentIndex 
-                                            ? "w-6 bg-blue-500" 
-                                            : "w-1.5 bg-gray-300 hover:bg-gray-400"
-                                        }`} 
-                                    />
+                                    <div className={`h-1.5 rounded-full transition-all duration-500 ${
+                                        idx === currentIndex ? "w-6 bg-blue-500" : "w-1.5 bg-gray-300 hover:bg-gray-400"
+                                    }`} />
                                 </button>
                             ))}
                         </div>
@@ -168,7 +188,7 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
                 </div>
             )}
 
-            {/* KONTEN GEMPA (Tidak Berubah) */}
+            {/* 2. KONTEN GEMPA */}
             {activeTab === "gempa" && (
                 <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                     {dataGempa ? (
@@ -209,6 +229,11 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
                         <div className="text-center text-gray-500 py-4">Data gempa tidak tersedia.</div>
                     )}
                 </div>
+            )}
+
+            {/* 3. KONTEN AWS REALTIME (Dipisah ke Component) */}
+            {activeTab === "aws" && (
+                <AwsWidgetContent data={awsData} />
             )}
 
         </div>
