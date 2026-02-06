@@ -9,13 +9,11 @@ import {
   Layers, Globe, Loader2, 
   Map as MapIcon, AlertTriangle, EyeOff, ChevronsRight, Settings2,
 } from "lucide-react";
-
 import { 
   getRadarIconHtml, getCurvedPath, 
   formatDateToRadar, formatDateToSatellite, 
   getVisibilityColor, getSigmetStyle, getSigmetTooltipContent 
 } from "@/lib/bmkg/aviation-utils";
-
 import { useTimeAnimation } from "@/components/hooks/use-time-animation";
 import TimeAnimationControl from "./TimeAnimationControl";
 import { RadarLegend, SatelliteLegend, SigmetLegend } from "./MapLegends"; // Pastikan import ini ada
@@ -157,7 +155,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                             {/* 2. SIGMET */}
                             <div className="p-2">
                                 <button onClick={() => setShowSigmet(!showSigmet)} className={`w-full flex items-center justify-between p-2 rounded-lg transition-all ${showSigmet ? 'bg-blue-900/30 text-blue-200 border border-blue-900/50' : 'text-slate-400 hover:bg-slate-800 border border-transparent'}`}>
-                                    <div className="flex items-center gap-3"><AlertTriangle className="w-4 h-4" /><span className="text-xs font-medium">SIGMET Hazards</span></div>
+                                    <div className="flex items-center gap-3"><AlertTriangle className="w-4 h-4" /><span className="text-xs font-medium">SIGMET</span></div>
                                     {showSigmet ? <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
 

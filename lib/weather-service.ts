@@ -56,9 +56,6 @@ export const fetchBMKGData = async (locationId: string): Promise<WeatherData | n
   else if (parts.length === 4) url = `https://cuaca.bmkg.go.id/api/df/v1/forecast/adm?adm4=${locationId}`;
 
   try {
-    // --- PERBAIKAN DI SINI ---
-    // HAPUS: { cache: 'no-store' } -> Menyebabkan error build
-    // GANTI: { next: { revalidate: 60 } } -> Data dianggap fresh selama 60 detik
     const res = await fetch(url, { next: { revalidate: 60 } });
 
     if (!res.ok) throw new Error("Gagal mengambil data BMKG");
@@ -126,7 +123,7 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
     // Data Utama
     temp: refWeather.t,
     condition: refWeather.weather_desc,
-    iconUrl: refWeather.image, // FIX: Ambil langsung dari weather item yang sama
+    iconUrl: refWeather.image,
     windSpeed: refWeather.ws,
     humidity: refWeather.hu,
     tcc: refWeather.tcc,
@@ -177,8 +174,6 @@ export const getKaltimWeather = async () => {
 
     const formattedList = responseData.data.map((item: any) => {
       const namaWilayah = item.lokasi.kotkab || "Wilayah";
-      
-      // FIX: Gunakan helper getCurrentWeatherItem agar konsisten dengan dashboard lain
       const current = getCurrentWeatherItem(item.cuaca);
 
       if (!current) return null;
@@ -192,7 +187,7 @@ export const getKaltimWeather = async () => {
         jam: current.local_datetime 
               ? current.local_datetime.split(' ')[1].substring(0, 5) 
               : "Terkini",
-        anginSpeed: Math.round(current.ws * 1.852), // Konversi Knot ke Km/j (jika API pakai knot)
+        anginSpeed: Math.round(current.ws * 1.852),
         anginDir: current.wd,
         kelembapan: current.hu
       };
@@ -212,17 +207,15 @@ export const getKaltimWeather = async () => {
 // Digunakan untuk Monitoring Rute Sungai
 export const getMahakamDataFull = async () => {
   const promises = MAHAKAM_LOCATIONS.map(async (loc) => {
-    // Panggil fetchBMKGData yang sudah cache-aware
     const weatherData = await fetchBMKGData(loc.bmkgId);
     
     if (!weatherData) return { ...loc, weather: 'N/A', temp: 0 };
 
     return {
       ...loc,
-      // Timpa data statis dengan data live
       weather: weatherData.condition,
       temp: weatherData.temp,
-      iconUrl: weatherData.iconUrl || "", // FIX: Ambil dari root, bukan subRegions
+      iconUrl: weatherData.iconUrl || "",
       windSpeed: weatherData.windSpeed,
       humidity: weatherData.humidity,
       feelsLike: weatherData.feelsLike,
@@ -232,7 +225,7 @@ export const getMahakamDataFull = async () => {
       // Data Forecast untuk Detail View (Modal)
       forecasts: weatherData.tableData?.map(item => ({
         time: item.time,
-        date: item.date, // Pass date agar tanggal di tabel detail dinamis
+        date: item.date,
         temp: item.temp,
         weatherIcon: item.weatherIcon,
         condition: item.weatherDesc,

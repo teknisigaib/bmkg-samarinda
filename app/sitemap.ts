@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://cuaca.bmkg-samarinda.go.id'; // Ganti dengan domain asli nanti
+  const baseUrl = 'https://stametaptpranoto.bmkg.go.id'; // Ganti dengan domain asli nanti
 
   return [
     {

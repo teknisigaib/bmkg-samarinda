@@ -78,7 +78,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
     }
   }, [initialData]);
 
-  if (!isMounted) return <div className="h-[500px] w-full bg-slate-100 animate-pulse rounded-[2.5rem]" />;
+  if (!isMounted) return <div className="h-[500px] w-full  animate-pulse rounded-[2.5rem]" />;
 
   const riverGlowStyle = { color: '#60a5fa', weight: 8, opacity: 0.5, lineCap: 'round' as const, lineJoin: 'round' as const };
   const riverCoreStyle = { color: '#2563eb', weight: 3, opacity: 1, lineCap: 'round' as const, lineJoin: 'round' as const };
@@ -165,7 +165,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
           center={[-0.502, 117.153]} 
           zoom={8} 
           scrollWheelZoom={false} 
-          className="h-full w-full z-0 bg-slate-100"
+          className="h-full w-full z-0 "
           zoomControl={false}
         >
             <TileLayer

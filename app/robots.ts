@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/api/', // Jangan indeks API
     },
-    sitemap: 'https://cuaca.bmkg-samarinda.go.id/sitemap.xml', // Ganti domain
+    sitemap: 'https://stametaptpranoto.bmkg.go.id/sitemap.xml', // Ganti domain
   };
 }

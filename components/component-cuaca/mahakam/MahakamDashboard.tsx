@@ -11,7 +11,7 @@ const RiverMap = dynamic(
   () => import('./RiverMap'),
   { 
     ssr: false,
-    loading: () => <div className="h-[500px] w-full bg-slate-100 animate-pulse rounded-[2.5rem]"/>
+    loading: () => <div className="h-[500px] w-full animate-pulse rounded-[2.5rem]"/>
   }
 );
 

@@ -63,7 +63,7 @@ export default function PeringatanDiniPage() {
   useEffect(() => {
     async function fetchData() {
         try {
-            const mapRes = await fetch("/maps/kabupaten-kota.geojson");
+            const mapRes = await fetch("/maps/Kabupaten-Kota.geojson");
             const mapData = await mapRes.json();
             setGeoJson(mapData);
 

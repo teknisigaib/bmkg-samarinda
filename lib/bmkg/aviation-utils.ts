@@ -211,7 +211,7 @@ export const formatDisplayTime = (date: Date) => {
 
 export const getInitialDate = () => {
   const now = new Date();
-  now.setMinutes(now.getMinutes() - 10);
+  now.setMinutes(now.getMinutes());
   now.setMinutes(now.getMinutes() - (now.getMinutes() % 10));
   return now;
 };
