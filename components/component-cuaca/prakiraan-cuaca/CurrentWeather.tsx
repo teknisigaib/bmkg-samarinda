@@ -85,8 +85,8 @@ export default function CurrentWeather({ data }: { data: WeatherData }) {
 
             {/* Jika Provinsi, tampilkan info ringkas */}
             {isRange && (
-                <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold border border-indigo-100">
-                    Rata-rata se-Provinsi
+                <div className="px-3 py-1 bg-indigo-50 text-blue-600 rounded-full text-xs border border-indigo-100">
+                    *Parameter cuaca adalah rata-rata wilayah.
                 </div>
             )}
           </div>

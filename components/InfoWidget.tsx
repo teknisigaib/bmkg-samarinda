@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { GempaData } from "@/lib/bmkg/gempa";
 import type { CuacaData } from "@/lib/bmkg/cuaca";
-import AwsWidgetContent, { AwsData } from "@/components/component-cuaca/aws/AwsWidgetContent";
+import HomeAwsWidget from "@/components/HomeAwsWidget";
 
 interface InfoWidgetProps {
   dataGempa: GempaData | null;
@@ -29,20 +29,6 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
   }, [listCuaca, isPaused, activeTab]);
 
   const currentCuaca = listCuaca && listCuaca.length > 0 ? listCuaca[currentIndex] : null;
-
-  // --- DATA AWS (Bisa diganti fetch API nantinya) ---
-  const awsData: AwsData = {
-    temp: 29.2,
-    humidity: 78,
-    rain: 0.0,
-    windSpeed: 12.5,
-    windDir: 270,
-    solarRad: 850,
-    tekanan: 1013,
-    lastUpdate: "09:30 WITA",
-    isOnline: true
-  };
-  // --------------------------------------------------
 
   const getFallbackIcon = (code: string, sizeClass: string = "w-20 h-20") => {
     const c = parseInt(code);
@@ -90,7 +76,7 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
                 activeTab === 'aws' ? 'bg-white text-blue-600 font-bold shadow-sm md:border-l-4 md:border-l-blue-600' : 'text-gray-500 hover:bg-gray-100'
             }`}
           >
-            <Radio className={`w-6 h-6 ${awsData.isOnline ? 'animate-pulse' : ''}`} /> 
+            <Radio className={`w-6 h-6 animate-pulse`} /> 
             <span className="text-sm">Live Data</span>
           </button>
 
@@ -235,7 +221,7 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
 
             {/* 3. KONTEN AWS REALTIME (Dipisah ke Component) */}
             {activeTab === "aws" && (
-                <AwsWidgetContent data={awsData} />
+                <HomeAwsWidget />
             )}
 
         </div>

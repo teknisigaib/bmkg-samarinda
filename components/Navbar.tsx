@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   CloudSun, AlertTriangle, Plane, Ship, ChevronDown, Users, ClipboardList,
   FileText, Target, Activity, Map, DropletOff,
-  Satellite, Flame, Newspaper, BookA, BookText, Menu, X, OctagonAlert, CloudRain, BarChart3, Leaf, Waves
+  Satellite, Flame, Newspaper, BookA, BookText, Menu, X, OctagonAlert, CloudRain, BarChart3, Leaf, Waves, Radio
 } from "lucide-react";
 
 // --- 1. Definisi Data Menu (Disatukan dalam Array Object) ---
@@ -30,9 +30,10 @@ const NAV_ITEMS = [
       { name: "Peringatan Dini", desc: "Informasi cuaca ekstrem", href: "/cuaca/peringatan-dini", icon: <AlertTriangle className="w-5 h-5 text-blue-500" /> },
       { name: "Cuaca Penerbangan", desc: "Info cuaca untuk penerbangan", href: "/cuaca/penerbangan", icon: <Plane className="w-5 h-5 text-blue-500" /> },
       { name: "Cuaca Maritim", desc: "Info cuaca untuk pelayaran", href: "/cuaca/maritim", icon: <Ship className="w-5 h-5 text-blue-500" /> },
+      { name: "Cuaca Mahakam", desc: "Prakiraan cuaca sungai Mahakam", href: "/cuaca/mahakam", icon: <Waves className="w-5 h-5 text-blue-500" /> },
       { name: "Satelit Cuaca", desc: "Visualisasi citra satelit cuaca", href: "/cuaca/satelit", icon: <Satellite className="w-5 h-5 text-blue-500" /> },
       { name: "Peringatan Karhutla", desc: "Kebakaran hutan dan lahan", href: "/cuaca/karhutla", icon: <Flame className="w-5 h-5 text-blue-500" /> },
-      { name: "Cuaca Mahakam", desc: "Prakiraan cuaca sungai Mahakam", href: "/cuaca/mahakam", icon: <Waves className="w-5 h-5 text-blue-500" /> },
+      { name: "Cuaca RealTime", desc: "Data Realtime Automatic Weather Station", href: "/cuaca/aws", icon: <Radio className="w-5 h-5 text-blue-500" /> },
     ]
   },
   {
@@ -100,10 +101,10 @@ export default function Navbar() {
                    </button>
                    <AnimatePresence>
                      {activeDesktop === menu.key && (
-                        <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2 }} className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black/5">
+                        <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2 }} className="absolute left-1/2 -translate-x-1/2 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black/5">
                           <div className="py-2">
                             {menu.items.map((item) => (
-                              <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className="flex items-start gap-1 px-4 py-3 hover:bg-blue-50 transition group">
+                              <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 transition group">
                                 <div className="p-2 bg-blue-50 rounded-lg shrink-0 text-blue-600 group-hover:bg-white group-hover:shadow-sm transition">{item.icon}</div>
                                 <div><p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 tracking-wide">{item.name}</p><p className="text-xs text-gray-500 leading-snug">{item.desc}</p></div>
                               </Link>

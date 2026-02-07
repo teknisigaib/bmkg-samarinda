@@ -10,7 +10,8 @@ import {
   Satellite, 
   Flame, 
   ChevronRight, 
-  Waves
+  Waves,
+  Radio
 } from "lucide-react";
 
 const sidebarItems = [
@@ -35,6 +36,11 @@ const sidebarItems = [
     icon: <Ship className="w-4 h-4" /> 
   },
   { 
+    name: "Cuaca Mahakam", 
+    href: "/cuaca/mahakam", 
+    icon: <Waves className="w-4 h-4" /> 
+  },
+  { 
     name: "Satelit Cuaca", 
     href: "/cuaca/satelit", 
     icon: <Satellite className="w-4 h-4" /> 
@@ -45,9 +51,9 @@ const sidebarItems = [
     icon: <Flame className="w-4 h-4" /> 
   },
   { 
-    name: "Cuaca Mahakam", 
-    href: "/cuaca/mahakam", 
-    icon: <Waves className="w-4 h-4" /> 
+    name: "Cuaca RealTime", 
+    href: "/cuaca/aws", 
+    icon: <Radio className="w-4 h-4" /> 
   },
 ];
 
