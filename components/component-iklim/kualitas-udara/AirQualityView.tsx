@@ -75,14 +75,11 @@ export default function AirQualityView() {
   const TrendIcon = trend ? trend.icon : null;
 
   return (
-    // FIX 1: Hapus overflow-x-hidden di sini jika parent layout sudah handle, 
-    // tapi tetap aman dipertahankan. Gunakan w-full.
-    <div className="w-full min-h-screen text-slate-800 pb-10 overflow-x-hidden">
+    <div className="w-full min-h-screen text-slate-800 overflow-x-hidden">
       
       {/* HEADER */}
-      {/* FIX 2: Layout header diperbaiki agar padding konsisten */}
       <div className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="mx-auto px-2 sm:px-4 lg:px-6 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
@@ -104,7 +101,7 @@ export default function AirQualityView() {
 
       {/* MAIN CONTENT WRAPPER */}
       {/* FIX 3: Gunakan max-w-7xl dan mx-auto agar konten terpusat dan tidak melebar tak terbatas */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 mt-6 md:mt-8 space-y-6">
 
         {loading && (
            <div className="h-64 flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-200 shadow-sm animate-pulse">
@@ -119,7 +116,7 @@ export default function AirQualityView() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             
             {/* KARTU 1: GAUGE UTAMA */}
-            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[400px]">
+            <div className="bg-white rounded-[2rem] p-2 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[400px]">
 
                 {/* Gauge SVG Container */}
                 <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6 flex-shrink-0">

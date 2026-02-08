@@ -27,10 +27,6 @@ export default async function KarhutlaPage() {
   return (
     <div className="space-y-10 w-full mb-20">
       
-      {/* HEADER LAMA DIHAPUS. 
-          HEADER BARU SEKARANG ADA DI DALAM HotspotMapWrapper
-          KITA KIRIM DATA lastUpdateString KE SANA */}
-      
       <section>
         <HotspotMapWrapper 
             data={weeklyHotspots} 

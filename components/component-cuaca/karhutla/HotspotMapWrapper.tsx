@@ -70,24 +70,34 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
     <div className="space-y-8 w-full max-w-full overflow-hidden"> 
 
       {/* 1. HEADER INFORMASI */}
-      <section className="bg-red-50 border border-red-100 rounded-xl p-6 flex flex-col md:flex-row gap-4 md:items-start shadow-sm">
+      <section className="bg-red-50 border border-red-100 rounded-xl p-6 flex flex-col md:flex-row gap-4 items-center text-center md:items-start md:text-left shadow-sm">
+        
+        {/* Ikon Api */}
         <div className="bg-white p-3 rounded-full shadow-sm w-fit">
             <Flame className="w-8 h-8 text-red-600" />
         </div>
+        
         <div className="flex-1">
             <h2 className="text-xl font-bold text-gray-800">Monitoring Titik Panas (Hotspot)</h2>
             <p className="text-gray-600 text-sm mt-1 leading-relaxed">
                 Peta sebaran titik panas di wilayah <strong>Kalimantan Timur</strong> berdasarkan pantauan satelit (SNPP/NOAA20). 
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            
+            {/* Container Badge (Pills) */}
+            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
+                
+                {/* Badge Jumlah Titik */}
                 <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-red-200 text-xs font-bold text-red-600 shadow-sm">
                     <Info className="w-3.5 h-3.5" />
                     {formatDateHeader(selectedDate)}: {filteredData.length} Titik
                 </div>
+                
+                {/* Badge Update Server */}
                 <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-500 shadow-sm">
                     <RefreshCw className="w-3.5 h-3.5" />
                     Update Server: {lastUpdateString}
                 </div>
+
             </div>
         </div>
       </section>

@@ -38,21 +38,42 @@ export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
     const heatIndex = calculateHeatIndex(temp, rh);
     const uvIndex = calculateUV(solrad);
 
-    // --- LOGIKA WAKTU BARU ---
-    const dateObj = new Date(jsonData.waktu); // Parse "2026-02-07 07:24:00"
-    const now = new Date();
+    // --- LOGIKA WAKTU & TANGGAL BARU ---
+  const dateObj = new Date(jsonData.waktu); // Parse "2026-02-07 07:24:00"
+  const now = new Date();
   
-    // Hitung selisih dalam menit
-    const diffMs = now.getTime() - dateObj.getTime();
-    const minutesAgo = Math.floor(diffMs / 60000);
+  // Hitung selisih
+  const diffMs = now.getTime() - dateObj.getTime();
+  const minutesAgo = Math.floor(diffMs / 60000);
 
-    const timeString = !isNaN(dateObj.getTime()) 
-        ? dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WITA"
-        : jsonData.waktu.split(' ')[1] + " WITA";
+  // Default Fallback
+  let dateStr = "Tanggal Tidak Valid";
+  let timeStr = "--:--";
 
-    
+  if (!isNaN(dateObj.getTime())) {
+      // Format: "Sabtu, 7 Februari 2026"
+      dateStr = dateObj.toLocaleDateString('id-ID', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+      });
+      
+      // Format: "07:24"
+      timeStr = dateObj.toLocaleTimeString('id-ID', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: false
+      });
+  } else {
+      // Fallback manual jika parsing gagal
+      const parts = jsonData.waktu.split(' ');
+      if(parts.length > 1) {
+          dateStr = parts[0]; 
+          timeStr = parts[1];
+      }
+  }
 
- 
    return {
     temp,
     humidity: rh,
@@ -65,10 +86,12 @@ export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
     heatIndex: parseFloat(heatIndex.toFixed(1)),
     uvIndex,
     dewPoint: parseFloat(dewPoint.toFixed(1)),
-    lastUpdate: timeString,
+    lastUpdate: `${timeStr} WITA`,
+    lastUpdateDate: dateStr,
+    lastUpdateTime: timeStr,
     lastUpdateRaw: jsonData.waktu,
     minutesAgo: minutesAgo,
-    isOnline: true
+    isOnline: true,
   };
 };
 

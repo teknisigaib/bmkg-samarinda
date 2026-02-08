@@ -23,7 +23,9 @@ export interface AwsSnapshotData {
   uvIndex: number;
   dewPoint: number;
   lastUpdate: string;
-  isOnline: boolean;
+  lastUpdateDate: string;
+  lastUpdateTime: string;
   lastUpdateRaw: string;
   minutesAgo: number;
+  isOnline: boolean;
 }

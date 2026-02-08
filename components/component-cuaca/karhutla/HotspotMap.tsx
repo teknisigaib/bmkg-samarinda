@@ -61,7 +61,7 @@ export default function HotspotMap({ data }: { data: HotspotData[] }) {
   const statusInfo = hoveredSpot ? getStatusInfo(hoveredSpot.conf) : null;
 
   return (
-    <div className="h-[500px] w-full rounded-2xl overflow-hidden shadow-md border border-red-100 z-0 relative bg-gray-100 group">
+    <div className="h-[500px] w-full rounded-2xl overflow-hidden shadow-md border border-red-100 z-0 relative bg-gray-100 group ">
       
       <MapContainer 
         center={[-0.5, 117]} 

@@ -7,7 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AirQualityPage() {
-  // Hanya merender Client Component
-  // Client Component yang akan memanggil API /api/pm25
   return <AirQualityView />;
 }
