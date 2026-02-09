@@ -1,0 +1,60 @@
+name: Deploy BMKG Samarinda
+
+on:
+  push:
+    branches:
+      - main  # Ganti jika branch utama Anda bernama 'master'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Ambil Kodingan Terbaru
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Login ke Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 3. Build Image & Push ke Docker Hub
+      # Proses berat terjadi di sini (Server GitHub), bukan di VPS Anda!
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/bmkg-samarinda:latest
+
+      # 4. Masuk ke VPS & Update Container
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: root  # Sesuaikan jika user Anda bukan root (misal: opc/ubuntu)
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            # Tarik image terbaru
+            docker pull ${{ secrets.DOCKER_USERNAME }}/bmkg-samarinda:latest
+            
+            # Stop & Hapus container lama
+            docker stop bmkg-samarinda || true
+            docker rm bmkg-samarinda || true
+            
+            # Jalankan container baru (Sesuai perintah manual Anda tadi)
+            docker run -d \
+              -p 3000:3000 \
+              --name bmkg-samarinda \
+              --restart always \
+              -v /www/wwwroot/bmkg-samarinda/.env:/app/.env \
+              ${{ secrets.DOCKER_USERNAME }}/bmkg-samarinda:latest
+            
+            # (Opsional) Sinkronisasi Database Prisma
+            docker exec bmkg-samarinda npx prisma db push
+
+            # Hapus image sampah (bekas update) agar disk tidak penuh
+            docker image prune -f
