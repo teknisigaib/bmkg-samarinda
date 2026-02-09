@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import AwsDashboardUI from '@/components/component-cuaca/aws/AwsDasboardUI';
 import { transformAwsData } from '@/lib/aws-utils';
 import { AwsApiData } from '@/lib/aws-types';
-
+export const dynamic = 'force-dynamic';
 // 1. Definisikan Metadata di sini (Server Side)
 export const metadata: Metadata = {
   title: 'AWS Monitoring - BMKG Samarinda',

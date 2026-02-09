@@ -1,5 +1,8 @@
-# 1. Base Image
-FROM node:18-alpine AS base
+# 1. Base Image: Gunakan Debian Slim (Bukan Alpine) agar OpenSSL aman
+FROM node:18-slim AS base
+
+# Install OpenSSL yang dibutuhkan Prisma
+RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 # 2. Dependencies
 FROM base AS deps
@@ -12,6 +15,14 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Matikan telemetri
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Build Next.js
 RUN npm run build
 
 # 4. Runner (Production)
@@ -19,7 +30,9 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV production
 ENV PORT 3000
+ENV NEXT_TELEMETRY_DISABLED 1
 
+# Buat user non-root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
