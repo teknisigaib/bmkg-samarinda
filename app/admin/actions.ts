@@ -4,14 +4,19 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+// --- CREATE BERITA ---
 export async function createPost(formData: FormData) {
   const title = formData.get("title") as string;
-  const author = formData.get("author") as string; // Tangkap input penulis manual
+  const author = formData.get("author") as string;
   const category = formData.get("category") as string;
   const excerpt = formData.get("excerpt") as string;
   const content = formData.get("content") as string;
   const imageUrl = formData.get("imageUrl") as string;
   
+  // 1. Ambil Input Tanggal Manual
+  const dateInput = formData.get("date") as string;
+  const createdAt = dateInput ? new Date(dateInput) : new Date();
+
   // Buat slug
   const slug = title.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
 
@@ -23,21 +28,16 @@ export async function createPost(formData: FormData) {
       excerpt,
       content,
       imageUrl,
-      // Gunakan input manual. Jika kosong (meski sudah required), fallback ke "Admin".
-      author: author || "Admin BMKG", 
+      author: author || "Admin BMKG",
       isFeatured: false,
+      createdAt: createdAt, // <-- Simpan Tanggal Manual
     },
   });
 
-  revalidatePath("/publikasi/berita-kegiatan");
   revalidatePath("/admin/berita");
-  redirect("/admin/berita");
-}
-
-export async function deletePost(id: string) {
-  await prisma.post.delete({ where: { id } });
   revalidatePath("/publikasi/berita-kegiatan");
-  revalidatePath("/admin/berita");
+  // return success object, JANGAN redirect
+  return { success: true };
 }
 
 // --- UPDATE BERITA ---
@@ -48,8 +48,11 @@ export async function updatePost(id: string, formData: FormData) {
   const excerpt = formData.get("excerpt") as string;
   const content = formData.get("content") as string;
   const imageUrl = formData.get("imageUrl") as string;
+  
+  // 1. Ambil Input Tanggal Manual
+  const dateInput = formData.get("date") as string;
+  const createdAt = dateInput ? new Date(dateInput) : undefined; 
 
-  // Update ke Database
   await prisma.post.update({
     where: { id },
     data: {
@@ -57,32 +60,27 @@ export async function updatePost(id: string, formData: FormData) {
       category,
       excerpt,
       content,
-      imageUrl, // Jika user tidak ganti gambar, form akan kirim URL lama (tetap aman)
+      imageUrl,
       author,
+      createdAt: createdAt, // <-- Update Tanggal
     },
   });
 
-  revalidatePath("/publikasi/berita-kegiatan");
-  revalidatePath(`/publikasi/berita-kegiatan/${id}`); // Refresh halaman detail juga (jika slug tidak berubah)
   revalidatePath("/admin/berita");
-  redirect("/admin/berita");
+  revalidatePath(`/publikasi/berita-kegiatan/${id}`); 
+  return { success: true };
 }
 
-// --- TOGGLE BERITA UTAMA ---
+// --- DELETE BERITA ---
+export async function deletePost(id: string) {
+  await prisma.post.delete({ where: { id } });
+  revalidatePath("/admin/berita");
+}
+
+// --- TOGGLE FEATURED ---
 export async function setFeatured(id: string) {
-  // 1. Reset semua berita jadi false (agar cuma ada 1 berita utama)
-  await prisma.post.updateMany({
-    data: { isFeatured: false },
-  });
-
-  // 2. Set berita yang dipilih jadi true
-  await prisma.post.update({
-    where: { id },
-    data: { isFeatured: true },
-  });
-
-  // 3. Refresh halaman
-  revalidatePath("/publikasi/berita-kegiatan");
+  await prisma.post.updateMany({ data: { isFeatured: false } });
+  await prisma.post.update({ where: { id }, data: { isFeatured: true } });
   revalidatePath("/admin/berita");
 }
 

@@ -131,7 +131,7 @@ export default function AwsDashboardUI({ initialData }: Props) {
        
        {/* --- MODAL POPUP --- */}
        {activeInfo && (
-         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setActiveInfo(null)}>
+         <div className=" inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setActiveInfo(null)}>
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
                 <button 
                   onClick={() => setActiveInfo(null)}
@@ -172,7 +172,7 @@ export default function AwsDashboardUI({ initialData }: Props) {
        )}
 
        {/* HEADER */}
-       <div className="pt-6 max-w-[1600px] mx-auto">
+       <div className="pt-2 max-w-[1600px] mx-auto">
           <div className="bg-blue-50/50 border border-blue-100 rounded-3xl p-4 sm:p-6 flex flex-col md:flex-row items-center md:items-center gap-6 shadow-sm relative overflow-hidden">
 
              <div className="flex-shrink-0">
@@ -243,7 +243,7 @@ export default function AwsDashboardUI({ initialData }: Props) {
                          </div>
                     </div>
                     <div className="flex items-baseline mt-2">
-                        <span className="text-6xl font-bold text-slate-800 tracking-tighter">{data.temp}</span>
+                        <span className="text-5xl font-bold text-slate-800 tracking-tighter">{data.temp}</span>
                         <span className="text-2xl font-semibold text-slate-400 ml-1">°C</span>
                     </div>
                     <div className="flex justify-between items-center text-xs text-slate-500 border-t border-slate-100 pt-3 mt-4">

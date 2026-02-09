@@ -39,7 +39,7 @@ export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
     const uvIndex = calculateUV(solrad);
 
     // --- LOGIKA WAKTU & TANGGAL BARU ---
-  const dateObj = new Date(jsonData.waktu); // Parse "2026-02-07 07:24:00"
+  const dateObj = new Date(jsonData.waktu);
   const now = new Date();
   
   // Hitung selisih

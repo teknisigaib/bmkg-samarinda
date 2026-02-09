@@ -1,12 +1,14 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://stametsamarinda.bmkg.go.id';
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: '/api/', // Jangan indeks API
+      disallow: ['/admin/', '/private/'],
     },
-    sitemap: 'https://stametaptpranoto.bmkg.go.id/sitemap.xml', // Ganti domain
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
