@@ -185,7 +185,7 @@ export default function AwsDashboardUI({ initialData }: Props) {
                    AWS Temindung
                 </h1>
                 <p className="text-slate-500 mt-2 text-sm sm:text-base leading-relaxed">
-                   Monitoring data cuaca <span className="font-semibold text-blue-600">real-time</span> dari sensor Automatic Weather Station (AWS) di Stasiun Meteorologi APT Pranoto (Kantor Temindung)
+                   Monitoring data cuaca <span className="font-semibold text-blue-600">real-time</span> dari Automatic Weather Station (AWS) di Stasiun Meteorologi APT Pranoto (Kantor Temindung)
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-4">
@@ -203,7 +203,7 @@ export default function AwsDashboardUI({ initialData }: Props) {
                    <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm">
                         <Clock className="w-3 h-3 text-slate-400" />
                       <div className="flex items-center gap-1">
-                          <span className="text-sm font-bold text-slate-400 tracking-wider leading-tight">Last Update:</span>
+                          <span className="text-sm font-bold text-slate-400 tracking-wider leading-tight">Update:</span>
                           <span className="text-sm font-semibold text-slate-600 ml-1">
                              {data.lastUpdateDate} {data.lastUpdateTime} UTC
                           </span> 

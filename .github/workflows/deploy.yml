@@ -8,12 +8,10 @@ on:
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/bmkg-samarinda:latest
   CONTAINER_NAME: bmkg-samarinda
-  # Pastikan path ini BENAR ada di server Anda
   ENV_PATH: /www/wwwroot/bmkg-samarinda/.env 
 
 jobs:
   # TAHAP 1: BUILD (Dikerjakan oleh GitHub Public Server)
-  # Alasannya: Hemat resource VPS Anda. Biar GitHub yang capek build.
   build_and_push:
     runs-on: ubuntu-latest
     steps:
@@ -33,11 +31,10 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}
 
-  # TAHAP 2: DEPLOY (Dikerjakan oleh Agen di VPS Anda)
-  # Alasannya: Agen ini ada di DALAM VPN, jadi dia bisa akses Docker lokal.
+  # TAHAP 2: DEPLOY
   deploy_local:
-    needs: build_and_push  # Tunggu tahap 1 selesai baru jalan
-    runs-on: self-hosted   # <--- INI KUNCI SUKSESNYA (Pakai Runner Anda)
+    needs: build_and_push
+    runs-on: self-hosted 
     
     steps:
       - name: Login Docker di Local
