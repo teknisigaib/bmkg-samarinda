@@ -2,17 +2,16 @@ name: Deploy via Self-Hosted Runner
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ] # Pastikan branch Anda 'main' atau 'master'
 
+# Variabel Global biar gampang ganti nama
 env:
-  # Ganti 'dockerhub-username' dengan username asli Anda jika belum sesuai
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/bmkg-samarinda:latest
   CONTAINER_NAME: bmkg-samarinda
-  # Path file .env di server VPS (untuk env server-side)
   ENV_PATH: /www/wwwroot/bmkg-samarinda/.env 
 
 jobs:
-  # TAHAP 1: BUILD (Dikerjakan di GitHub Cloud)
+  # TAHAP 1: BUILD (Dikerjakan oleh GitHub Public Server)
   build_and_push:
     runs-on: ubuntu-latest
     steps:
@@ -31,14 +30,13 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE_NAME }}
-          # --- PERBAIKAN UTAMA DISINI ---
-          # Kita kirim Secrets GitHub ke dalam Docker Build
+          # --- TAMBAHAN PENTING 1: Agar Env Supabase masuk saat Build ---
           build-args: |
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # ------------------------------
+          # ---------------------------------------------------------------
 
-  # TAHAP 2: DEPLOY (Dikerjakan di VPS Anda)
+  # TAHAP 2: DEPLOY
   deploy_local:
     needs: build_and_push
     runs-on: self-hosted 
@@ -56,7 +54,7 @@ jobs:
           docker rm ${{ env.CONTAINER_NAME }} || true
 
       - name: Jalankan Container Baru
-        # Kita tetap mount .env server untuk variabel sisi server (non-PUBLIC)
+        # Menggunakan --env-file agar variabel terbaca oleh Prisma nanti
         run: |
           docker run -d \
             -p 3000:3000 \
@@ -65,10 +63,11 @@ jobs:
             --env-file ${{ env.ENV_PATH }} \
             ${{ env.IMAGE_NAME }}
 
-      # Opsional: Jika Prisma butuh update schema
-      # Pastikan DATABASE_URL ada di dalam file .env di server
       - name: Update Database (Prisma)
-        run: docker exec ${{ env.CONTAINER_NAME }} npx prisma db push --skip-generate
+        # --- TAMBAHAN PENTING 2: Fix Error Permission (EACCES) ---
+        # -u 0 : Jalankan sebagai Root
+        # -e HOME=/root : Set direktori home ke root
+        run: docker exec -u 0 -e HOME=/root ${{ env.CONTAINER_NAME }} npx prisma@5.22.0 db push --skip-generate
 
       - name: Bersih-bersih Image Sampah
         run: docker image prune -f
