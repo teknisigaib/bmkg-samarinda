@@ -61,7 +61,7 @@ jobs:
             ${{ env.IMAGE_NAME }}
 
       - name: Update Database (Prisma)
-        run: docker exec -e HOME=/tmp ${{ env.CONTAINER_NAME }} npx prisma db push
+        run: docker exec -e HOME=/tmp ${{ env.CONTAINER_NAME }} npx prisma@5.22.0 db push
 
       - name: Bersih-bersih Image Sampah
         run: docker image prune -f
