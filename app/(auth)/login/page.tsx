@@ -5,7 +5,6 @@ import Image from "next/image";
 export default function LoginPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      {/* Logo di luar box agar terlihat resmi */}
       <div className="mb-8">
          <Image 
             src="/logo-bmkg.png" 
