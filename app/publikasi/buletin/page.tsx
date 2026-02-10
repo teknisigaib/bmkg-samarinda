@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import BuletinClient from "@/components/component-publikasi/BuletinClient";
 import prisma from "@/lib/prisma";
