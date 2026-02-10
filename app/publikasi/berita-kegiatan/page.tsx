@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import BeritaClient from "@/components/component-publikasi/BeritaClient";
 import prisma from "@/lib/prisma"; // 1. Import helper Prisma

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import PublikasiListClient from "@/components/component-publikasi/PublikasiListClient";
 import prisma from "@/lib/prisma";

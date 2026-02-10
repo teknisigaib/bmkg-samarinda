@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { Plus, Pencil, FileText } from "lucide-react"; // Hapus import Trash dari sini
