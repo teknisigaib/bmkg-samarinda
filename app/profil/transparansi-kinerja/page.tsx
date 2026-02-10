@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import { FileText, Download, Calendar, ShieldCheck, AlertCircle } from "lucide-react";
 import { getKinerjaDocs } from "@/lib/data-kinerja"; 
