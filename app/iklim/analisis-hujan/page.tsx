@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import prisma from "@/lib/prisma";
 import AnalisisTabs from "@/components/component-iklim/AnalisisTabs";
