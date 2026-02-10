@@ -1,7 +1,7 @@
 # 1. Base Image
 FROM node:20-slim AS base
 
-# OpenSSL
+# Install OpenSSL
 RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 # 2. Dependencies
@@ -22,6 +22,11 @@ RUN npx prisma generate
 # Matikan telemetri
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# --- FIX BUILD ERROR ---
+ENV NEXT_PUBLIC_SUPABASE_URL="https://placeholder.supabase.co"
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY="placeholder-key"
+# -----------------------
+
 # Build Next.js
 RUN npm run build
 
@@ -32,7 +37,7 @@ ENV NODE_ENV production
 ENV PORT 3000
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# User non-root
+# Buat user non-root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
