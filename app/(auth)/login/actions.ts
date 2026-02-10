@@ -9,6 +9,11 @@ import { cookies } from "next/headers";
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+
+  // --- TAMBAHKAN LOG INI SEMENTARA ---
+  console.log("--- DEBUG LOGIN ---");
+  console.log("Email:", email);
+  console.log("URL Supabase:", process.env.NEXT_PUBLIC_SUPABASE_URL);
   
   const cookieStore = await cookies();
 
@@ -44,8 +49,11 @@ export async function login(formData: FormData) {
     password,
   });
 
+  // --- LOG ERROR SUPABASE ---
   if (error) {
-    return redirect(`/login?error=${encodeURIComponent("Email atau Password Salah")}`);
+    console.error("Supabase Error:", error.message); // <--- Lihat ini di logs server
+    console.error("Supabase Error Full:", JSON.stringify(error, null, 2));
+    return redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
 
   revalidatePath("/", "layout");
