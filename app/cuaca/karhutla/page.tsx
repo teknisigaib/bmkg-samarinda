@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import { Map as MapIcon } from "lucide-react"; // Hapus import Flame, Info, RefreshCw
 import { getRawWeeklyHotspots, getHotspotTrend } from "@/lib/data-karhutla"; 
