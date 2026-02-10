@@ -1,22 +1,38 @@
 import Link from "next/link";
-import { CloudRain, Home } from "lucide-react";
+import Navbar from "@/components/Navbar"; // Import Navbar
+import Footer from "@/components/Footer"; // Import Footer
+import { AlertTriangle } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 text-center">
-      <div className="bg-blue-100 p-6 rounded-full mb-6 animate-bounce">
-        <CloudRain className="w-16 h-16 text-blue-600" />
-      </div>
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">404 - Halaman Hilang</h1>
-      <p className="text-gray-600 max-w-md mb-8">
-        Maaf, halaman yang Anda cari mungkin tertiup angin atau belum tersedia dalam data prakiraan kami.
-      </p>
-      <Link 
-        href="/"
-        className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-      >
-        <Home className="w-5 h-5" /> Kembali ke Beranda
-      </Link>
+    <div className="flex flex-col min-h-screen">
+      {/* Kita pasang Navbar manual disini */}
+      <Navbar />
+
+      <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-4 text-center">
+        <div className="bg-orange-100 p-4 rounded-full mb-6 animate-bounce">
+          <AlertTriangle className="w-12 h-12 text-orange-600" />
+        </div>
+        
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">404</h1>
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Halaman Tidak Ditemukan</h2>
+        
+        <p className="text-gray-500 max-w-md mb-8">
+          Maaf, halaman yang Anda tuju mungkin sudah dihapus, namanya diganti, atau sedang tidak tersedia sementara waktu.
+        </p>
+
+        <div className="flex gap-4">
+            <Link 
+              href="/" 
+              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              Kembali ke Beranda
+            </Link>
+        </div>
+      </main>
+
+      {/* Kita pasang Footer manual disini */}
+      <Footer />
     </div>
   );
 }

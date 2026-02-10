@@ -1,6 +1,6 @@
 import { Pencil } from "lucide-react";
-import FeaturedToggle from "@/app/admin/berita/featured-toggle"; // Sesuaikan path
-import DeleteButton from "@/app/admin/berita/delete-button";     // Sesuaikan path
+import FeaturedToggle from "@/app/(admin)/admin/berita/featured-toggle"; // Sesuaikan path
+import DeleteButton from "@/app/(admin)/admin/berita/delete-button";     // Sesuaikan path
 
 interface PostListProps {
     data: any[];

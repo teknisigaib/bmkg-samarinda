@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"; // Tambah useEffect
 import { supabase } from "@/lib/supabase";
-import { createPost, updatePost } from "@/app/admin/actions";
+import { createPost, updatePost } from "@/app/(admin)/admin/actions";
 import RichTextEditor from "./RichTextEditor";
 import { Image as ImageIcon, X, Save, Calendar } from "lucide-react";
 

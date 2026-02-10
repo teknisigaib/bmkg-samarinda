@@ -6,7 +6,6 @@ import {
     Navigation2, Ship, ArrowRight, CloudSun, 
     Thermometer, Eye, Droplets, MousePointerClick, 
     AlertTriangle, CheckCircle2, XCircle, 
-    LucideNavigation2Off
 } from 'lucide-react';
 
 interface Props {

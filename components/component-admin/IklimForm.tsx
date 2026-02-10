@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { createClimateData, updateClimateData } from "@/app/admin/iklim-actions";
+import { createClimateData, updateClimateData } from "@/app/(admin)/admin/iklim-actions";
 import RichTextEditor from "./RichTextEditor";
 import { Image as ImageIcon, Calendar, Wand2 } from "lucide-react";
 

@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { MahakamLocation } from '@/lib/mahakam-data';
 import RouteForecastView from './RouteForecastView';
-import StationDetailView from './StationDetailView'; // Import baru
+import StationDetailView from './StationDetailView';
 
 // Dynamic Map
 const RiverMap = dynamic(

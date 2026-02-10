@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { MahakamLocation } from '@/lib/mahakam-data';
-import { Navigation, Droplets, X, MapPin } from 'lucide-react';
+import { Navigation2, Droplets, X, MapPin } from 'lucide-react';
 
 interface Props {
   data: MahakamLocation;
@@ -118,7 +118,7 @@ export default function StationDetailView({ data, onClose }: Props) {
                                     <td className="px-6 py-4 whitespace-nowrap align-middle">
                                         <div className="flex items-center gap-4">
                                             <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                                                <Navigation 
+                                                <Navigation2 
                                                   size={14} 
                                                   className="text-blue-600"
                                                   style={{ transform: `rotate(${fc.windDeg || 0}deg)` }} 

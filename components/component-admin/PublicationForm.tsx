@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { createPublication, updatePublication } from "@/app/admin/actions";
+import { createPublication, updatePublication } from "@/app/(admin)/admin/actions";
 import { Upload, FileText, Image as ImageIcon } from "lucide-react";
 
 interface PublicationFormProps {

@@ -11,7 +11,19 @@ import {
 } from "lucide-react";
 
 // --- 1. Definisi Data Menu (Disatukan dalam Array Object) ---
-const NAV_ITEMS = [
+// Definisi tipe data untuk item menu (jika menggunakan TypeScript)
+type NavItem = {
+  key: string;
+  label: string;
+  items: {
+    name: string;
+    desc: string;
+    href: string;
+    icon: React.ReactNode;
+  }[];
+};
+
+const NAV_ITEMS: NavItem[] = [
   {
     key: "profil",
     label: "Profil",
@@ -82,7 +94,15 @@ export default function Navbar() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 z-50">
-            <Image src="/logo-bmkg.png" alt="Logo BMKG" width={40} height={40} priority className="w-9 h-8 md:w-12 md:h-10" />
+            <Image 
+              src="/logo-bmkg.png" 
+              alt="Logo BMKG" 
+              width={40} 
+              height={40} 
+              priority 
+              className="w-9 h-8 md:w-12 md:h-10"
+              sizes="(max-width: 768px) 36px, 48px" // Optimasi ukuran gambar
+            />
             <div className="flex flex-col">
               <span className="text-gray-800 font-bold text-xs md:text-sm leading-tight">Badan Meteorologi Klimatologi & Geofisika</span>
               <span className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">Stasiun Meteorologi APT Pranoto Samarinda</span>
@@ -91,25 +111,26 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex space-x-1 items-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-             {/* ... kode looping NAV_ITEMS ... */}
              <Link href="/" className="px-4 py-2 text-md font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">Home</Link>
              {NAV_ITEMS.map((menu) => (
-                /* ... kode dropdown desktop ... */
                 <div key={menu.key} className="relative" onMouseEnter={() => setActiveDesktop(menu.key)} onMouseLeave={() => setActiveDesktop(null)}>
-                   <button className={`px-4 py-2 text-md font-medium flex items-center gap-1 rounded-full transition-colors ${activeDesktop === menu.key ? "text-blue-600 bg-blue-50" : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"}`}>
+                   <button 
+                     className={`px-4 py-2 text-md font-medium flex items-center gap-1 rounded-full transition-colors ${activeDesktop === menu.key ? "text-blue-600 bg-blue-50" : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"}`}
+                     aria-expanded={activeDesktop === menu.key} // Aksesibilitas
+                   >
                       {menu.label} <ChevronDown className={`w-3 h-3 transition-transform ${activeDesktop === menu.key ? 'rotate-180' : ''}`} />
                    </button>
                    <AnimatePresence>
                      {activeDesktop === menu.key && (
                         <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2 }} className="absolute left-1/2 -translate-x-1/2 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black/5">
-                          <div className="py-2">
-                            {menu.items.map((item) => (
-                              <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 transition group">
-                                <div className="p-2 bg-blue-50 rounded-lg shrink-0 text-blue-600 group-hover:bg-white group-hover:shadow-sm transition">{item.icon}</div>
-                                <div><p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 tracking-wide">{item.name}</p><p className="text-xs text-gray-500 leading-snug">{item.desc}</p></div>
-                              </Link>
-                            ))}
-                          </div>
+                           <div className="py-2">
+                             {menu.items.map((item) => (
+                               <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 transition group">
+                                 <div className="p-2 bg-blue-50 rounded-lg shrink-0 text-blue-600 group-hover:bg-white group-hover:shadow-sm transition">{item.icon}</div>
+                                 <div><p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 tracking-wide">{item.name}</p><p className="text-xs text-gray-500 leading-snug">{item.desc}</p></div>
+                               </Link>
+                             ))}
+                           </div>
                         </motion.div>
                      )}
                    </AnimatePresence>
@@ -120,7 +141,7 @@ export default function Navbar() {
           {/* Right Section */}
           <div className="flex items-center gap-3 ml-auto">
             <Link href="/contact" className="hidden md:inline-flex items-center justify-center bg-white text-slate-600 text-sm font-semibold px-5 py-2 rounded-xl hover:bg-blue-700 transition-all border-slate-600 border-1 hover:text-white">Kontak Kami</Link>
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition" aria-label="Toggle Menu">
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition" aria-label="Toggle Menu" aria-expanded={mobileOpen}>
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -135,7 +156,7 @@ export default function Navbar() {
             <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={() => setMobileOpen(false)}
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[10000] md:hidden"
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[10000] lg:hidden"
             />
             {/* Drawer Content */}
             <motion.div
@@ -145,7 +166,7 @@ export default function Navbar() {
               {/* Header Drawer */}
               <div className="flex justify-between items-center mb-8">
                 <span className="font-bold text-xl text-gray-800">Menu</span>
-                <button onClick={() => setMobileOpen(false)} className="p-1 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full"><X className="w-5 h-5" /></button>
+                <button onClick={() => setMobileOpen(false)} className="p-1 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full" aria-label="Close Menu"><X className="w-5 h-5" /></button>
               </div>
 
               {/* Isi Menu Mobile */}
@@ -153,7 +174,11 @@ export default function Navbar() {
                 <Link href="/" onClick={() => setMobileOpen(false)} className="block px-4 py-3 text-gray-700 font-medium hover:bg-blue-50 rounded-xl transition">Home</Link>
                 {NAV_ITEMS.map((menu) => (
                   <div key={menu.key} className="overflow-hidden">
-                    <button onClick={() => setActiveMobileSub(activeMobileSub === menu.key ? null : menu.key)} className="w-full flex items-center justify-between px-4 py-3 text-gray-700 font-medium hover:bg-blue-50 rounded-xl transition">
+                    <button 
+                      onClick={() => setActiveMobileSub(activeMobileSub === menu.key ? null : menu.key)} 
+                      className="w-full flex items-center justify-between px-4 py-3 text-gray-700 font-medium hover:bg-blue-50 rounded-xl transition"
+                      aria-expanded={activeMobileSub === menu.key}
+                    >
                       {menu.label} <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${activeMobileSub === menu.key ? 'rotate-180' : ''}`} />
                     </button>
                     <AnimatePresence>
