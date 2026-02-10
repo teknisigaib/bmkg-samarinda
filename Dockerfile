@@ -1,7 +1,7 @@
-# 1. Base Image: Gunakan Debian Slim (Bukan Alpine) agar OpenSSL aman
-FROM node:18-slim AS base
+# 1. Base Image
+FROM node:20-slim AS base
 
-# Install OpenSSL yang dibutuhkan Prisma
+# OpenSSL
 RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 # 2. Dependencies
@@ -32,7 +32,7 @@ ENV NODE_ENV production
 ENV PORT 3000
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Buat user non-root
+# User non-root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

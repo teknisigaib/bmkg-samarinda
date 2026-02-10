@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, X, Loader2, UploadCloud, FileText } from "lucide-react";
