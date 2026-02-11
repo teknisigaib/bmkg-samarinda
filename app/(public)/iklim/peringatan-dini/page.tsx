@@ -7,7 +7,10 @@ import {
   Download, 
   ChevronLeft, 
   ChevronRight,
-  Info
+  CloudRain, // Icon Hujan
+  Sun,       // Icon Kekeringan
+  Calendar,  // Icon Periode
+  Map
 } from "lucide-react";
 import { getPdieData } from "@/app/(admin)/admin/peringatan-dini/actions"; 
 import { RegionData } from "@/components/component-iklim/PDIEMapClient";
@@ -17,7 +20,7 @@ const ClimateMapClient = dynamic(() => import("@/components/component-iklim/PDIE
   ssr: false,
   loading: () => (
     <div className="w-full h-[500px] bg-slate-50 flex flex-col items-center justify-center gap-3 text-slate-400 animate-pulse rounded-xl border border-slate-100">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"/>
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"/>
         <span className="text-xs font-medium tracking-wide">Memuat Peta...</span>
     </div>
   )
@@ -96,17 +99,20 @@ export default function PeringatanDiniPage() {
     setDocPage(1);
   }, [activeTab]);
 
-
-  // PAGINATION HANDLER
   const handlePageChange = (newPage: number) => {
     setDocPage(newPage);
   }
+
+  // DESKRIPSI STATIS
+  const description = activeTab === "HUJAN" 
+    ? "Monitoring potensi curah hujan tinggi yang dapat memicu bencana hidrometeorologi basah di wilayah Kalimantan Timur."
+    : "Monitoring hari tanpa hujan berturut-turut untuk kewaspadaan kekeringan meteorologis di wilayah Kalimantan Timur.";
 
   // LOADING SCREEN
   if (isLoading) {
       return (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-[3px] border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
               <span className="text-sm text-slate-400">Memuat Data...</span>
           </div>
       );
@@ -115,42 +121,64 @@ export default function PeringatanDiniPage() {
   return (
     <div className="space-y-8">
         
-        {/*  TITLE & INFO */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-4">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                    Peringatan Dini Iklim
-                </h2>
-                <p className="text-gray-500 text-sm mt-1">
-                    Periode Aktif: <span className="font-bold text-blue-600">{periodeLabel || "-"}</span>
-                </p>
-            </div>
+        {/* HEADER  */}
+        <section className="bg-emerald-50 border border-emerald-100 rounded-[2rem] p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          
+          {/* Main Icon  */}
+          <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0">
+            {activeTab === "HUJAN" ? (
+                <CloudRain className="w-8 h-8 text-emerald-600" />
+            ) : (
+                <Sun className="w-8 h-8 text-emerald-600" />
+            )}
+          </div>
+  
+          <div className="flex-1 w-full">
+            <h2 className="text-2xl font-bold text-slate-800">
+                Peringatan Dini Iklim Ekstrem
+            </h2>
+            <p className="text-slate-600 text-sm mt-2 leading-relaxed mx-auto md:mx-0">
+               {description}
+            </p>
             
-            {/* Simple Tab Switcher */}
-            <div className="bg-slate-100 p-1 rounded-lg inline-flex">
-                <button
-                    onClick={() => setActiveTab("HUJAN")}
-                    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${
-                        activeTab === "HUJAN" 
-                        ? "bg-white text-blue-600 shadow-sm" 
-                        : "text-slate-500 hover:text-slate-700"
-                    }`}
-                >
-                    Curah Hujan Tinggi
-                </button>
-                <button
-                    onClick={() => setActiveTab("KEKERINGAN")}
-                    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${
-                        activeTab === "KEKERINGAN" 
-                        ? "bg-white text-amber-600 shadow-sm" 
-                        : "text-slate-500 hover:text-slate-700"
-                    }`}
-                >
-                    Kekeringan
-                </button>
-            </div>
-        </div>
+            {/* Action Row: Badge & Switcher */}
+            <div className="mt-5 flex flex-wrap items-center justify-center md:justify-start gap-4">
+              
+              {/* Badge Periode */}
+              <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 shadow-sm">
+                  <Calendar className="w-4 h-4 text-emerald-600" />
+                  <span>Periode: <span className="font-bold text-slate-800">{periodeLabel || "-"}</span></span>
+              </div>
 
+              {/* Tab Switcher */}
+              <div className="bg-white p-1 rounded-xl border border-slate-200 shadow-sm inline-flex">
+                  <button
+                      onClick={() => setActiveTab("HUJAN")}
+                      className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 ${
+                          activeTab === "HUJAN" 
+                          ? "bg-emerald-100 text-emerald-700 shadow-sm" 
+                          : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                      }`}
+                  >
+                      <CloudRain className="w-3.5 h-3.5" />
+                      Hujan Tinggi
+                  </button>
+                  <button
+                      onClick={() => setActiveTab("KEKERINGAN")}
+                      className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 ${
+                          activeTab === "KEKERINGAN" 
+                          ? "bg-emerald-100 text-emerald-700 shadow-sm" 
+                          : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                      }`}
+                  >
+                      <Sun className="w-3.5 h-3.5" />
+                      Kekeringan
+                  </button>
+              </div>
+
+            </div>
+          </div>
+        </section>
 
         {/* 2. MAP AREA  */}
         <div className="relative w-full h-[500px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
@@ -164,22 +192,22 @@ export default function PeringatanDiniPage() {
 
                 {/* Legend (Bottom Left) */}
                 <div className="absolute bottom-4 left-4 z-[400] bg-white/95 backdrop-blur-sm px-4 py-3 rounded-xl shadow-lg border border-slate-100">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2">Legenda</h4>
+                    <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2">Legenda Status</h4>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-xl bg-emerald-500"></span> 
+                            <span className="w-3 h-3 rounded-sm bg-emerald-500"></span> 
                             <span className="text-xs text-slate-600">Aman</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-xl bg-yellow-400"></span> 
+                            <span className="w-3 h-3 rounded-sm bg-yellow-400"></span> 
                             <span className="text-xs text-slate-600">Waspada</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-xl bg-orange-500"></span> 
+                            <span className="w-3 h-3 rounded-sm bg-orange-500"></span> 
                             <span className="text-xs text-slate-600">Siaga</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-xl bg-red-600"></span> 
+                            <span className="w-3 h-3 rounded-sm bg-red-600"></span> 
                             <span className="text-xs text-slate-600">Awas</span>
                         </div>
                     </div>
@@ -196,17 +224,18 @@ export default function PeringatanDiniPage() {
             {filteredDocs.length > 0 ? (
                 <div className="space-y-3">
                     {currentDocs.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition-colors shadow-sm group">
+                        <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl hover:border-emerald-200 transition-colors shadow-sm group">
                             <div className="flex items-center gap-4">
-                                <div className={`p-2 rounded-lg ${doc.type === 'HUJAN' ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-500'}`}>
+                                {/* Ikon Dokumen Juga Hijau Konsisten */}
+                                <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
                                     <FileText className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-700 group-hover:text-blue-600">{doc.title}</p>
+                                    <p className="text-sm font-semibold text-gray-700 group-hover:text-emerald-600">{doc.title}</p>
                                     <p className="text-xs text-gray-400 mt-0.5">{doc.date} • {doc.fileSize || "PDF"}</p>
                                 </div>
                             </div>
-                            <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
                                 <Download className="w-4 h-4" />
                             </a>
                         </div>
@@ -227,7 +256,7 @@ export default function PeringatanDiniPage() {
                 </div>
             ) : (
                 <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <p className="text-sm text-gray-400">Tidak ada dokumen tersedia.</p>
+                    <p className="text-sm text-gray-400">Tidak ada dokumen tersedia untuk kategori ini.</p>
                 </div>
             )}
         </div>
