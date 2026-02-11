@@ -1,4 +1,4 @@
-"use client"; // Opsional, tapi aman untuk animasi UI
+"use client";
 
 import { AlertTriangle, CheckCircle2, Waves } from "lucide-react";
 

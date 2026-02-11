@@ -1,3 +1,5 @@
+const FETCH_TIMEOUT_MS = 5000;
+
 export interface MaritimeForecast {
   valid_from: string;
   valid_to: string;
@@ -19,7 +21,6 @@ export interface MaritimeData {
   issued: string;
   data: MaritimeForecast[];
 }
-
 
 export interface WaveOverviewItem {
   issued: string;
@@ -43,38 +44,64 @@ export const getWaveColor = (category: string) => {
 };
 
 
-//  Fetch Detail
+// 1. Fetch Detail Wilayah
 export async function getMaritimeWeather(code: string, name: string): Promise<MaritimeData | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
   try {
     const encodedName = encodeURIComponent(name); 
     const url = `https://peta-maritim.bmkg.go.id/public_api/perairan/${code}_${encodedName}.json`;
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    
+    const res = await fetch(url, { 
+        next: { revalidate: 3600 },
+        signal: controller.signal 
+    });
+
+    clearTimeout(timeoutId);
+
     if (!res.ok) return null;
     return await res.json();
-  } catch (error) {
-    console.error("Gagal fetch detail maritim:", error);
+
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+        console.warn(`⏳ Timeout fetch detail maritim (${name}) > 5s`);
+    } else {
+        console.error("Gagal fetch detail maritim:", error);
+    }
     return null;
   }
 }
 
-//  Overview 
+// 2. Overview 
 export async function getWaveOverview(): Promise<OverviewData | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
   try {
     const url = "https://peta-maritim.bmkg.go.id/public_api/overview/gelombang.json";
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    
+    const res = await fetch(url, { 
+        next: { revalidate: 3600 },
+        signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
     if (!res.ok) return null;
     return await res.json();
-  } catch (error) {
-    console.error("Gagal fetch overview gelombang:", error);
+
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+        console.warn("⏳ Timeout fetch overview gelombang > 5s");
+    } else {
+        console.error("Gagal fetch overview gelombang:", error);
+    }
     return null;
   }
 }
 
-
-
-
-
-//  TIPE DATA PELABUHAN 
+// TIPE DATA PELABUHAN 
 export interface PortForecastItem {
   issued: string;
   valid_from: string;
@@ -106,30 +133,41 @@ export interface PortData {
   data: PortForecastItem[];
 }
 
-
-// ETCH PELABUHAN
+// 3. Fetch Pelabuhan
 export async function getPortWeather(portId: string, portName: string): Promise<PortData | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
   try {
-    
     const encodedName = encodeURIComponent(portName);
     const url = `https://peta-maritim.bmkg.go.id/public_api/pelabuhan/${portId}_${encodedName}.json`;
     
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url, { 
+        next: { revalidate: 3600 },
+        signal: controller.signal 
+    });
+
+    clearTimeout(timeoutId);
+
     if (!res.ok) return null;
     return await res.json();
-  } catch (error) {
-    console.error(`Gagal fetch pelabuhan ${portName}:`, error);
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+        console.warn(`⏳ Timeout fetch pelabuhan ${portName} > 5s`);
+    } else {
+        console.error(`Gagal fetch pelabuhan ${portName}:`, error);
+    }
     return null;
   }
 }
 
 import { MARITIME_GEOJSON } from "@/components/component-cuaca/cuaca-maritim/geojson";
 
-
-// FETCH WARNINGS
+// FETCH WARNING
 export async function getMaritimeWarnings(): Promise<string[]> {
   try {
     const overview = await getWaveOverview();
+    
     if (!overview) return [];
 
     const warnings: string[] = [];
