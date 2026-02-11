@@ -1,3 +1,4 @@
+import { getRawMetar, getRawTaf } from "@/lib/bmkg/aviation";
 import { parseRawMetar } from "@/lib/metar-parser";
 import { 
   Plane, Wind, Eye, Thermometer, Navigation, 
@@ -5,12 +6,8 @@ import {
   CloudRain, Layers, CalendarClock, Info 
 } from "lucide-react";
 
-interface AviationProps {
-  rawMetars: any[];
-  rawTafs: any[];
-}
-
-export default function AviationSection({ rawMetars, rawTafs }: AviationProps) {
+export default async function AviationSection() {
+  const ICAO_CODE = "WALS";
   const RUNWAY_ACTUAL_HEADING = 40; 
 
   let data = null;
@@ -19,16 +16,21 @@ export default function AviationSection({ rawMetars, rawTafs }: AviationProps) {
   let errorMsg = null;
 
   try {
+      const [rawMetars, rawTafs] = await Promise.all([
+        getRawMetar(ICAO_CODE).catch(() => []),
+        getRawTaf(ICAO_CODE).catch(() => [])
+      ]);
+
       latestRawString = (rawMetars && rawMetars.length > 0) ? rawMetars[0].data_text : null;
       latestTafString = (rawTafs && rawTafs.length > 0) ? rawTafs[0].data_text : null;
 
       if (latestRawString) {
           data = parseRawMetar(latestRawString);
       } else {
-          errorMsg = "Data METAR tidak tersedia saat ini.";
+          errorMsg = "Data METAR tidak ditemukan dari sumber BMKG.";
       }
   } catch (err) {
-      errorMsg = "Gagal memproses data penerbangan.";
+      errorMsg = "Terjadi kesalahan sistem saat mengambil data.";
   }
 
   if (!data || !latestRawString) {
