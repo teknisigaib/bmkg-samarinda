@@ -1,47 +1,37 @@
-import { AlertTriangle, CheckCircle2, Waves } from "lucide-react";
-import { getPeringatanDiniKaltim } from "@/lib/bmkg/warnings";
-import { getMaritimeWarnings } from "@/lib/bmkg/maritim";
+"use client"; // Opsional, tapi aman untuk animasi UI
 
-export default async function RunningText() {
-  const [weatherText, marineWarnings] = await Promise.all([
-    getPeringatanDiniKaltim(),
-    getMaritimeWarnings()
-  ]);
+import { AlertTriangle, CheckCircle2, Waves } from "lucide-react";
+
+interface RunningTextProps {
+  weatherText: string;
+  marineWarnings: string[];
+}
+
+export default function RunningText({ weatherText, marineWarnings }: RunningTextProps) {
   
-  // Cek Kondisi Masing-masing
-  const isWeatherSafe = weatherText.includes("Tidak ada peringatan");
-  const isMarineSafe = marineWarnings.length === 0;
-  
-  //  Aman jika keduanya Aman
+  // LOGIKA PEMROSESAN DATA
+  const isWeatherSafe = weatherText.includes("Tidak ada peringatan") || weatherText.toLowerCase().includes("nihil");
+  const isMarineSafe = (!marineWarnings || marineWarnings.length === 0);
   const isOverallSafe = isWeatherSafe && isMarineSafe;
 
   // Susun Pesan Akhir
   let finalText = "";
 
   if (isOverallSafe) {
-    // Jika semua aman, tampilkan pesan default cuaca
     finalText = weatherText;
   } else {
-    // Susun pesan bahaya
     const parts = [];
-    
-    // Masukkan peringatan cuaca (jika ada bahaya)
     if (!isWeatherSafe) parts.push(weatherText);
-    
-    // Masukkan peringatan maritim (jika ada bahaya)
     if (!isMarineSafe) {
       const marineMsg = `WASPADA MARITIM: ${marineWarnings.join(" • ")}`;
       parts.push(marineMsg);
     }
-    
-    // Gabungkan dengan pemisah
-    finalText = parts.join("  |  ");
+    finalText = parts.join("  |  ");
   }
 
   // KONFIGURASI VISUAL
   const styles = isOverallSafe 
     ? {
-        // Mode Aman (Biru/Hijau & Tenang)
         bg: "bg-green-600",
         border: "border-green-700",
         labelBg: "bg-green-700",
@@ -53,7 +43,6 @@ export default async function RunningText() {
         speed: "25s"
       }
     : {
-        // Mode Bahaya 
         bg: "bg-yellow-400",
         border: "border-yellow-500",
         labelBg: "bg-yellow-500",
@@ -87,10 +76,7 @@ export default async function RunningText() {
             className="animate-marquee whitespace-nowrap absolute flex items-center gap-8"
             style={{ animationDuration: styles.speed }}
         >
-          {/* Render Text */}
           <span>{finalText}</span>
-          
-          {/* Render Duplikat */}
           <span className="opacity-50 mx-4">•</span>
           <span>{finalText}</span>
         </div>
