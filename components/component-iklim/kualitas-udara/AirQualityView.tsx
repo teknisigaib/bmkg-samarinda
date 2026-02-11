@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { 
-  MapPin, RefreshCw, BookOpen, TrendingUp, TrendingDown, Minus
+  MapPin, RefreshCw, BookOpen, TrendingUp, TrendingDown, Minus,
+  Wind,
+  Clock
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
@@ -76,27 +78,45 @@ export default function AirQualityView() {
   return (
     <div className="w-full min-h-screen text-slate-800 overflow-x-hidden">
       
-      {/* HEADER */}
-      <div className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-sm">
-        <div className="mx-auto px-2 sm:px-4 lg:px-6 py-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
-                Kualitas Udara Kota Samarinda
-              </h1>
-              <p className="text-slate-500 text-xs md:text-sm mt-1 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="truncate">Stasiun: BMKG APT Pranoto Samarinda</span>
-              </p>
-            </div>
-            <div className="text-right hidden md:block flex-shrink-0">
-              <div className="text-xs text-slate-400 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm inline-block">
-                Update Terakhir: <span className="text-slate-600 font-bold">{data.lastUpdate}</span>
+      <section className="bg-emerald-50 border border-emerald-100 rounded-[2rem] p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          {/* Icon Container */}
+          <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0">
+            <Wind className="w-8 h-8 text-emerald-600" />
+          </div>
+  
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-slate-800">Kualitas Udara Kota Samarinda</h2>
+            <p className="text-slate-600 text-sm mt-2 leading-relaxed ">
+              Monitoring konsentrasi Particulate Matter (<strong className="text-emerald-600">PM2.5</strong>) secara real-time di Stasiun Meteorologi APT Pranoto.
+            </p>
+            
+            {/* Container Badge */}
+            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
+              
+              {/* Badge Status (Online/Gangguan) */}
+              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-bold shadow-sm">
+                 <span className="relative flex h-2.5 w-2.5">
+                   {!loading && !error && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+                   <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${!loading && !error ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                 </span>
+                 {!loading && !error ? 'Status: Online' : 'Status: Connecting...'}
               </div>
+          
+              {/* Badge Lokasi */}
+              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                  BMKG APT Pranoto
+              </div>
+
+              {/* Badge Waktu Update */}
+              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
+                  <Clock className="w-3.5 h-3.5 text-emerald-500" />
+                  Update: {data.lastUpdate}
+              </div>
+
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
       {/* CONTENT WRAPPER */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 mt-6 md:mt-8 space-y-6">

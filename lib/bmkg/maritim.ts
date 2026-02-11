@@ -1,4 +1,4 @@
-const FETCH_TIMEOUT_MS = 5000;
+const FETCH_TIMEOUT_MS = 2000;
 
 export interface MaritimeForecast {
   valid_from: string;
