@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           
-          {/* Kolom 1: Identitas */}
+          {/*  Identitas */}
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-4">
                 <Image src="/logo-bmkg.png" alt="Logo BMKG" width={40} height={40} />
@@ -28,7 +28,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Kolom 2: Kontak */}
+          {/* Kontak */}
           <div className="space-y-4">
             <h4 className="text-white font-bold text-base mb-2">Hubungi Kami</h4>
             <div className="flex items-start gap-3">
@@ -49,7 +49,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Kolom 3: Tautan Cepat */}
+          {/* Tautan Cepat */}
           <div className="space-y-4">
             <h4 className="text-white font-bold text-base mb-2">Tautan Cepat</h4>
             <ul className="space-y-2">
@@ -61,7 +61,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Kolom 4: Peta / Widget */}
+          {/*  Peta / Widget */}
           <div className="space-y-4">
             <h4 className="text-white font-bold text-base mb-2">Lokasi Kantor</h4>
             {/* Embed Google Maps (Iframe) */}

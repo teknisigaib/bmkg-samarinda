@@ -1,22 +1,21 @@
-import { AlertTriangle, CheckCircle2, Waves } from "lucide-react"; // Tambah icon Waves
+import { AlertTriangle, CheckCircle2, Waves } from "lucide-react";
 import { getPeringatanDiniKaltim } from "@/lib/bmkg/warnings";
-import { getMaritimeWarnings } from "@/lib/bmkg/maritim"; // Import fungsi baru tadi
+import { getMaritimeWarnings } from "@/lib/bmkg/maritim";
 
 export default async function RunningText() {
-  // 1. Fetch Data secara Paralel (Agar cepat)
   const [weatherText, marineWarnings] = await Promise.all([
     getPeringatanDiniKaltim(),
     getMaritimeWarnings()
   ]);
   
-  // 2. Cek Kondisi Masing-masing
+  // Cek Kondisi Masing-masing
   const isWeatherSafe = weatherText.includes("Tidak ada peringatan");
   const isMarineSafe = marineWarnings.length === 0;
   
-  // Kondisi Global: Aman jika keduanya Aman
+  //  Aman jika keduanya Aman
   const isOverallSafe = isWeatherSafe && isMarineSafe;
 
-  // 3. Susun Pesan Akhir
+  // Susun Pesan Akhir
   let finalText = "";
 
   if (isOverallSafe) {
@@ -39,7 +38,7 @@ export default async function RunningText() {
     finalText = parts.join("  |  ");
   }
 
-  // 4. KONFIGURASI VISUAL
+  // KONFIGURASI VISUAL
   const styles = isOverallSafe 
     ? {
         // Mode Aman (Biru/Hijau & Tenang)
@@ -51,23 +50,21 @@ export default async function RunningText() {
         Icon: CheckCircle2,
         label: "INFO TERKINI:",
         maskGradient: "from-green-600",
-        speed: "25s" // Sedikit diperlambat agar terbaca
+        speed: "25s"
       }
     : {
-        // Mode Bahaya (Kuning & Cepat)
+        // Mode Bahaya 
         bg: "bg-yellow-400",
         border: "border-yellow-500",
         labelBg: "bg-yellow-500",
         textColor: "text-blue-900",
         iconColor: "text-red-600",
-        Icon: AlertTriangle, // Icon default peringatan
+        Icon: AlertTriangle, 
         label: "PERINGATAN DINI:",
         maskGradient: "from-yellow-400",
-        speed: "45s" // Dipercepat karena urgent
+        speed: "45s"
       };
 
-  // Jika Bahaya Maritim dominan (tidak ada cuaca ekstrem tapi ada gelombang tinggi), ganti icon label jadi Ombak
-  // (Opsional, agar lebih spesifik)
   const DisplayIcon = (!isMarineSafe && isWeatherSafe) ? Waves : styles.Icon;
 
   return (
@@ -93,7 +90,7 @@ export default async function RunningText() {
           {/* Render Text */}
           <span>{finalText}</span>
           
-          {/* Render Duplikat untuk efek looping mulus (jika teks pendek) */}
+          {/* Render Duplikat */}
           <span className="opacity-50 mx-4">•</span>
           <span>{finalText}</span>
         </div>

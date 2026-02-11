@@ -43,7 +43,6 @@ export default function IklimSidebar() {
         </div>
         <nav className="p-2 space-y-1">
           {sidebarItems.map((item) => {
-            // Logic Active: Jika URL diawali dengan href menu
             const isActive = pathname.startsWith(item.href);
             
             return (

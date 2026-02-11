@@ -10,10 +10,8 @@ export default function HomeAwsWidget() {
   const [data, setData] = useState<AwsSnapshotData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fungsi Fetch Data (Sama seperti di halaman detail)
   const fetchData = async () => {
     try {
-      // Gunakan Proxy API Route
       const response = await fetch('/api/aws-proxy');
       
       if (!response.ok) throw new Error("Gagal mengambil data");
@@ -31,12 +29,11 @@ export default function HomeAwsWidget() {
 
   useEffect(() => {
     fetchData();
-    // Auto refresh setiap 60 detik
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // --- TAMPILAN LOADING (SKELETON SIMPEL) ---
+  // TAMPILAN LOADING
   if (loading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 animate-pulse min-h-[180px]">
@@ -46,7 +43,7 @@ export default function HomeAwsWidget() {
     );
   }
 
-  // --- TAMPILAN ERROR (Jika gagal fetch) ---
+  // TAMPILAN ERROR
   if (!data) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center text-red-400 min-h-[180px]">
@@ -61,6 +58,5 @@ export default function HomeAwsWidget() {
     );
   }
 
-  // --- TAMPILAN SUKSES ---
   return <AwsWidgetContent data={data} />;
 }

@@ -1,9 +1,8 @@
 "use server";
 
-import prisma from "@/lib/prisma"; // Import helper yang kita buat di langkah 2
+import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-// Kita sesuaikan Type dengan yang dibutuhkan Frontend
 export interface Pegawai {
   id: string;
   name: string;
@@ -12,23 +11,21 @@ export interface Pegawai {
   image: string;
 }
 
-// --- 1. GET (READ) ---
+// GET (READ) 
 export async function getPegawai() {
   try {
     const data = await prisma.employee.findMany({
       orderBy: {
-        createdAt: 'asc', // Urutkan dari yang pertama dibuat
+        createdAt: 'asc', 
       },
     });
 
-    // Mapping data Prisma ke Interface Frontend
-    // (Prisma mengembalikan null untuk image, tapi frontend butuh string kosong jika tidak ada)
     return data.map((p) => ({
       id: p.id,
       name: p.name,
       position: p.position,
-      group: p.group as "Pimpinan" | "Struktural" | "Fungsional", // Type casting
-      image: p.image || "", // Handle null
+      group: p.group as "Pimpinan" | "Struktural" | "Fungsional", 
+      image: p.image || "", 
     }));
   } catch (error) {
     console.error("Gagal ambil data pegawai:", error);
@@ -36,11 +33,10 @@ export async function getPegawai() {
   }
 }
 
-// --- 2. SAVE (CREATE / UPDATE) ---
+// SAVE (CREATE / UPDATE) 
 export async function savePegawai(data: Pegawai) {
   try {
     if (data.id) {
-      // --- UPDATE (Jika ada ID) ---
       await prisma.employee.update({
         where: { id: data.id },
         data: {
@@ -51,7 +47,7 @@ export async function savePegawai(data: Pegawai) {
         },
       });
     } else {
-      // --- CREATE (Jika ID kosong) ---
+      //  CREATE 
       await prisma.employee.create({
         data: {
           name: data.name,
@@ -62,7 +58,6 @@ export async function savePegawai(data: Pegawai) {
       });
     }
 
-    // Refresh halaman agar data baru langsung muncul
     revalidatePath("/admin/pegawai"); 
     revalidatePath("/profil/daftar-pegawai");
     return { success: true };
@@ -73,7 +68,7 @@ export async function savePegawai(data: Pegawai) {
   }
 }
 
-// --- 3. DELETE ---
+//  DELETE 
 export async function deletePegawai(id: string) {
   try {
     await prisma.employee.delete({

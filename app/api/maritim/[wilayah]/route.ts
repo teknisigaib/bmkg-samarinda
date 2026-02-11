@@ -1,11 +1,9 @@
-// File: app/api/maritim/[wilayah]/route.ts
 import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, context: any) {
   try {
-    // ✅ Perbaikan utama: ambil params di dalam fungsi, bukan di parameter langsung
     const params = await context.params;
     const wilayah = params?.wilayah;
 
@@ -16,7 +14,6 @@ export async function GET(request: Request, context: any) {
       );
     }
 
-    // ✅ Gunakan nama file JSON dari BMKG
     const url = `https://peta-maritim.bmkg.go.id/public_api/perairan/${wilayah}.json`;
 
     console.log("Mencoba fetch ke URL BMKG:", url);
@@ -26,7 +23,7 @@ export async function GET(request: Request, context: any) {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
       },
-      next: { revalidate: 3600 }, // cache 1 jam
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
@@ -41,7 +38,6 @@ export async function GET(request: Request, context: any) {
 
     return NextResponse.json(jsonData.data);
   } catch (error: any) {
-    console.error("Error di API Route Maritim:", error.message);
     return NextResponse.json(
       { message: "Terjadi kesalahan pada server: " + error.message },
       { status: 500 }

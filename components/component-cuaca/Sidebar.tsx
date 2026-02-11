@@ -63,7 +63,6 @@ export default function CuacaSidebar() {
   return (
     <aside className="w-full md:w-60 flex-shrink-0">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
-        {/* Header Sidebar dengan Gradasi Biru Langit */}
         <div className="bg-gradient-to-r from-sky-600 to-blue-600 px-6 py-4">
           <span className="text-white font-bold text-sm uppercase tracking-wide">
             Informasi Cuaca

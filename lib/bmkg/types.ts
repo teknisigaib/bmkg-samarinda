@@ -1,16 +1,14 @@
-// lib/bmkg/types.ts
-
 export interface WeatherDataPoint {
   tcc: number;
   datetime: string;
   local_datetime: string;
-  t: number;       // Suhu
-  hu: number;      // Kelembapan
-  weather_desc: string; // Deskripsi (Berawan, Hujan, dll)
-  ws: number;      // Wind Speed
-  wd: string;      // Wind Direction (N, SW, etc)
-  image: string;   // URL Icon
-  vs_text: string; // Visibility
+  t: number;      
+  hu: number;      
+  weather_desc: string; 
+  ws: number;      
+  wd: string;     
+  image: string;   
+  vs_text: string; 
 }
 
 export interface WeatherLocation {
@@ -24,6 +22,6 @@ export interface WeatherLocation {
 export interface WeatherResponse {
   lokasi: WeatherLocation;
   data: {
-    cuaca: WeatherDataPoint[][]; // Array 2D: [Hari1[], Hari2[], Hari3[]]
+    cuaca: WeatherDataPoint[][]; 
   }[];
 }

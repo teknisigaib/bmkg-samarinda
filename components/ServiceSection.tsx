@@ -13,9 +13,9 @@ const services = [
     title: "Monitoring Hujan",
     desc: "Pantauan intensitas dan sebaran hujan realtime dari Automatic Rain Gauge (ARG)",
     icon: <CloudRain className="w-6 h-6 text-white" />,
-    color: "bg-sky-600", // Warna Langit/Hujan
+    color: "bg-sky-600",
     href: "https://monitoringarg.bmkgaptpranoto.com/",
-    external: true, // Menandakan link eksternal
+    external: true,
   },
   {
     title: "Prakerin & Magang",
@@ -37,7 +37,6 @@ const services = [
 export default function ServiceSection() {
   return (
     <section className="py-24 bg-gray-50 relative overflow-hidden">
-      {/* Background Decoration */}
       <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#444 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -83,7 +82,6 @@ function ServiceCardContent({ item }: { item: any }) {
     return (
         <div className="h-full bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-300 relative overflow-hidden flex flex-col">
             
-            {/* Gradient Background on Hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
             {/* Icon Box */}

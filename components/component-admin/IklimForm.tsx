@@ -31,13 +31,12 @@ const DASARIANS = ["Dasarian I", "Dasarian II", "Dasarian III", "Bulanan"];
 export default function ClimateForm({ type, initialData }: ClimateFormProps) {
   const isEditMode = !!initialData;
   
-  // --- STATE UPLOAD ---
+  // STATE UPLOAD
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
   const [content, setContent] = useState(initialData?.content || "");
   const [uploading, setUploading] = useState(false);
 
-  // --- STATE TANGGAL PINTAR ---
-  // Default ke bulan/tahun sekarang jika buat baru
+  //  STATE TANGGAL
   const now = new Date();
   const [selectedDasarian, setSelectedDasarian] = useState(initialData?.dasarian || "Dasarian I");
   const [selectedMonth, setSelectedMonth] = useState(initialData ? initialData.bulan.split(" ")[0] : MONTHS[now.getMonth()]);
@@ -47,9 +46,8 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
   const [autoTitle, setAutoTitle] = useState(initialData?.title || "");
   const [autoPeriod, setAutoPeriod] = useState(initialData?.period || "");
 
-  // --- LOGIKA OTOMATISASI ---
   useEffect(() => {
-    // 1. Hitung Periode Tanggal
+    // Hitung Periode Tanggal
     let periodString = "";
     
     if (selectedDasarian === "Dasarian I") {
@@ -57,18 +55,14 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
     } else if (selectedDasarian === "Dasarian II") {
       periodString = `11 - 20 ${selectedMonth} ${selectedYear}`;
     } else if (selectedDasarian === "Dasarian III") {
-      // Hitung tanggal terakhir bulan tersebut (28/29/30/31)
       const monthIndex = MONTHS.indexOf(selectedMonth);
       const lastDay = new Date(selectedYear, monthIndex + 1, 0).getDate();
       periodString = `21 - ${lastDay} ${selectedMonth} ${selectedYear}`;
     } else {
-      // Bulanan
       periodString = `01 - ${new Date(selectedYear, MONTHS.indexOf(selectedMonth) + 1, 0).getDate()} ${selectedMonth} ${selectedYear}`;
     }
 
-    // 2. Generate Judul Otomatis
-    // Contoh: "Monitoring HTH Dasarian I Januari 2025"
-    // Kita gunakan nama tipe agar dinamis (HTH, Hujan Dasarian, dll)
+    // Generate Judul Otomatis
     const typeLabel = type === "HTH" ? "Hari Tanpa Hujan (HTH)" 
                     : type === "HujanDasarian" ? "Analisis Curah Hujan" 
                     : type === "PotensiBanjir" ? "Potensi Banjir" 
@@ -76,15 +70,11 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
     
     const titleString = `${typeLabel} - ${selectedDasarian} ${selectedMonth} ${selectedYear}`;
 
-    // Update State (Hanya update otomatis jika bukan mode edit, atau admin bisa override)
-    // Di sini kita paksa update agar konsisten
     setAutoPeriod(periodString);
     setAutoTitle(titleString);
 
   }, [selectedDasarian, selectedMonth, selectedYear, type]);
 
-
-  // ... (Handle Upload sama seperti sebelumnya) ...
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -107,8 +97,6 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
 
   const handleSubmit = async (formData: FormData) => {
     formData.append("type", type);
-    // Kita append data hasil kalkulasi otomatis
-    // Walaupun user tidak ketik, data ini akan terkirim
     formData.set("title", autoTitle);
     formData.set("period", autoPeriod);
     formData.set("bulan", `${selectedMonth} ${selectedYear}`);
@@ -130,7 +118,7 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
       
       <form action={handleSubmit} className="space-y-8">
         
-        {/* --- AREA OTOMATISASI (Selector) --- */}
+        {/* AREA Selector */}
         <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
             <h3 className="text-sm font-bold text-blue-800 mb-4 flex items-center gap-2">
                 <Wand2 className="w-4 h-4" /> Generator Periode Otomatis
@@ -174,7 +162,7 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
             </div>
         </div>
 
-        {/* --- PREVIEW HASIL GENERATE (Read Only) --- */}
+        {/* PREVIEW HASIL GENERATE */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label className="block text-sm font-medium mb-1 text-gray-500">Judul Lengkap (Otomatis)</label>
@@ -182,7 +170,7 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
                     type="text" 
                     name="title" 
                     value={autoTitle}
-                    readOnly // User tidak bisa edit manual, biar konsisten
+                    readOnly
                     className="w-full p-2 bg-gray-100 border rounded-lg text-gray-600 cursor-not-allowed font-medium"
                 />
             </div>
@@ -198,7 +186,7 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
             </div>
         </div>
 
-        {/* --- UPLOAD PETA --- */}
+        {/* UPLOAD PETA */}
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
             <label className="block text-sm font-medium mb-3 text-gray-700">Upload Peta Visualisasi</label>
             
@@ -220,7 +208,7 @@ export default function ClimateForm({ type, initialData }: ClimateFormProps) {
             <p className="text-xs text-gray-400 mt-2">Maks. 2 MB (JPG/PNG)</p>
         </div>
 
-        {/* --- EDITOR ANALISIS --- */}
+        {/* EDITOR ANALISIS */}
         <div>
           <label className="block text-sm font-medium mb-1">Analisis Klimatologis</label>
           <RichTextEditor content={content} onChange={(newHtml) => setContent(newHtml)} />

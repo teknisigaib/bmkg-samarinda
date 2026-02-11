@@ -2,9 +2,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-// 1. Import TextAlign extension
 import TextAlign from '@tiptap/extension-text-align';
-// 2. Import Icon AlignJustify
 import { Bold, Italic, List, ListOrdered, Heading2, AlignJustify } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -16,10 +14,9 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
   const editor = useEditor({
     extensions: [
       StarterKit,
-      // 3. Konfigurasi TextAlign
       TextAlign.configure({
-        types: ['heading', 'paragraph'], // Bisa untuk judul dan paragraf biasa
-        alignments: ['justify', 'left'], // Kita aktifkan justify (dan left untuk reset)
+        types: ['heading', 'paragraph'],
+        alignments: ['justify', 'left'],
       }),
     ],
     content: content,
@@ -38,14 +35,13 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
     return null;
   }
 
-  // Helper untuk mengecek tombol aktif (Diupdate sedikit untuk support text align)
   const isActive = (type: string, options?: any) => 
     editor.isActive(type, options) ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100 text-gray-600";
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
       
-      {/* --- TOOLBAR --- */}
+      {/* TOOLBAR */}
       <div className="bg-gray-50 border-b border-gray-200 p-2 flex gap-1 flex-wrap">
         
         {/* Bold */}
@@ -102,18 +98,16 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
 
         <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
 
-        {/* --- 4. TOMBOL RATA KANAN KIRI (JUSTIFY) --- */}
+        {/* JUSTIFY */}
         <button
           type="button"
           onClick={() => {
-            // Jika sudah justify, kembalikan ke left (unset). Jika belum, set justify.
             if (editor.isActive({ textAlign: 'justify' })) {
                 editor.chain().focus().unsetTextAlign().run();
             } else {
                 editor.chain().focus().setTextAlign('justify').run();
             }
           }}
-          // Cek apakah alignment sekarang adalah justify
           className={`p-2 rounded ${editor.isActive({ textAlign: 'justify' }) ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100 text-gray-600"}`}
           title="Rata Kanan Kiri"
         >
@@ -122,7 +116,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
 
       </div>
 
-      {/* --- AREA EDITOR --- */}
+      {/* AREA EDITOR  */}
       <EditorContent editor={editor} />
     </div>
   );

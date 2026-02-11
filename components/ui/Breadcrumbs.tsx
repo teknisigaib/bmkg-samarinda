@@ -4,7 +4,7 @@ import { ChevronRight, Home } from "lucide-react";
 interface BreadcrumbProps {
   items: {
     label: string;
-    href?: string; // Opsional, jika undefined berarti halaman aktif (text only)
+    href?: string;
   }[];
 }
 

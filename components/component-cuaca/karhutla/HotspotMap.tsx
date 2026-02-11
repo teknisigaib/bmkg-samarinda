@@ -7,11 +7,9 @@ import { useEffect, useState } from "react";
 import { HotspotData } from "@/lib/data-karhutla";
 import { Calendar, Info, Compass } from "lucide-react";
 
-// --- 1. ICON GENERATOR (SOLID / TANPA GLOW) ---
 const createHotspotIcon = (conf: number, isHovered: boolean) => {
   let mainColor = "";
 
-  // LOGIKA WARNA (Tanpa warna ping/glow)
   if (conf >= 9) {
     mainColor = "bg-red-600";
   } else if (conf >= 7) {
@@ -20,18 +18,17 @@ const createHotspotIcon = (conf: number, isHovered: boolean) => {
     mainColor = "bg-yellow-400";
   }
   
-  // Ukuran titik (Membesar sedikit jika di-hover)
   const sizeClass = isHovered ? "w-5 h-5 border-[3px]" : "w-3 h-3 border-2";
 
   return L.divIcon({
-    className: "bg-transparent", // Pastikan container transparan
+    className: "bg-transparent",
     html: `
       <div class="flex items-center justify-center w-full h-full">
         <span class="relative inline-flex ${sizeClass} rounded-full ${mainColor} border-white shadow-md transition-all duration-200"></span>
       </div>
     `,
     iconSize: [20, 20],   
-    iconAnchor: [10, 10], // Titik tengah icon
+    iconAnchor: [10, 10], 
   });
 };
 
@@ -89,7 +86,7 @@ export default function HotspotMap({ data }: { data: HotspotData[] }) {
         ))}
       </MapContainer>
       
-      {/* --- INFO WINDOW (Floating Card) --- */}
+      {/* INFO WINDOW */}
       <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300">
         <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1">
              <Info className="w-3 h-3" /> INFO TITIK PANAS
@@ -146,11 +143,10 @@ export default function HotspotMap({ data }: { data: HotspotData[] }) {
         )}
       </div>
 
-      {/* --- LEGEND (Solid Dots) --- */}
+      {/* LEGEND  */}
       <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-xs hidden md:block">
          <div className="space-y-2">
             <div className="flex items-center gap-2">
-                {/* Hapus animate-ping */}
                 <span className="h-3 w-3 rounded-full bg-red-600 border border-white shadow-sm"></span>
                 <span className="font-medium text-gray-700">Tinggi (9-10)</span>
             </div>

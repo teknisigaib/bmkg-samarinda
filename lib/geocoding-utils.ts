@@ -1,6 +1,5 @@
 export async function searchCoordinates(query: string): Promise<{ lat: number; lng: number } | null> {
   try {
-    // API Nominatim OpenStreetMap (Gratis)
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
     
     const res = await fetch(url, {

@@ -82,7 +82,7 @@ export default async function AviationSection() {
         
         <div className="flex flex-col gap-6">
 
-            {/* BARIS 1: 4 METRIK UTAMA */}
+            {/* METRIK UTAMA */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Wind */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-400 transition-colors group">
@@ -135,7 +135,7 @@ export default async function AviationSection() {
                 </div>
             </div>
 
-            {/* BARIS 2: VISUALISASI RUNWAY & WEATHER (DIPASTIKAN SEJAJAR) */}
+            {/* BARIS 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
                 
                 {/* KOLOM KIRI: Visualisasi Runway */}
@@ -179,11 +179,9 @@ export default async function AviationSection() {
                     )}
                 </div>
 
-                {/* KOLOM KANAN: Weather & Clouds */}
-                {/* h-full memastikan wrapper ini setinggi Runway. */}
+            
                 <div className="lg:col-span-2 flex flex-col gap-4 h-full">
                     
-                    {/* flex-1 memastikan kartu ini memenuhi ruang kosong. */}
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4 flex-1 hover:border-blue-400">
                         <div>
                             <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wider">
@@ -229,7 +227,6 @@ export default async function AviationSection() {
                         )}
                     </div>
 
-                    {/* flex-1 memastikan kartu ini juga ikut meregang. */}
                     <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col flex-1 hover:border-blue-400">
                         <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mb-2 tracking-wider">
                             <Layers className="w-3.5 h-3.5 text-blue-500" /> Cloud Coverage
@@ -247,7 +244,7 @@ export default async function AviationSection() {
                 </div>
             </div>
 
-            {/* BARIS 3: RAW DATA (DIPASTIKAN SEJAJAR) */}
+            {/* RAW DATA */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
                 <div className="bg-slate-700 p-4 rounded-xl border border-slate-200 transition-colors shadow-sm flex flex-col h-full">
                     <div className="flex items-center justify-between mb-2">

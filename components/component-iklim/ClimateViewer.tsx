@@ -4,14 +4,14 @@ import { useState } from "react";
 import Image from "next/image";
 import { Calendar, Info, History, ChevronRight, Map, Clock } from "lucide-react";
 
-// Tipe data ini harus cocok dengan hasil transformasi di page.tsx
+
 interface ClimateViewerProps {
   data: {
     id: string;
     title: string;
-    period: string;   // Contoh: "21 - 30 November 2024"
-    dasarian: string; // Contoh: "Dasarian III"
-    bulan: string;    // Contoh: "November 2024"
+    period: string;
+    dasarian: string;
+    bulan: string;
     image: string;
     analysis: string;
     isLatest: boolean;
@@ -19,16 +19,15 @@ interface ClimateViewerProps {
 }
 
 export default function ClimateViewer({ data }: ClimateViewerProps) {
-  // State untuk menyimpan data yang sedang dilihat user (Default: Data pertama/terbaru)
   const [activeData, setActiveData] = useState(data[0]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
-      {/* --- KOLOM KIRI (KONTEN UTAMA) --- */}
+      {/* KOLOM KIRI */}
       <div className="lg:col-span-2 space-y-4">
         
-        {/* Header Info Aktif (Clean Style) */}
+        {/* Header Info Aktif*/}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
             <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -67,7 +66,7 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
                 className="w-full h-auto object-contain min-h-[300px] max-h-[80vh] bg-white transition-opacity duration-300"
             />
 
-            {/* Overlay Judul (Tetap ada) */}
+            {/* Overlay Judul */}
             <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4 pt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <p className="text-white text-sm font-medium flex items-center gap-2">
                     <Map className="w-4 h-4 opacity-80" /> {activeData.title}
@@ -75,7 +74,7 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
             </div>
         </div>
 
-        {/* Analisis Teks (Rich Text) */}
+        {/* Analisis Teks  */}
         <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
             <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
                 <Info className="w-4 h-4 text-blue-600" /> Analisis Klimatologis
@@ -87,7 +86,7 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
         </div>
       </div>
 
-      {/* --- KOLOM KANAN (DAFTAR ARSIP) --- */}
+      {/* KOLOM KANAN */}
       <div className="space-y-4">
         <div className="flex items-center justify-between text-gray-800 font-bold text-base mb-2 border-b pb-2">
             <div className="flex items-center gap-2">

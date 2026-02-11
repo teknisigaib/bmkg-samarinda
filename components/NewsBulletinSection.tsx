@@ -38,10 +38,8 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
   const [featuredPost, ...otherPosts] = posts;
 
   return (
-    <section className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-4 py-16 bg-slate-50">
+    <section className="max-w-7xl mx-auto px-0 sm:px-2 lg:px-4 py-16 bg-slate-50">
       
-      {/* === HEADER SECTION (NEW STYLE) === */}
-      {/* Tombol "Lihat Semua Berita" dipindah ke sini */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-b border-slate-200 pb-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
@@ -50,7 +48,6 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
           </h2>
         </div>
         
-        {/* REFACTOR 1: Link Berita dipindah ke atas dengan gaya Text Link */}
         <Link 
           href="/publikasi/berita-kegiatan" 
           className="group flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors"
@@ -64,7 +61,6 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         
-        {/* === KOLOM KIRI: BERITA (Span 8) === */}
         <div className="lg:col-span-9 flex flex-col gap-8">
           
           {/* Featured Post */}
@@ -134,7 +130,7 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
           </div>
         </div>
 
-        {/* === KOLOM KANAN: BULETIN (Span 4) === */}
+        {/* KOLOM KANAN */}
         <div className="lg:col-span-3 flex flex-col h-full">
           
           <div className="text-slate-900 bg-white rounded-3xl p-8 shadow-xl h-full flex flex-col relative overflow-hidden">
@@ -159,7 +155,6 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
                                 fill 
                                 className="object-cover"
                             />
-                            {/* Simple overlay for download */}
                              <a 
                                 href={bulletin.pdfUrl} 
                                 target="_blank"
@@ -176,7 +171,6 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
                 )}
             </div>
 
-            {/* REFACTOR 2: Tombol Buletin (Gaya Outline/Secondary) */}
             <div className="mt-0 pt-4 border-t border-white/10">
                 <Link 
                     href="/publikasi/buletin" 

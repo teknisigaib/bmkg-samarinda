@@ -22,32 +22,29 @@ interface PublicationFormProps {
 
 export default function PublicationForm({ initialData }: PublicationFormProps) {
   const isEditMode = !!initialData;
-  
-  // State
   const [type, setType] = useState(initialData?.type || "Buletin");
   const [coverUrl, setCoverUrl] = useState(initialData?.coverUrl || "");
   const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl || "");
   const [uploading, setUploading] = useState(false);
 
-  // Helper Upload (Bisa dipakai untuk Gambar maupun PDF)
+  // Helper Upload
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, isPdf: boolean) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
 
-    // --- 1. VALIDASI UKURAN FILE ---
-    const maxSizeMB = isPdf ? 5 : 1; // PDF 10MB, Gambar 2MB
+    // VALIDASI UKURAN FILE 
+    const maxSizeMB = isPdf ? 2 : 1; // PDF 2MB, Gambar 1MB
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
     if (file.size > maxSizeBytes) {
       alert(`File terlalu besar! \nUkuran file: ${(file.size / 1024 / 1024).toFixed(2)} MB.\nBatas maksimal: ${maxSizeMB} MB.`);
-      e.target.value = ""; // Reset input
+      e.target.value = "";
       return;
     }
 
-    // --- 2. PROSES UPLOAD ---
+    // PROSES UPLOAD
     setUploading(true);
-    // Prefix nama file biar rapi (img-xxx atau doc-xxx)
     const fileName = `${isPdf ? "doc" : "img"}-${Date.now()}-${file.name}`;
     
     const { error } = await supabase.storage.from("bmkg-public").upload(fileName, file);
@@ -55,7 +52,6 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
     if (error) {
       alert("Upload gagal: " + error.message);
     } else {
-      // Ambil URL Publik
       const { data } = supabase.storage.from("bmkg-public").getPublicUrl(fileName);
       if (isPdf) setPdfUrl(data.publicUrl);
       else setCoverUrl(data.publicUrl);
@@ -79,7 +75,7 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
       
       <form action={handleSubmit} className="space-y-6">
         
-        {/* 1. Tipe Publikasi */}
+        {/* Tipe Publikasi */}
         <div>
           <label className="block text-sm font-medium mb-1">Jenis Dokumen</label>
           <select 
@@ -95,10 +91,9 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
         </div>
 
         {/* 2. Upload Area */}
-        {/* LOGIKA GRID: Jika Buletin (2 Kolom), Jika Lainnya (1 Kolom) */}
         <div className={`grid grid-cols-1 ${type === 'Buletin' ? 'md:grid-cols-2' : ''} gap-6`}>
             
-            {/* --- UPLOAD COVER (HANYA MUNCUL JIKA BULETIN) --- */}
+            {/* UPLOAD COVER */}
             {type === "Buletin" && (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                     <label className="block text-sm font-medium mb-2">Cover Buletin</label>
@@ -125,7 +120,7 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
                 </div>
             )}
 
-            {/* --- UPLOAD PDF (SELALU MUNCUL) --- */}
+            {/* UPLOAD PDF */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center flex flex-col justify-center">
                 <label className="block text-sm font-medium mb-2">File Dokumen (PDF) <span className="text-red-500">*</span></label>
                 
@@ -157,7 +152,7 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
         {uploading && <p className="text-center text-xs text-blue-500 animate-pulse">Sedang mengupload file...</p>}
 
 
-        {/* 3. Data Umum */}
+        {/* 3. Data */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1">Judul Dokumen</label>
@@ -175,7 +170,7 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
             </div>
         </div>
 
-        {/* 4. Input Khusus (Conditional) */}
+        {/* 4. Input Khusus */}
         {type === "Buletin" && (
             <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
                 <label className="block text-sm font-medium mb-1 text-yellow-800">Edisi Buletin</label>

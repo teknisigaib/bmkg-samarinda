@@ -8,16 +8,16 @@ import L from "leaflet";
 import { useEffect, useState } from "react";
 import { OverviewData, getWaveColor } from "@/lib/bmkg/maritim";
 import { MARITIME_GEOJSON } from "./geojson";
-import { PORT_LOCATIONS } from "./ports"; // Import data pelabuhan statis
+import { PORT_LOCATIONS } from "./ports";
 
-// --- CUSTOM ICON UNTUK PELABUHAN ---
+// ICON PELABUHAN
 const anchorIcon = L.divIcon({
   className: "custom-anchor-icon",
   html: `<div style="background-color: white; border-radius: 50%; padding: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid #2563eb; display: flex; align-items: center; justify-content: center;">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" x2="12" y1="22" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>
   </div>`,
   iconSize: [36, 36],
-  iconAnchor: [18, 36], // Titik tumpu di bawah tengah
+  iconAnchor: [18, 36],
   popupAnchor: [0, -36]
 });
 
@@ -31,10 +31,10 @@ const AutoZoom = () => {
 };
 
 interface MaritimeMapProps {
-  mode: 'area' | 'port'; // Prop baru untuk mode
+  mode: 'area' | 'port';
   onSelectArea: (code: string, name: string) => void;
-  onSelectPort: (id: string, name: string) => void; // Handler baru untuk port
-  selectedId: string | null; // Bisa ID Area atau ID Port
+  onSelectPort: (id: string, name: string) => void;
+  selectedId: string | null;
   overviewData: OverviewData | null;
   dayIndex: number;
 }
@@ -54,7 +54,6 @@ export default function MaritimeMap({ mode, onSelectArea, onSelectPort, selected
     }
   };
 
-// Logic untuk konten Info Card (Prioritas: Hover > Selected > Null)
   const activeId = hoveredId || selectedId;
   
   let activeInfo = null;
@@ -89,7 +88,7 @@ export default function MaritimeMap({ mode, onSelectArea, onSelectPort, selected
         <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
         <AutoZoom />
 
-        {/* --- RENDER MODE AREA (POLYGON) --- */}
+        {/* RENDER AREA  */}
         {mode === 'area' && MARITIME_GEOJSON.features.map((feature: any, idx: number) => {
           const code = feature.properties.WP_1;
           const name = feature.properties.WP_IMM;
@@ -111,7 +110,7 @@ export default function MaritimeMap({ mode, onSelectArea, onSelectPort, selected
           );
         })}
 
-        {/* --- RENDER MODE PORT (MARKER) --- */}
+        {/* RENDER  PORT */}
         {mode === 'port' && PORT_LOCATIONS.map((port) => (
           <Marker 
             key={port.id} 
@@ -127,7 +126,7 @@ export default function MaritimeMap({ mode, onSelectArea, onSelectPort, selected
 
       </MapContainer>
 
-      {/* --- FLOATING INFO CARD (RESTORED & IMPROVED) --- */}
+      {/*FLOATING INFO CARD  */}
       <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300">
         <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
             {activeInfo ? activeInfo.title : (mode === 'area' ? "Info Perairan" : "Info Pelabuhan")}
@@ -159,7 +158,7 @@ export default function MaritimeMap({ mode, onSelectArea, onSelectPort, selected
         )}
       </div>
 
-      {/* Info Box & Legend (Hanya tampil di mode Area) */}
+      {/* Info Box & Legend */}
       {mode === 'area' && (
         <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/20 text-xs">
            <div className="font-bold text-gray-500 mb-2 uppercase tracking-wider text-[10px]">Tinggi Gelombang</div>

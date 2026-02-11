@@ -5,7 +5,6 @@ export interface PortLocation {
   lng: number;
 }
 
-// Daftar pelabuhan hardcoded agar peta bisa render marker tanpa fetch API
 export const PORT_LOCATIONS: PortLocation[] = [
   { id: "0194", name: "Samarinda", lat: -0.508104, lng: 117.155324 },
   { id: "0193", name: "Semayang, Balikpapan", lat: -1.2729, lng: 116.8285 },

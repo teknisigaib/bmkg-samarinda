@@ -1,8 +1,6 @@
-// lib/bmkg/aviation-utils.ts
-
 import { ReactNode } from "react";
 
-// --- TYPE DEFINITIONS ---
+// TYPE DEFINITIONS
 
 export interface ParsedMetar {
     time_zone: ReactNode;
@@ -25,12 +23,12 @@ export interface ParsedMetar {
 export interface RawMetar {
     data_code: string;
     icao_code: string;
-    observed_time?: string; // Ada di METAR & SPECI
-    issued_time?: string;   // Ada di TAF
+    observed_time?: string; 
+    issued_time?: string; 
     data_text: string;
 }
 
-// --- HELPERS (Sync Functions) ---
+//  HELPERS 
 
 export function filterKaltimAirports(airports: ParsedMetar[]) {
     const KALTIM_ICAO = [
@@ -62,21 +60,20 @@ export function getFlightCategory(visibility: string, weather: string) {
 
 
 export function getPublicSummary(visibility: string, weather: string) {
-    // 1. Tentukan Status Warna & Label
     let status = { label: "Kondisi Baik", color: "bg-green-100 text-green-700 border-green-200", icon: "safe" };
     
     // Parse Visibilitas
     let cleanVis = visibility.replace(">=", "").replace(">", "").replace("<", "");
-    let vis = parseFloat(cleanVis); // KM
+    let vis = parseFloat(cleanVis); 
 
-    // Logika Sederhana untuk Awam
+    // Logika Awam
     if (vis < 5 || weather.toLowerCase().includes('hujan lebat') || weather.toLowerCase().includes('badai')) {
         status = { label: "Waspada / Cuaca Buruk", color: "bg-red-100 text-red-700 border-red-200", icon: "danger" };
     } else if (vis < 8 || weather.toLowerCase().includes('hujan')) {
         status = { label: "Hati-hati / Hujan Ringan", color: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: "warning" };
     }
 
-    // 2. Terjemahkan Kode Cuaca (Jika perlu diperhalus)
+    // Terjemahkan Kode Cuaca
     let humanWeather = weather;
     if (!weather || weather === '-' || weather === 'NSW') humanWeather = "Cerah / Berawan";
     if (weather.includes('TS')) humanWeather = "Hujan Badai / Guntur";
@@ -88,20 +85,14 @@ export function getPublicSummary(visibility: string, weather: string) {
 
 export function formatWind(direction: string, speed: string) {
     if (!direction || direction === 'Variabel') return "Arah Berubah-ubah";
-    // Konversi Knot ke Km/j untuk awam (opsional, tapi data API anda sudah KM/H atau Knot?)
-    // Asumsi data API parsed anda 'speed' dalam km/h atau m/s. Jika raw metar biasanya Knot.
-    // Kita tampilkan apa adanya dulu + arah.
     return `Dari ${direction}, Kecepatan ${speed}`;
 }
 
 
-// lib/bmkg/aviation-utils.ts
 
-// ... (kode sebelumnya tetap ada)
-
-// --- HELPER BARU: HITUNG JARAK (Haversine) ---
+//HELPER  HITUNG JARAK 
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; // Radius bumi dalam km
+    const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
@@ -109,15 +100,14 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
         Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return Math.round(R * c); // Hasil dalam KM
+    return Math.round(R * c);
 }
 
 
 
-// Tambahkan fungsi-fungsi ini ke dalam file aviation-utils.ts Anda
 
 export const estimateDuration = (km: number) => {
-    const speed = 550; // Avg speed km/h
+    const speed = 550;
     const timeInHours = km / speed;
     const hours = Math.floor(timeInHours);
     const minutes = Math.round((timeInHours - hours) * 60);
@@ -127,13 +117,11 @@ export const estimateDuration = (km: number) => {
 export const getVisibilityStatus = (visibilityStr: string) => {
     if (!visibilityStr) return { label: 'No Data', className: 'bg-slate-100 text-slate-500 border-slate-200', dot: 'bg-slate-400' };
 
-    // Sanitasi input
     const cleanString = visibilityStr.toString().replace(/[^0-9.]/g, '');
     let vis = parseFloat(cleanString);
 
     if (isNaN(vis)) return { label: 'No Data', className: 'bg-slate-100 text-slate-500 border-slate-200', dot: 'bg-slate-400' };
 
-    // Normalisasi (9999 = 10km, >50 = meter ke km)
     if (vis === 9999) vis = 10;
     else if (vis > 50) vis = vis / 1000;
 
@@ -145,10 +133,6 @@ export const getVisibilityStatus = (visibilityStr: string) => {
 
 
 
-
-
-
-import L from "leaflet";
 
 // --- KONSTANTA ---
 export const HAZARD_COLORS: Record<string, string> = {
@@ -162,8 +146,6 @@ export const HAZARD_COLORS: Record<string, string> = {
   SS: "#a8a29e",   // Sand (Sand Storm)
 };
 
-// --- ICON HELPERS (HTML STRING ONLY) ---
-// Kita pisahkan logic HTML string agar file ini tidak terlalu bergantung pada objek 'L' saat SSR
 export const getPlaneIconHtml = (color: string, rotation: number) => `
   <div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; transform: rotate(${rotation}deg);">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"/><path d="m5 12 3-5m11 5-3-5"/><path d="m4 19 3-2.5"/><path d="m20 19-3-2.5"/></svg>
@@ -177,7 +159,7 @@ export const getRadarIconHtml = () => `
   </div>
 `;
 
-// --- MATH HELPERS ---
+// MATH HELPERS
 export const getCurvedPath = (start: [number, number], end: [number, number]) => {
   const lat1 = start[0], lng1 = start[1], lat2 = end[0], lng2 = end[1];
   const midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2;
@@ -193,7 +175,7 @@ export const getCurvedPath = (start: [number, number], end: [number, number]) =>
   return path;
 };
 
-// --- DATE HELPERS ---
+//  DATE HELPERS 
 export const formatDateToRadar = (date: Date) => {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}`;
@@ -216,7 +198,7 @@ export const getInitialDate = () => {
   return now;
 };
 
-// --- COLOR LOGIC ---
+// COLOR LOGIC 
 export const getVisibilityColor = (visibilityStr: string) => {
   if (!visibilityStr) return '#64748b';
   const cleanString = visibilityStr.toString().replace(/[^0-9.]/g, '');
@@ -226,7 +208,7 @@ export const getVisibilityColor = (visibilityStr: string) => {
   if (vis > 8) return '#22c55e'; if (vis >= 4.8) return '#06b6d4'; if (vis >= 1.6) return '#eab308'; return '#ef4444';
 };
 
-// --- SIGMET HELPERS ---
+//  SIGMET HELPERS 
 export const getSigmetStyle = (feature: any) => {
   const color = HAZARD_COLORS[feature.properties.hazard] || '#94a3b8';
   return { color, weight: 2, opacity: 1, fillColor: color, fillOpacity: 0.2, dashArray: '5, 5' };
@@ -257,17 +239,11 @@ export const getSigmetTooltipContent = (properties: any) => {
 
 
 
-// ... (kode lama tetap ada)
 
-// --- TIME STEP GENERATOR ---
-// Menghasilkan array waktu mundur ke belakang (untuk slider)
-// intervalMinutes: 10 untuk satelit, 5 untuk radar
-// totalDurationMinutes: 120 (2 jam) untuk satelit, 60 (1 jam) untuk radar
 export const generateTimeSteps = (intervalMinutes: number, totalDurationMinutes: number): Date[] => {
   const steps: Date[] = [];
-  const now = getInitialDate(); // Waktu "sekarang" (dibulatkan)
+  const now = getInitialDate();
   
-  // Mulai dari masa lalu (Now - Duration) sampai Now
   const startTime = new Date(now.getTime() - totalDurationMinutes * 60000);
   
   let currentTime = startTime;
@@ -298,12 +274,7 @@ export const RADAR_DBZ_COLORS = [
 
 export const RADAR_DBZ_LABELS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65];
 
-// ... export SATELLITE_LEGEND_STOPS tetap ada ...
 
-// ... kode lama tetap ada ...
-
-// --- DATA LEGENDA SATELLITE BARU (DISCRETE IR ENHANCED) ---
-// Warna diambil dari referensi: Red (Cold/-100) -> Orange -> Green -> Blue -> Black (Warm/+60)
 export const SATELLITE_IR_COLORS = [
     '#e93f33', // -100 (Red)
     '#ea5456', // -80 (Peach)
@@ -324,7 +295,7 @@ export const SATELLITE_IR_COLORS = [
     '#000000'
 ];
 
-// Label yang akan ditampilkan di bawah setiap segmen warna
+// Label
 export const SATELLITE_IR_LABELS = [
     '-100', '-80', '-60', '-40', '-30', '-20', '-10', '0', '10', '20','60'
 ];

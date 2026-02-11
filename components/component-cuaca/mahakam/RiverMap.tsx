@@ -13,7 +13,6 @@ interface RiverMapProps {
   onViewDetail?: (loc: MahakamLocation) => void;
 }
 
-// --- CUSTOM ICON GENERATOR (TETAP SAMA) ---
 const createCustomWeatherIcon = (loc: MahakamLocation, isActive: boolean) => {
   const iconHtml = renderToString(
     <div className={`
@@ -88,7 +87,6 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
       
       <div className="h-[500px] w-full rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-xl relative group bg-slate-100">
         
-        {/* --- FLOATING INFO CARD (STYLING DARI SNIPPET ANDA) --- */}
         {selectedLoc ? (
             <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300 animate-in slide-in-from-top-2 fade-in">
                 
@@ -110,7 +108,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
                     {selectedLoc.name}
                 </div>
                 
-                {/* Data Rows (Menggunakan Style Snippet: bg-gray-50, rounded, border) */}
+                {/* Data Rows  */}
                 <div className="space-y-2">
                     
                     {/* Cuaca */}
@@ -139,7 +137,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
 
                 </div>
 
-                {/* Tombol Action (Opsional, disesuaikan agar muat di w-64) */}
+                {/* Tombol Action */}
                 {onViewDetail && (
                     <button 
                         onClick={() => onViewDetail(selectedLoc)}
@@ -152,7 +150,6 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
 
             </div>
         ) : (
-            // Placeholder jika tidak ada yang dipilih (Opsional)
             <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50">
                  <div className="text-gray-400 text-xs italic text-center">
                     Klik titik stasiun pada peta untuk melihat informasi cuaca.
@@ -160,7 +157,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
             </div>
         )}
 
-        {/* --- MAP COMPONENT --- */}
+        {/* MAP COMPONENT */}
         <MapContainer 
           center={[-0.502, 117.153]} 
           zoom={8} 

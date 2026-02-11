@@ -1,6 +1,3 @@
-// src/lib/weather-utils.ts
-
-// Hitung "Feels Like" (Suhu yang dirasakan)
 export const calculateFeelsLike = (t: number, rh: number, ws: number): number => {
   const expValue = (17.27 * t) / (237.7 + t);
   const e = (rh / 100) * 6.105 * Math.exp(expValue);

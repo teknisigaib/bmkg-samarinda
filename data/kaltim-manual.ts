@@ -1,26 +1,23 @@
-// data/kaltim-manual.ts
-
-// --- DEFINISI TIPE DATA (Interface) ---
+// DEFINISI TIPE DATA 
 export interface VillageNode {
-  id: string;   // Kode Desa (misal: 64.71.01.1001)
-  name: string; // Nama Desa
-  code?: string; // Optional: Isi HANYA jika kode BMKG beda dengan ID. Jika sama, kosongkan biar hemat.
+  id: string;   
+  name: string;
+  code?: string; 
 }
 
 export interface DistrictNode {
-  id: string;        // Kode Kec (misal: 64.71.01)
+  id: string;        
   name: string;
-  villages: VillageNode[]; // Anak-anaknya (Kelurahan)
+  villages: VillageNode[]; 
 }
 
 export interface CityNode {
-  id: string;        // Kode Kota (misal: 64.71)
+  id: string;       
   name: string;
-  districts: DistrictNode[]; // Anak-anaknya (Kecamatan)
+  districts: DistrictNode[]; 
 }
 
 // --- DATA UTAMA (KALIMANTAN TIMUR) ---
-// Perhatikan: Tidak ada 'parentId' yang berulang-ulang!
 export const DATA_KALTIM: CityNode[] = [
     // KABUPATEN PASER
     {

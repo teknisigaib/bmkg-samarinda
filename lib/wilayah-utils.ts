@@ -1,21 +1,18 @@
-// lib/wilayah-utils.ts
 import { DATA_KALTIM } from "@/data/kaltim-manual";
 
-// Tipe data yang dibutuhkan oleh komponen UI (tetap sama agar tidak merusak komponen lain)
 export interface Wilayah {
   id: string;
   name: string;
   bmkgCode: string;
 }
 
-// 1. Ambil Provinsi (Statis satu saja)
+// 1. Ambil Provinsi
 export const getProvinces = async (): Promise<Wilayah[]> => {
   return [{ id: "64", name: "KALIMANTAN TIMUR", bmkgCode: "64" }];
 };
 
-// 2. Ambil Kota/Kab (Level 1 dari Data)
+// 2. Ambil Kota/Kab 
 export const getRegencies = async (provId: string): Promise<Wilayah[]> => {
-  // Karena kita cuma punya data Kaltim (64), langsung return root data
   if (provId !== "64") return [];
   
   return DATA_KALTIM.map(city => ({
@@ -25,9 +22,8 @@ export const getRegencies = async (provId: string): Promise<Wilayah[]> => {
   }));
 };
 
-// 3. Ambil Kecamatan (Level 2: Cari Kota dulu, baru ambil districts-nya)
+// 3. Ambil Kecamatan 
 export const getDistricts = async (cityId: string): Promise<Wilayah[]> => {
-  // Cari kota yang cocok
   const city = DATA_KALTIM.find(c => c.id === cityId);
   if (!city) return [];
 
@@ -38,11 +34,8 @@ export const getDistricts = async (cityId: string): Promise<Wilayah[]> => {
   }));
 };
 
-// 4. Ambil Kelurahan (Level 3: Cari Kota -> Cari Kec -> Ambil villages)
-// Note: Algoritma ini mencari dengan loop. Karena data statis, ini sangat cepat (<1ms).
+// 4. Ambil Kelurahan 
 export const getVillages = async (distId: string): Promise<Wilayah[]> => {
-  // 1. Kita butuh ID Kota untuk mempersempit pencarian (Kecamatan 64.71.01 pasti ada di Kota 64.71)
-  // Cara cepat: Ambil 5 karakter pertama dari distId (contoh: "64.71.01" -> "64.71")
   const cityId = distId.substring(0, 5);
   
   const city = DATA_KALTIM.find(c => c.id === cityId);
@@ -58,5 +51,4 @@ export const getVillages = async (distId: string): Promise<Wilayah[]> => {
   }));
 };
 
-// Helper format tidak berubah, tetap bisa dipakai jika perlu
 export const formatBmkgCode = (code: string) => code;

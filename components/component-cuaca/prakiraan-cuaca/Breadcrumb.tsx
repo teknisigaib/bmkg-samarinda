@@ -1,4 +1,3 @@
-// components/Breadcrumb.tsx (Bisa dibuat komponen terpisah)
 import { ChevronRight, Home } from 'lucide-react';
 
 export default function LocationBreadcrumb({ items }: { items: { name: string, url: string }[] }) {

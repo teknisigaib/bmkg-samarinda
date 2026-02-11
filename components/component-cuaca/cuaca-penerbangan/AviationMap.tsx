@@ -16,12 +16,11 @@ import {
 } from "@/lib/bmkg/aviation-utils";
 import { useTimeAnimation } from "@/components/hooks/use-time-animation";
 import TimeAnimationControl from "./TimeAnimationControl";
-import { RadarLegend, SatelliteLegend, SigmetLegend } from "./MapLegends"; // Pastikan import ini ada
+import { RadarLegend, SatelliteLegend, SigmetLegend } from "./MapLegends";
 
-// --- CLIENT-SIDE ICONS ---
+
 const createAirportDot = (color: string) => L.divIcon({
     className: "airport-dot",
-    // HTML: Lingkaran warna dengan border putih tebal & efek glow
     html: `
         <div style="
             background-color: ${color}; 
@@ -32,8 +31,8 @@ const createAirportDot = (color: string) => L.divIcon({
             transition: all 0.3s ease;
         "></div>
     `,
-    iconSize: [14, 14], // Ukuran kecil
-    iconAnchor: [7, 7], // Anchor di tengah (setengah dari size)
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
 });
 
 const createRadarIcon = () => L.divIcon({
@@ -43,7 +42,7 @@ const createRadarIcon = () => L.divIcon({
     iconAnchor: [12, 12],
 });
 
-// --- COMPONENT AUTO ZOOM ---
+//  AUTO ZOOM 
 const AutoZoom = ({ data }: { data: ParsedMetar[] }) => {
     const map = useMap();
     useEffect(() => { 
@@ -55,7 +54,6 @@ const AutoZoom = ({ data }: { data: ParsedMetar[] }) => {
     return null;
 };
 
-// --- COMPONENT UTAMA ---
 interface MapProps {
     airports: ParsedMetar[];
     onSelect: (icao: string) => void;
@@ -63,32 +61,29 @@ interface MapProps {
 }
 
 export default function AviationMap({ airports, onSelect, selectedIcao }: MapProps) {
-    // --- LAYER STATES ---
+    // LAYER STATES
     const [showRadar, setShowRadar] = useState(false);
     const [showSatellite, setShowSatellite] = useState(false);
     const [showBoundary, setShowBoundary] = useState(true);
     const [showSigmet, setShowSigmet] = useState(false); 
     
-    // --- ANIMATION HOOKS ---
     const radarAnim = useTimeAnimation(5, 60, 2500);
     const satAnim = useTimeAnimation(10, 120, 2500);
 
-    // --- UI STATES ---
     const [isLayerLoading, setIsLayerLoading] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(true);
-    
-    // --- DATA STATES ---
+
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [sigmetData, setSigmetData] = useState<any>(null); 
     const loadingCount = useRef(0);
 
-    // --- INIT ---
+    // INIT 
     useEffect(() => {
         fetch('/maps/indonesia.geojson').then(res => res.json()).then(setGeoJsonData).catch(console.error);
         if (window.innerWidth < 768) setIsPanelOpen(false);
     }, []);
 
-    // Lazy Load SIGMET
+    // Load SIGMET
     useEffect(() => {
         if (showSigmet && !sigmetData) {
             setIsLayerLoading(true);
@@ -132,7 +127,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
             `}</style>
 
 
-            {/* --- RIGHT PANEL (LAYERS) --- */}
+            {/* RIGHT PANEL*/}
             <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-2 font-sans transition-all duration-300">
                 {isPanelOpen ? (
                     <div className="w-[260px] bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700 shadow-2xl overflow-hidden divide-y divide-slate-800 animate-in fade-in zoom-in-95 duration-200">
@@ -159,7 +154,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                                     {showSigmet ? <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
 
-                                {/* --- LEGEND SIGMET  --- */}
+                                {/*  LEGEND SIGMET */}
                                 {showSigmet && (
                                     <div className="mt-1 pl-1">
                                         <SigmetLegend className="w-full bg-slate-800/50 border border-slate-700/50 animate-in slide-in-from-top-2" />
@@ -167,14 +162,14 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                                 )}
                             </div>
 
-                            {/* 3. RADAR (INDEPENDENT) */}
+                            {/* 3. RADAR  */}
                             <div className="p-2">
                                 <button onClick={() => setShowRadar(!showRadar)} className={`w-full flex items-center justify-between p-2 rounded-lg transition-all ${showRadar ? 'bg-blue-900/30 text-blue-200 border border-blue-900/50' : 'text-slate-400 hover:bg-slate-800 border border-transparent'}`}>
                                     <div className="flex items-center gap-3"><Layers className="w-4 h-4" /><span className="text-xs font-medium">Radar</span></div>
                                     {showRadar ? <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
                                 
-                                {/* LEGEND RADAR (INSIDE PANEL) */}
+                                {/* LEGEND RADAR */}
                                 {showRadar && (
                                     <div className="mt-2 pl-2">
                                         <RadarLegend className="w-full bg-slate-800/50 border border-slate-700/50 p-2 rounded-lg animate-in slide-in-from-top-2" />
@@ -182,14 +177,14 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                                 )}
                             </div>
 
-                            {/* 4. SATELLITE (INDEPENDENT) */}
+                            {/* 4. SATELLITE */}
                             <div className="p-2">
                                 <button onClick={() => setShowSatellite(!showSatellite)} className={`w-full flex items-center justify-between p-2 rounded-lg transition-all ${showSatellite ? 'bg-blue-900/30 text-blue-200 border border-blue-900/50' : 'text-slate-400 hover:bg-slate-800 border border-transparent'}`}>
                                     <div className="flex items-center gap-3"><Globe className="w-4 h-4" /><span className="text-xs font-medium">Himawari-9</span></div>
                                     {showSatellite ? <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div> : <EyeOff className="w-3.5 h-3.5" />}
                                 </button>
 
-                                {/* LEGEND SATELLITE (INSIDE PANEL) */}
+                                {/* LEGEND SATELLITE */}
                                 {showSatellite && (
                                     <div className="mt-2 pl-2">
                                         <SatelliteLegend className="w-full bg-slate-800/50 border border-slate-700/50 p-2 rounded-lg animate-in slide-in-from-top-2" />
@@ -205,7 +200,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                 )}
             </div>
 
-            {/* --- BOTTOM FLOATING TIME CONTROLS (SMART LAYOUT) --- */}
+            {/*  FLOATING TIME CONTROLS */}
             {(showRadar || showSatellite) && (
                 <div className="absolute bottom-8 left-4 right-4 z-[1000] pointer-events-none flex flex-col justify-end items-center">
                     
@@ -225,7 +220,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                                 onPlayToggle={satAnim.togglePlay}
                                 onSeek={satAnim.seek}
                                 label="SATELLITE"
-                                className="w-full" // Isi penuh kolom grid/container
+                                className="w-full"
                             />
                         )}
 
@@ -238,7 +233,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                                 onPlayToggle={radarAnim.togglePlay}
                                 onSeek={radarAnim.seek}
                                 label="RADAR"
-                                className="w-full" // Isi penuh kolom grid/container
+                                className="w-full"
                             />
                         )}
 
@@ -246,7 +241,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
                 </div>
             )}
 
-            {/* --- MAP --- */}
+            {/* MAP  */}
             <MapContainer center={[0, 117]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
 

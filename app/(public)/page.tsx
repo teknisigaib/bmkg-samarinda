@@ -1,14 +1,8 @@
-// src/app/page.tsx
-
-// 1. HAPUS 'force-dynamic' agar fitur Cache/ISR jalan (SEO Lebih Bagus)
-// export const dynamic = 'force-dynamic'; 
-
 import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { ArrowRight } from "lucide-react";
 
-// --- COMPONENTS ---
 import RunningText from "@/components/RunningText";
 import InfoWidget from "@/components/InfoWidget";
 import AviationSection from "@/components/AviationSection";
@@ -17,16 +11,15 @@ import AppPromo from "@/components/AppPromo";
 import NewsBulletinSection from "@/components/NewsBulletinSection";
 import FlyerSection from "@/components/FlyerSection";
 
-// --- DATA FETCHING ---
+//  DATA FETCHING
 import { getGempaTerbaru } from "@/lib/bmkg/gempa";
 import { getKaltimWeather } from "@/lib/weather-service"; 
 
-// 2. Gunakan ISR (Update cache setiap 60 detik)
-// Ini bikin web secepat statis, tapi data update tiap menit.
+//  ISR (Update cache setiap 60 detik)
 export const revalidate = 60; 
 
 export default async function HomePage() {
-  // --- INISIALISASI VARIABEL KOSONG (DEFAULT) ---
+  // --- INISIALISASI VARIABEL KOSONG
   let heroPost: any = null;
   let latestPosts: any[] = [];
   let formattedBulletin: any = null;
@@ -34,22 +27,21 @@ export default async function HomePage() {
   let listCuacaKaltim: any = null;
   let flyers: any[] = [];
 
-  // 3. CEK APAKAH SEDANG PROSES BUILD (GITHUB ACTIONS)
-  // Kita cek apakah URL database valid atau dummy (placeholder)
+  // CEK PROSES BUILD (GITHUB ACTIONS)
   const isBuildTime = !process.env.DATABASE_URL || 
                       process.env.DATABASE_URL.includes('placeholder') ||
                       process.env.DATABASE_URL === "undefined";
 
-  // 4. LOGIKA PENGAMBILAN DATA (Hanya jalan jika BUKAN build time)
+  // LOGIKA AMBIL DATA
   if (!isBuildTime) {
     try {
       console.log("Fetching data for Homepage...");
 
-      // A. Ambil Data Database (Parallel biar cepat)
+      //  Ambil Data Database 
       const [rawHeroPost, rawLatestPosts, rawBulletin, rawFlyers] = await Promise.all([
         // Hero Post
         prisma.post.findFirst({ where: { isFeatured: true } }),
-        // Latest Posts (ambil agak banyak buat filter nanti)
+        // Latest Posts
         prisma.post.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),
         // Buletin
         prisma.publication.findFirst({ where: { type: "Buletin" }, orderBy: { createdAt: "desc" } }),
@@ -57,17 +49,17 @@ export default async function HomePage() {
         prisma.flyer.findMany({ where: { isActive: true }, orderBy: { createdAt: "desc" } })
       ]);
 
-      // Logic Fallback Hero Post (Jika tidak ada yang featured, ambil yang paling baru)
+      // Logic Fallback Hero Post
       if (rawHeroPost) {
         heroPost = rawHeroPost;
       } else if (rawLatestPosts.length > 0) {
         heroPost = rawLatestPosts[0];
       }
 
-      // Filter Latest Post (Supaya tidak dobel dengan Hero)
+      // Filter Latest Post 
       latestPosts = rawLatestPosts
         .filter(p => p.id !== heroPost?.id)
-        .slice(0, 3); // Ambil 3 sisa
+        .slice(0, 3);
 
       // Formatting Bulletin
       if (rawBulletin) {
@@ -83,8 +75,7 @@ export default async function HomePage() {
 
       flyers = rawFlyers;
 
-      // B. Ambil Data API External (Gempa & Cuaca)
-      // Kita pisah try-catch nya agar kalau API BMKG error, web tetap jalan
+      //  Ambil Data API External 
       try {
         const [gData, cData] = await Promise.all([
           getGempaTerbaru(),
@@ -94,26 +85,23 @@ export default async function HomePage() {
         listCuacaKaltim = cData;
       } catch (apiError) {
         console.error("Gagal mengambil data BMKG/Cuaca:", apiError);
-        // Biarkan null, nanti widget akan menampilkan state 'Data tidak tersedia'
       }
 
     } catch (dbError) {
       console.error("Gagal koneksi Database (mungkin build time atau DB down):", dbError);
-      // Data tetap kosong/null, halaman akan tetap render kerangka
     }
   } else {
     console.log("⚠️ Skipping Data Fetching during Build Time to prevent crash.");
   }
 
-  // --- RENDER HALAMAN ---
+  // RENDER HALAMAN
   return (
-    <main className="min-h-screen max-w-8xl bg-gray-50 mt-6">
+    <main className="min-h-screen max-w-7xl mx-auto bg-gray-50 mt-6">
       
       {/* 1. RUNNING TEXT */}
       <RunningText />
 
       {/* 2. HERO SECTION */}
-      {/* Kita tambahkan kondisi: Tampilkan placeholder jika heroPost kosong (saat build) */}
       {heroPost ? (
         <section className="relative bg-blue-900 text-white overflow-hidden pb-24">
           <div className="absolute inset-0 z-0">
@@ -145,7 +133,7 @@ export default async function HomePage() {
           </div>
         </section>
       ) : (
-        // Fallback UI saat Build / Loading / Data Kosong (Biar tidak jelek)
+        // Fallback UI saat Build / Loading / Data Kosong 
         <section className="relative bg-blue-900 text-white pb-24 min-h-[50vh] flex items-center justify-center">
              <div className="text-center px-4">
                 <h1 className="text-3xl font-bold mb-2">BMKG Samarinda</h1>

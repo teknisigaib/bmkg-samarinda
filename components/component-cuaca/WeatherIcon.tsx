@@ -1,4 +1,3 @@
-// File: components/component-cuaca/WeatherIcon.tsx (Versi Berwarna)
 "use client";
 
 import {

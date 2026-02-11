@@ -1,12 +1,11 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar"; // Import Navbar
-import Footer from "@/components/Footer"; // Import Footer
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer"; 
 import { AlertTriangle } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Kita pasang Navbar manual disini */}
       <Navbar />
 
       <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-4 text-center">
@@ -31,7 +30,6 @@ export default function NotFound() {
         </div>
       </main>
 
-      {/* Kita pasang Footer manual disini */}
       <Footer />
     </div>
   );

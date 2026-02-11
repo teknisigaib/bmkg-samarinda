@@ -1,7 +1,5 @@
 import { AwsApiData, AwsSnapshotData } from "./aws-types";
 
-// --- RUMUS MATEMATIKA ---
-
 export const calculateDewPoint = (temp: number, rh: number) => {
   const a = 17.27;
   const b = 237.7;
@@ -24,7 +22,6 @@ export const calculateUV = (solRad: number) => {
   return Math.round(solRad / 40);
 };
 
-// --- FORMATTER ---
 
 export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
     const temp = parseFloat(jsonData.temp) || 0;
@@ -38,7 +35,6 @@ export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
     const heatIndex = calculateHeatIndex(temp, rh);
     const uvIndex = calculateUV(solrad);
 
-    // --- LOGIKA WAKTU & TANGGAL BARU ---
   const dateObj = new Date(jsonData.waktu);
   const now = new Date();
   
@@ -51,7 +47,6 @@ export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
   let timeStr = "--:--";
 
   if (!isNaN(dateObj.getTime())) {
-      // Format: "Sabtu, 7 Februari 2026"
       dateStr = dateObj.toLocaleDateString('id-ID', { 
           weekday: 'long', 
           year: 'numeric', 
@@ -59,14 +54,12 @@ export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
           day: 'numeric' 
       });
       
-      // Format: "07:24"
       timeStr = dateObj.toLocaleTimeString('id-ID', { 
           hour: '2-digit', 
           minute: '2-digit',
           hour12: false
       });
   } else {
-      // Fallback manual jika parsing gagal
       const parts = jsonData.waktu.split(' ');
       if(parts.length > 1) {
           dateStr = parts[0]; 
@@ -95,7 +88,7 @@ export const transformAwsData = (jsonData: AwsApiData): AwsSnapshotData => {
   };
 };
 
-// --- STATUS BADGE (Helper UI) ---
+// STATUS BADGE
 export const getStatus = (type: 'temp' | 'humidity' | 'wind' | 'rain' | 'pressure' | 'solar', value: number) => {
   switch (type) {
     case 'temp':

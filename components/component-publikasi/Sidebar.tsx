@@ -24,8 +24,6 @@ export default function PublikasiSidebar() {
 
         <nav className="p-2 space-y-1">
           {sidebarItems.map((item) => {
-            // Logic Active State: Cek jika URL diawali dengan href menu
-            // (Agar sub-halaman detail berita tetap membuat menu 'Berita' aktif)
             const isActive = pathname.startsWith(item.href);
 
             return (

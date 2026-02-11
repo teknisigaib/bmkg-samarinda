@@ -1,22 +1,20 @@
 @import "tailwindcss";
 
-/* hide scrollbar but keep scroll functionality */
 .hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
 }
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none; 
 }
 
 .text-bmkg-blue {
-  color: #007baf; /* warna khas BMKG */
+  color: #007baf; 
 }
 
 
-/* ====== Leaflet Popup Custom Style ====== */
 .leaflet-popup-content-wrapper {
-  background: transparent !important; /* hilangkan kotak default */
+  background: transparent !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   padding: 0 !important;
@@ -27,7 +25,7 @@
 }
 
 .leaflet-popup-tip {
-  display: none !important; /* hilangkan segitiga bawaan */
+  display: none !important; 
 }
 
 
@@ -58,9 +56,7 @@
   animation: marquee 2s linear infinite;
 }
 
-/* app/globals.css */
 
-/* Custom Scrollbar untuk element yang punya class overflow-x-auto */
 ::-webkit-scrollbar {
   height: 6px;
   width: 6px;

@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useState } from "react";
 
-// Tipe Data
 export type WarningLevel = "AWAS" | "SIAGA" | "WASPADA" | "AMAN" | "TIDAK ADA DATA";
 
 export interface RegionData {
@@ -22,10 +21,10 @@ interface ClimateMapProps {
 
 const getColor = (level: WarningLevel) => {
   switch (level) {
-    case "AWAS": return "#ef4444";    // Red
-    case "SIAGA": return "#f97316";   // Orange
-    case "WASPADA": return "#eab308"; // Yellow
-    case "AMAN": return "#10b981";    // Emerald
+    case "AWAS": return "#ef4444";    
+    case "SIAGA": return "#f97316";   
+    case "WASPADA": return "#eab308"; 
+    case "AMAN": return "#10b981";   
     default: return "#cbd5e1";
   }
 };
@@ -89,14 +88,13 @@ export default function ClimateMapClient({ geoJsonData, warningData, warningType
           <GeoJSON 
             key={warningType} 
             data={geoJsonData} 
-            // @ts-ignore
             style={style} 
             onEachFeature={onEachFeature} 
           />
         )}
       </MapContainer>
 
-      {/* --- FLOATING INFO CARD (Sesuai Desain Maritime Map) --- */}
+      {/* FLOATING INFO CARD */}
       <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300">
         <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
              Info Wilayah

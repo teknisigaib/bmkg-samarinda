@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Droplets, Wind, Sun, Gauge, ArrowRight, Radio } from "lucide-react";
-import { AwsSnapshotData } from "@/lib/aws-types"; // Import tipe data standar
+import { AwsSnapshotData } from "@/lib/aws-types";
 
 interface AwsWidgetContentProps {
   data: AwsSnapshotData;
@@ -15,7 +15,7 @@ export default function AwsWidgetContent({ data }: AwsWidgetContentProps) {
       {/* CONTAINER UTAMA */}
       <div className="w-full flex flex-col md:flex-row items-center gap-4 md:gap-8">
 
-        {/* === KOLOM 1: DATA UTAMA === */}
+        {/*  DATA UTAMA */}
         <div className="flex flex-col items-center text-center mx-auto min-w-[100px]">
              {/* Header Kecil */}
              <div className="flex items-center gap-1.5 text-gray-500 mb-1">
@@ -39,10 +39,10 @@ export default function AwsWidgetContent({ data }: AwsWidgetContentProps) {
              </div>
         </div>
 
-        {/* === KOLOM 2: PARAMETER LAIN === */}
+        {/* PARAMETER LAIN */}
         <div className="flex-1 w-full grid grid-cols-2 gap-x-6 gap-y-6 border-t md:border-t-0 md:border-l border-gray-100 pt-6 md:pt-0 md:pl-8">
             
-            {/* Kotak 1: Hujan */}
+            {/* Hujan */}
             <div className="flex items-center gap-3">
                <div className="p-2 bg-blue-50 rounded-lg text-blue-500 shrink-0">
                   <Droplets className="w-5 h-5" strokeWidth={2} />
@@ -55,21 +55,20 @@ export default function AwsWidgetContent({ data }: AwsWidgetContentProps) {
                </div>
             </div>
 
-            {/* Kotak 2: Angin */}
+            {/* Angin */}
             <div className="flex items-center gap-3">
                <div className="p-2 bg-blue-50 rounded-lg text-blue-500 shrink-0">
                   <Wind className="w-5 h-5" strokeWidth={2} />
                </div>
                <div className="flex flex-col">
                   <span className="text-lg font-bold text-gray-800 leading-none">
-                     {/* Konversi m/s ke km/j untuk display umum */}
                      {data.windSpeed} <span className="text-sm font-normal text-gray-400">m/s</span>
                   </span>
                   <span className="text-[10px] uppercase font-bold text-gray-400 mt-0.5">Arah {data.windDir}°</span>
                </div>
             </div>
 
-            {/* Kotak 3: Radiasi */}
+            {/* Radiasi */}
             <div className="flex items-center gap-3">
                <div className="p-2 bg-blue-50 rounded-lg text-blue-500 shrink-0">
                   <Sun className="w-5 h-5" strokeWidth={2} />
@@ -82,7 +81,7 @@ export default function AwsWidgetContent({ data }: AwsWidgetContentProps) {
                </div>
             </div>
 
-             {/* Kotak 4: Tekanan */}
+             {/* Tekanan */}
              <div className="flex items-center gap-3">
                <div className="p-2 bg-blue-50 rounded-lg text-blue-500 shrink-0">
                   <Gauge className="w-5 h-5" strokeWidth={2} />

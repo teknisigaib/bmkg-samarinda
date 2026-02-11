@@ -20,7 +20,6 @@ export default function FlyerSection({ flyers }: FlyerSectionProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   
-  // STATE BARU: Untuk mengecek apakah user sedang hover mouse di banner
   const [isPaused, setIsPaused] = useState(false);
 
   if (!flyers || flyers.length === 0) return null;
@@ -33,33 +32,29 @@ export default function FlyerSection({ flyers }: FlyerSectionProps) {
     }
   };
 
-  // --- 1. FITUR AUTO SCROLL ---
+  // AUTO SCROLL 
   useEffect(() => {
-    // Jika sedang dipause (user hover), jangan jalankan interval
+    //
     if (isPaused) return;
 
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        
-        // Cek apakah sudah mentok kanan?
+      
         const isEnd = scrollLeft + clientWidth >= scrollWidth - 10;
 
         if (isEnd) {
-          // Jika sudah di akhir, KEMBALI KE AWAL (Looping)
           scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
         } else {
-          // Jika belum, geser ke kanan
           scrollRef.current.scrollBy({ left: clientWidth, behavior: "smooth" });
         }
       }
-    }, 5000); // Ganti angka ini untuk kecepatan (5000ms = 5 detik)
+    }, 3000);
 
-    // Bersihkan interval saat komponen unmount atau status pause berubah
     return () => clearInterval(interval);
-  }, [isPaused]); // Effect akan reset setiap kali isPaused berubah
+  }, [isPaused]);
 
-  // --- 2. LISTENER SCROLL MANUAL ---
+  // SCROLL MANUAL
   useEffect(() => {
     checkScroll();
     const container = scrollRef.current;
@@ -90,9 +85,9 @@ export default function FlyerSection({ flyers }: FlyerSectionProps) {
     <section className="w-full py-6 md:py-10 border-b border-gray-100">
       <div 
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative group"
-        // --- 3. EVENT HANDLER PAUSE ---
-        onMouseEnter={() => setIsPaused(true)} // Mouse Masuk -> Stop Animasi
-        onMouseLeave={() => setIsPaused(false)} // Mouse Keluar -> Jalan Lagi
+        // EVENT HANDLER PAUSE 
+        onMouseEnter={() => setIsPaused(true)} 
+        onMouseLeave={() => setIsPaused(false)} 
       >
         
         {/* Tombol Kiri */}
@@ -138,7 +133,7 @@ export default function FlyerSection({ flyers }: FlyerSectionProps) {
                         />
                     </div>
                     
-                    {/* Progress Bar (Indikator Waktu) - Opsional, pemanis visual */}
+                    {/* Progress Bar  */}
                     {!isPaused && (
                          <div className="absolute bottom-0 left-0 h-1 bg-blue-600/50 animate-[progress_5s_linear_infinite] w-full origin-left z-10"></div>
                     )}
@@ -160,7 +155,6 @@ export default function FlyerSection({ flyers }: FlyerSectionProps) {
 
       </div>
       
-      {/* Tambahkan keyframes untuk animasi progress bar di global CSS atau tailwind config jika ingin dipakai */}
       <style jsx global>{`
         @keyframes progress {
           0% { transform: scaleX(0); }

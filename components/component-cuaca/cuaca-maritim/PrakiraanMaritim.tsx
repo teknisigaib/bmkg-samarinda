@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import WeatherIcon from "../WeatherIcon";
-import { Waves, Wind, AlertTriangle } from "lucide-react"; // <-- Impor AlertTriangle
+import { Waves, Wind, AlertTriangle } from "lucide-react";
 
 interface PrakiraanProps {
   id: string;
@@ -19,7 +19,7 @@ interface PrakiraanItem {
   wind_to: string;
   wind_speed_min: number;
   wind_speed_max: number;
-  warning_desc: string; // <-- Tambahkan properti warning_desc
+  warning_desc: string;
 }
 
 export default function PrakiraanMaritim({ id, nama }: PrakiraanProps) {
@@ -87,7 +87,7 @@ export default function PrakiraanMaritim({ id, nama }: PrakiraanProps) {
                 <div className="flex items-center gap-3 bg-white/50 p-3 rounded-lg"><Wind className="w-8 h-8 text-slate-500 flex-shrink-0" /><div><p className="text-sm text-slate-500">Angin</p><p className="text-lg font-bold">{selectedData.wind_speed_min}-{selectedData.wind_speed_max} knot</p><p className="text-xs text-slate-500">{selectedData.wind_from} - {selectedData.wind_to}</p></div></div>
             </div>
             
-            {/* ✅ BLOK PERINGATAN DITAMBAHKAN DI SINI */}
+            {/* PERINGATAN */}
             {selectedData.warning_desc && selectedData.warning_desc !== "NIL" && (
               <div className="flex items-start gap-3 bg-red-50 border border-red-300/50 text-red-800 p-3 rounded-lg">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />

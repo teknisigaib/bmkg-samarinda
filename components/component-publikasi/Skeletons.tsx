@@ -1,10 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ==========================================
-// 1. ATOMS (Komponen Kecil / Kartu Satuan)
-// ==========================================
-
-// Atom A: Kartu Berita (Landscape Image + Text)
 const NewsCardSkeleton = () => (
   <div className="bg-white rounded-xl border border-gray-100 overflow-hidden space-y-3 shadow-sm">
     <Skeleton className="h-48 w-full rounded-none" />
@@ -20,7 +15,7 @@ const NewsCardSkeleton = () => (
   </div>
 );
 
-// Atom B: Kartu Buletin/Artikel (Portrait Image 3:4)
+// Kartu Buletin/Artikel 
 const PortraitCardSkeleton = () => (
   <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
      <div className="relative aspect-[3/4]">
@@ -34,7 +29,7 @@ const PortraitCardSkeleton = () => (
   </div>
 );
 
-// Atom C: List Makalah (Text Focused + Side Accent)
+// List Makalah
 const ListRowSkeleton = () => (
   <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm flex flex-col md:flex-row gap-6">
       {/* Side Accent Line */}
@@ -42,27 +37,21 @@ const ListRowSkeleton = () => (
       
       <div className="w-full space-y-3">
           <div className="flex justify-between">
-             <Skeleton className="h-5 w-24 rounded-md" /> {/* Badge Type */}
-             <Skeleton className="h-5 w-5 rounded-full" /> {/* Icon */}
+             <Skeleton className="h-5 w-24 rounded-md" />
+             <Skeleton className="h-5 w-5 rounded-full" />
           </div>
-          <Skeleton className="h-7 w-3/4" /> {/* Title */}
-          <Skeleton className="h-4 w-40" /> {/* Author */}
-          <Skeleton className="h-12 w-full" /> {/* Abstract */}
+          <Skeleton className="h-7 w-3/4" /> 
+          <Skeleton className="h-4 w-40" /> 
+          <Skeleton className="h-12 w-full" /> 
           <div className="flex gap-2 pt-2">
-              <Skeleton className="h-6 w-16 rounded-md" /> {/* Tag */}
-              <Skeleton className="h-6 w-16 rounded-md" /> {/* Tag */}
+              <Skeleton className="h-6 w-16 rounded-md" /> 
+              <Skeleton className="h-6 w-16 rounded-md" />
           </div>
       </div>
   </div>
 );
 
 
-// ==========================================
-// 2. COMPOSITES (Susunan Halaman Lengkap)
-//    Ini yang akan di-import di loading.tsx
-// ==========================================
-
-// Dipanggil di: /berita-kegiatan/loading.tsx
 export function BeritaPageSkeleton() {
   return (
     <div className="space-y-12">
@@ -91,7 +80,6 @@ export function BeritaPageSkeleton() {
   );
 }
 
-// Dipanggil di: /buletin/loading.tsx
 export function BuletinPageSkeleton() {
   return (
     <div className="space-y-12">
@@ -114,7 +102,6 @@ export function BuletinPageSkeleton() {
   );
 }
 
-// Dipanggil di: /artikel/loading.tsx (atau /makalah)
 export function PublikasiListPageSkeleton() {
   return (
     <div className="space-y-12">

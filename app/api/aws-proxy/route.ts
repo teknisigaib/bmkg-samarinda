@@ -1,11 +1,9 @@
-// src/app/api/aws-proxy/route.ts
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // Server Next.js melakukan fetch ke API HTTP (ini diperbolehkan di sisi server)
     const res = await fetch("http://202.90.199.132/aws-new/data/station/latest/4000000055", {
-      cache: "no-store", // Pastikan selalu ambil data terbaru
+      cache: "no-store", 
     });
 
     if (!res.ok) {
@@ -14,7 +12,6 @@ export async function GET() {
 
     const data = await res.json();
 
-    // Kembalikan data ke frontend dengan status 200
     return NextResponse.json(data);
   } catch (error) {
     console.error("Proxy Error:", error);

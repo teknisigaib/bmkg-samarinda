@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Calendar, User, ArrowRight, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 9;
 const CATEGORIES = ["All", "Berita", "Kegiatan", "Edukasi"];
 
 interface NewsItem {
@@ -30,7 +30,6 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
   const [filterCategory, setFilterCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // --- LOGIC (Tetap Sama) ---
   const filteredNews = initialData.filter((item) => {
     const matchSearch = item.title.toLowerCase().includes(search.toLowerCase());
     const matchCategory = filterCategory === "All" || item.category === filterCategory;
@@ -66,10 +65,9 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
   return (
     <div className="w-full space-y-10">
 
-        {/* --- 1. NEW DESIGN: FILTER & SEARCH SECTION --- */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-gray-100">
           
-          {/* Left: Modern Tabs */}
+          {/* Left Tabs */}
           <div className="flex items-center gap-8 overflow-x-auto w-full md:w-auto no-scrollbar relative">
              {CATEGORIES.map((cat) => {
                const isActive = filterCategory === cat;
@@ -109,7 +107,7 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
           </div>
         </div>
 
-        {/* Featured News (Desain Sedikit Diperhalus Shadow-nya) */}
+        {/* Featured News */}
         <AnimatePresence>
         {featuredNews && currentPage === 1 && (
           <motion.div 
@@ -133,7 +131,6 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
                   </div>
                 </div>
                 <div className="p-6 md:p-12 flex flex-col justify-center bg-white relative">
-                  {/* Decorative Background Element */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-10 opacity-50" />
 
                   <div className="flex items-center gap-4 text-xs font-medium text-gray-500 mb-4 uppercase tracking-wider">
@@ -235,7 +232,7 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
             )}
         </div>
 
-        {/* Pagination (Minimalist) */}
+        {/* Pagination  */}
         {listNews.length > ITEMS_PER_PAGE && (
             <div className="mt-16 flex justify-center items-center gap-2">
                 <button

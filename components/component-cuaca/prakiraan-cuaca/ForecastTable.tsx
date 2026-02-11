@@ -35,8 +35,7 @@ export default function ForecastTable({ data }: { data: GeneralForecastRow[] }) 
             <tbody className="divide-y divide-slate-100">
               {data.map((row, idx) => {
                 
-                // 2. HITUNG ROTASI MENGGUNAKAN HELPER
-                // row.wind.direction berisi teks seperti "N", "SE", "TL"
+                // HITUNG ROTASI
                 const windDegree = getWindRotation(row.wind.direction);
                 
                 return (
@@ -60,12 +59,11 @@ export default function ForecastTable({ data }: { data: GeneralForecastRow[] }) 
                       </div>
                     </td>
 
-                    {/* 3. KOLOM ANGIN DENGAN LOGIKA BARU */}
+                    {/* KOLOM ANGIN*/}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div 
                           className="p-1.5 bg-slate-100 rounded-full transform transition-transform duration-300 flex-shrink-0"
-                          // +180 agar panah menunjuk ke arah angin PERGI (Flow), bukan arah DATANG (Source)
                           style={{ transform: `rotate(${windDegree}deg)` }}
                         >
                           <Navigation2 className="w-4 h-4 text-blue-500" fill="currentColor" fillOpacity={1} />

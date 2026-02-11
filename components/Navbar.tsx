@@ -10,8 +10,6 @@ import {
   Satellite, Flame, Newspaper, BookA, BookText, Menu, X, OctagonAlert, CloudRain, BarChart3, Leaf, Waves, Radio
 } from "lucide-react";
 
-// --- 1. Definisi Data Menu (Disatukan dalam Array Object) ---
-// Definisi tipe data untuk item menu (jika menggunakan TypeScript)
 type NavItem = {
   key: string;
   label: string;
@@ -79,12 +77,12 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function Navbar() {
-  // State Desktop: Menyimpan ID menu yang sedang di-hover (misal: "profil")
+  // State Desktop
   const [activeDesktop, setActiveDesktop] = useState<string | null>(null);
 
-  // State Mobile: Toggle Drawer utama
+  // State Mobile
   const [mobileOpen, setMobileOpen] = useState(false);
-  // State Mobile Submenu: Menyimpan ID menu yang sedang dibuka di mobile
+  // State Mobile Submenu:
   const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
 
   return (
@@ -101,7 +99,7 @@ export default function Navbar() {
               height={40} 
               priority 
               className="w-9 h-8 md:w-12 md:h-10"
-              sizes="(max-width: 768px) 36px, 48px" // Optimasi ukuran gambar
+              sizes="(max-width: 768px) 36px, 48px"
             />
             <div className="flex flex-col">
               <span className="text-gray-800 font-bold text-xs md:text-sm leading-tight">Badan Meteorologi Klimatologi & Geofisika</span>
@@ -116,7 +114,7 @@ export default function Navbar() {
                 <div key={menu.key} className="relative" onMouseEnter={() => setActiveDesktop(menu.key)} onMouseLeave={() => setActiveDesktop(null)}>
                    <button 
                      className={`px-4 py-2 text-md font-medium flex items-center gap-1 rounded-full transition-colors ${activeDesktop === menu.key ? "text-blue-600 bg-blue-50" : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"}`}
-                     aria-expanded={activeDesktop === menu.key} // Aksesibilitas
+                     aria-expanded={activeDesktop === menu.key}
                    >
                       {menu.label} <ChevronDown className={`w-3 h-3 transition-transform ${activeDesktop === menu.key ? 'rotate-180' : ''}`} />
                    </button>
@@ -148,7 +146,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- MOBILE DRAWER (DI LUAR NAV) --- */}
+      {/* MOBILE DRAWER */}
       <AnimatePresence>
         {mobileOpen && (
           <>

@@ -1,14 +1,12 @@
-// src/lib/weather-service.ts
-
 const CACHE = new Map<string, { data: WeatherData, timestamp: number }>();
-const CACHE_DURATION = 1000 * 60 * 10; // 10 Menit
+const CACHE_DURATION = 1000 * 60 * 10;
 
 import { BMKGResponse, BMKGWeatherItem } from './bmkg-types';
 import { WeatherData, RegionLevel } from './types';
 import { calculateFeelsLike } from './weather-utils';
 import { MAHAKAM_LOCATIONS } from '@/lib/mahakam-data';
 
-// --- HELPERS ---
+// HELPER
 const getLevel = (id: string): RegionLevel => {
   const parts = id.split('.');
   if (parts.length === 1) return 'province';
@@ -17,8 +15,7 @@ const getLevel = (id: string): RegionLevel => {
   return 'village';
 };
 
-// --- HELPER SINKRONISASI WAKTU (The Fixer) ---
-// Mencari data cuaca yang jam-nya paling dekat dengan sekarang (bukan sekadar jam pertama)
+// HELPER SINKRONISASI WAKTU
 const getCurrentWeatherItem = (cuacaArray: BMKGWeatherItem[][]): BMKGWeatherItem => {
   const flatList = cuacaArray.flat();
   const now = new Date();
@@ -26,7 +23,6 @@ const getCurrentWeatherItem = (cuacaArray: BMKGWeatherItem[][]): BMKGWeatherItem
   let minDiff = Infinity;
 
   flatList.forEach(item => {
-    // Pastikan format local_datetime didukung browser (biasanya "YYYY-MM-DD HH:mm:ss")
     const itemTime = new Date(item.local_datetime).getTime();
     const diff = Math.abs(now.getTime() - itemTime);
     if (diff < minDiff) {
@@ -38,12 +34,11 @@ const getCurrentWeatherItem = (cuacaArray: BMKGWeatherItem[][]): BMKGWeatherItem
   return closestItem;
 };
 
-// --- CORE FETCHING ---
+// CORE FETCHING
 export const fetchBMKGData = async (locationId: string): Promise<WeatherData | null> => {
   const cached = CACHE.get(locationId);
   const now = Date.now();
   
-  // 1. Cek In-Memory Cache dulu (Layer 1)
   if (cached && (now - cached.timestamp < CACHE_DURATION)) {
     return cached.data;
   }
@@ -63,7 +58,7 @@ export const fetchBMKGData = async (locationId: string): Promise<WeatherData | n
     const json: BMKGResponse = await res.json();
     const data = transformToUIData(json, locationId);
     
-    // 2. Simpan ke In-Memory Cache (Layer 2)
+    // Simpan ke In-Memory Cache
     CACHE.set(locationId, { data, timestamp: Date.now() });
     
     return data;
@@ -95,7 +90,7 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
   else if (level === 'district') locationName = rootMeta.kecamatan || "";
   else locationName = rootMeta.desa || "";
 
-  // --- LOGIKA SUB-REGIONS ---
+  // LOGIKA SUB-REGIONS 
   const subRegions = json.data.map(item => {
     const w = getCurrentWeatherItem(item.cuaca);
     let id = item.lokasi.adm4 || item.lokasi.adm3 || item.lokasi.adm2 || "";
@@ -116,11 +111,9 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
     };
   });
 
-  // --- HITUNG STATISTIK LENGKAP ---
+  // HITUNG STATISTIK LENGKAP 
   let tempRange: string | undefined = undefined;
   let description = "";
-
-  // MODIFIKASI: Jangan tampilkan range jika level Desa/Kelurahan ATAU data cuma 1
   const showRange = subRegions.length > 1 && level !== 'village';
 
   if (showRange) {
@@ -163,13 +156,8 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
           description = `Untuk wilayah ${locationName}, kondisi cuaca dominan ${dominantWeather} dengan suhu rata-rata wilayah ${avgTemp}°C dan kecepatan angin ${minWind} sampai ${maxWind} km/j.`;
       }
 
-  } else {
-      // LOGIKA SINGLE (DESA/KELURAHAN atau KOTA Tanpa Sub-region)
-      // Tampilkan data spesifik titik tersebut
-      
+  } else {  
       description = `Untuk wilayah ${locationName}, kondisi cuaca saat ini ${refWeather.weather_desc} dengan suhu ${refWeather.t}°C, terasa seperti ${realFeelValue}°C, dan kecepatan angin ${refWeather.ws} km/j.`;
-      
-      // Pastikan tempRange undefined agar UI tidak masuk mode range
       tempRange = undefined; 
   }
 
@@ -178,8 +166,6 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
     parentLocation: level === 'province' ? 'Indonesia' : (rootMeta.provinsi || rootMeta.kotkab || ""),
     level: level,
     timestamp: `Diperbarui: ${refWeather.local_datetime}`,
-    
-    // Data Utama
     temp: refWeather.t,
     condition: refWeather.weather_desc,
     iconUrl: refWeather.image,
@@ -189,7 +175,6 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
     feelsLike: realFeelValue,
     visibility: parseFloat(refWeather.vs_text.replace(/[<>=a-zA-Z]/g, '').trim()) || 10,
     uvIndex: 0,
-    
     subRegions: subRegions,
     tempRange: tempRange, 
     description: description,
@@ -211,8 +196,7 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
   };
 };
 
-// --- FUNGSI 1: AMBIL DATA PROVINSI (KALTIM) ---
-// Digunakan untuk list cuaca kota-kota di halaman utama
+// FUNGSI 1: AMBIL DATA PROVINSI (KALTIM)
 export const getKaltimWeather = async () => {
   try {
     const res = await fetch(
@@ -259,8 +243,7 @@ export const getKaltimWeather = async () => {
   }
 };
 
-// --- FUNGSI 2: AMBIL DATA MAHAKAM (DASHBOARD) ---
-// Digunakan untuk Monitoring Rute Sungai
+// FUNGSI 2: AMBIL DATA MAHAKAM 
 export const getMahakamDataFull = async () => {
   const promises = MAHAKAM_LOCATIONS.map(async (loc) => {
     const weatherData = await fetchBMKGData(loc.bmkgId);
@@ -277,8 +260,6 @@ export const getMahakamDataFull = async () => {
       feelsLike: weatherData.feelsLike,
       windDeg: weatherData.tableData?.[0]?.wind.deg || 0,
       visibility: weatherData.visibility,
-      
-      // Data Forecast untuk Detail View (Modal)
       forecasts: weatherData.tableData?.map(item => ({
         time: item.time,
         date: item.date,

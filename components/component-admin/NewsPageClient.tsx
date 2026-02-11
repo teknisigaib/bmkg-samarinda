@@ -9,8 +9,6 @@ import { useRouter } from "next/navigation";
 interface Props { initialPosts: any[]; }
 
 export default function NewsPageClient({ initialPosts }: Props) {
-  // View mode sekarang: "list" adalah default. "form" hanya state boolean "isModalOpen" sebenarnya.
-  // Tapi kita tetap pakai 'view' agar konsisten dengan logika sebelumnya.
   const [view, setView] = useState<"list" | "form">("list");
   const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
   const router = useRouter();
@@ -41,7 +39,7 @@ export default function NewsPageClient({ initialPosts }: Props) {
 
   return (
     <div className="space-y-6 relative"> 
-      {/* HEADER PAGE (Selalu Tampil) */}
+      {/* HEADER PAGE */}
       <div className="flex justify-between items-center">
         <div>
             <h1 className="text-2xl font-bold text-gray-800">Kelola Berita</h1>
@@ -55,10 +53,10 @@ export default function NewsPageClient({ initialPosts }: Props) {
         </button>
       </div>
 
-      {/* LIST BERITA (Selalu Tampil di background) */}
+      {/* LIST BERITA */}
       <PostList data={initialPosts} onEdit={handleEdit} />
 
-      {/* MODAL FORM (Muncul di atas List jika view === 'form') */}
+      {/* MODAL FORM  */}
       {view === "form" && (
         <PostForm 
             initialData={selectedPost} 

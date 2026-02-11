@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import React from "react";
 
-// Pindahkan logika dynamic import ke sini
 const WarningMap = dynamic(
   () => import("./WarningMap"), 
   {
@@ -16,7 +15,6 @@ const WarningMap = dynamic(
   }
 );
 
-// Wrapper sederhana untuk meneruskan props
 export default function MapLoader({ data }: { data: any }) {
   return <WarningMap data={data} />;
 }

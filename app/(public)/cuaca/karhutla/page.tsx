@@ -19,7 +19,7 @@ export default async function KarhutlaPage() {
     getHotspotTrend()
   ]);
 
-  // Ambil tanggal update terakhir dari data paling baru yg didapat
+  // Ambil tanggal update terakhir
   const lastUpdateString = weeklyHotspots.length > 0 
     ? weeklyHotspots[0].date.split(" ")[0] 
     : new Date().toLocaleDateString("id-ID");
@@ -39,7 +39,7 @@ export default async function KarhutlaPage() {
         <KarhutlaStats trend={trendData} />
       </section>
 
-      {/* PETA ANALISIS SPARTAN */}
+      {/* PETA ANALISIS */}
       <section className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-gray-200 pb-3">
             <div className="flex items-center gap-3">

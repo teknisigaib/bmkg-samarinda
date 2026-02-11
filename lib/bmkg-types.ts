@@ -1,5 +1,3 @@
-// lib/bmkg-types.ts
-
 export interface BMKGLocation {
   adm1: string;
   adm2: string;
@@ -21,22 +19,22 @@ export interface BMKGWeatherItem {
   datetime: string;
   utc_datetime: string;
   local_datetime: string;
-  t: number;       // Suhu
-  hu: number;      // Humidity
-  ws: number;      // Wind Speed (km/h atau knots)
-  wd: string;      // Wind Direction (Cardinals: N, SE)
-  wd_deg: number;  // Wind Direction (Degree)
+  t: number;       
+  hu: number;      
+  ws: number;     
+  wd: string;     
+  wd_deg: number; 
   weather_desc: string;
   weather_desc_en: string;
-  vs_text: string; // Visibility Text (< 8 km)
+  vs_text: string; 
   analysis_date: string;
-  image: string;   // URL Icon BMKG
+  image: string;   
   tcc: number
 }
 
 export interface BMKGDataRow {
   lokasi: BMKGLocation;
-  cuaca: BMKGWeatherItem[][]; // Array of Array (Per hari)
+  cuaca: BMKGWeatherItem[][];
 }
 
 export interface BMKGResponse {

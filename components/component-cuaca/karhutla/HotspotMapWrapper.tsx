@@ -20,7 +20,7 @@ const HotspotMap = dynamic(() => import("./HotspotMap"), {
   ),
 });
 
-// --- HELPER FORMAT ---
+// HELPER FORMAT 
 const formatDateID = (date: Date) => {
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -66,10 +66,9 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
   }, [data, selectedDate]);
 
   return (
-    // PARENT UTAMA: overflow-hidden untuk mencegah scroll horizontal pada level page
     <div className="space-y-8 w-full max-w-full overflow-hidden"> 
 
-      {/* 1. HEADER INFORMASI */}
+      {/* HEADER */}
       <section className="bg-red-50 border border-red-100 rounded-xl p-6 flex flex-col md:flex-row gap-4 items-center text-center md:items-start md:text-left shadow-sm">
         
         {/* Ikon Api */}
@@ -102,14 +101,13 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
         </div>
       </section>
       
-      {/* 2. DATE PICKER (FIX LEBAR DI SINI) */}
+      {/* 2. DATE PICKER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h3 className="font-bold text-gray-700 flex items-center gap-2">
             <CalendarDays className="w-5 h-5 text-red-500" />
             Pilih Tanggal Pantauan
         </h3>
         
-        {/* FIX: max-w-[calc(100vw-2rem)] memaksa lebar container < lebar layar HP */}
         <div className="flex bg-gray-50 p-1.5 rounded-xl border border-gray-200 overflow-x-auto hide-scrollbar gap-2 snap-x w-full max-w-[calc(100vw-2.5rem)] md:max-w-none md:w-auto">
             {last7Days.map((date, idx) => {
                 const isSelected = formatDateID(date) === formatDateID(selectedDate);
@@ -144,7 +142,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
         </div>
       </div>
 
-      {/* 3. PETA INTERAKTIF */}
+      {/*  PETA INTERAKTIF */}
       <div className="relative group">
         <HotspotMap data={filteredData} />
         <div className="absolute top-4 left-4 right-4 md:right-auto md:w-auto z-[400] pointer-events-none flex justify-center md:justify-start">
@@ -168,7 +166,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
         )}
       </div>
 
-      {/* 4. TABEL DAFTAR TITIK PANAS (FIX LEBAR JUGA) */}
+      {/* 4. TABEL DAFTAR TITIK PANAS */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm w-full">
         <div className="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row justify-between md:items-center gap-2">
             <h3 className="font-bold text-gray-800 flex items-center gap-2">
@@ -180,7 +178,6 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
             </span>
         </div>
 
-        {/* FIX: max-w-[calc(100vw-2.5rem)] agar tabel scrollable di dalam box, bukan melebarkan halaman */}
         <div className="overflow-x-auto w-full max-w-[calc(100vw-2.5rem)] md:max-w-full mx-auto max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
             <table className="w-full text-sm text-left relative">
                 <thead className="bg-gray-50 text-gray-500 font-bold uppercase text-[10px] tracking-wider sticky top-0 z-10 shadow-sm">

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Download, User, Calendar, X, ExternalLink, Tag, BookOpen, ChevronLeft, ChevronRight, Layers } from "lucide-react";
 
-// --- Definisi Tipe Data ---
+// Definisi Tipe Data
 export type PublikasiType = "Artikel" | "Makalah";
 
 export type PublikasiItem = {
@@ -31,7 +31,7 @@ export default function PublikasiListClient({ initialData }: PublikasiListProps)
   const [filterType, setFilterType] = useState<"Semua" | PublikasiType>("Semua");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 1. Filter Logic
+  // Filter Logic
   const filteredData = initialData.filter((item) => {
     const matchSearch = item.title.toLowerCase().includes(search.toLowerCase()) || 
                         item.author.toLowerCase().includes(search.toLowerCase());
@@ -39,7 +39,7 @@ export default function PublikasiListClient({ initialData }: PublikasiListProps)
     return matchSearch && matchType;
   });
 
-  // 2. Pagination Logic
+  // Pagination Logic
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const currentData = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,

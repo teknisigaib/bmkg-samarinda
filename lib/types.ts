@@ -1,5 +1,3 @@
-// lib/types.ts
-import { GeneralForecastRow } from './data';
 
 export type RegionLevel = 'province' | 'city' | 'district' | 'village';
 
@@ -7,8 +5,6 @@ export interface BreadcrumbItem {
   name: string;
   url: string;
 }
-
-// Interface AirQuality DIHAPUS
 
 export interface SubRegionSummary {
   id: string;
@@ -39,7 +35,6 @@ export interface WeatherData {
   parentLocation: string;
   level: RegionLevel;
   timestamp: string;
-  
   temp: number;
   tempRange?: string;
   condition: string;
@@ -47,11 +42,7 @@ export interface WeatherData {
   windSpeed: number;
   humidity: number;
   iconUrl: string;
-  
-  // --- PASTIKAN INI TCC, BUKAN PRESSURE ---
   tcc: number; 
-  // pressure: number; // (Hapus baris ini jika masih ada)
-  
   feelsLike: number;
   visibility: number;
   uvIndex: number;

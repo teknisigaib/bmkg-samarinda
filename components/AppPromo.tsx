@@ -3,11 +3,10 @@ import { CheckCircle2, Smartphone, Download } from "lucide-react";
 
 export default function AppPromo() {
   return (
-    // 1. BACKGROUND LEBIH CERAH & MODERN
-    // Menggunakan gradien biru yang lebih terang dan halus.
+   
     <section className="relative py-12 md:py-16 bg-gradient-to-br from-blue-600 to-blue-800 overflow-hidden rounded-2xl">
       
-      {/* Dekorasi Background - Pola Gelombang Halus */}
+    
       <div className="absolute inset-0 opacity-10 pointer-events-none">
           <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path fill="#ffffff" fillOpacity="0.2" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -17,26 +16,25 @@ export default function AppPromo() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-8 lg:gap-16">
           
-          {/* --- KOLOM KIRI: TEKS & TOMBOL --- */}
+          {/* KOLOM KIRI: TEKS & TOMBOL  */}
           <div className="md:w-1/2 text-white space-y-6">
-            {/* Badge yang Lebih Ringkas */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-blue-100 border border-white/20">
               <Smartphone className="w-4 h-4" />
               Aplikasi Mobile Resmi
             </div>
             
-            {/* Judul Lebih Padat */}
+            {/* Judul */}
             <h2 className="text-3xl md:text-4xl font-bold leading-tight">
               Info BMKG dalam Genggaman.
               <span className="block text-blue-200">Cepat, Akurat, Realtime.</span>
             </h2>
             
-            {/* Deskripsi Lebih Fokus */}
+            {/* Deskripsi */}
             <p className="text-blue-100 text-base md:text-lg leading-relaxed max-w-xl">
               Dapatkan notifikasi dini cuaca ekstrem, gempa bumi, dan prakiraan iklim langsung di smartphone Anda di mana saja, kapan saja.
             </p>
             
-            {/* List Fitur (2 Kolom agar lebih pendek) */}
+            {/* List Fitur */}
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
                 {["Notifikasi Peringatan Dini", "Info Gempa < 5 Menit", "Cuaca per Kecamatan", "Citra Satelit & Radar"].map((item, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-blue-100 font-medium text-sm">
@@ -45,7 +43,7 @@ export default function AppPromo() {
                 ))}
             </ul>
 
-            {/* Tombol Download (Lebih Menonjol) */}
+            {/* Tombol Download*/}
             <div className="flex flex-wrap gap-4">
               <AppButton 
                 href="https://play.google.com/store/apps/details?id=com.bmkg.infobmkg"
@@ -60,32 +58,24 @@ export default function AppPromo() {
             </div>
           </div>
 
-          {/* --- KOLOM KANAN: MOCKUP HP (LEBIH DINAMIS) --- */}
+          {/*  KOLOM KANAN */}
           <div className="md:w-1/2 flex justify-center relative">
-            {/* Efek Glow di Belakang */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
             
-            {/* MOCKUP HP yang "MENGAMBANG" & MIRING.
-                Menggunakan transform rotate dan shadow untuk efek 3D.
-                Tingginya dikurangi dari 500px menjadi 450px agar lebih proporsional.
-            */}
             <div className="relative w-[240px] h-[480px] bg-slate-900 rounded-[2.5rem] border-[6px] border-slate-800 shadow-2xl overflow-hidden z-10 transform rotate-[-6deg] hover:rotate-0 transition-transform duration-500 group">
                {/* Notch */}
                <div className="absolute top-0 inset-x-0 h-6 bg-slate-900 flex justify-center z-20">
                    <div className="w-24 h-4 bg-slate-800 rounded-b-xl"></div>
                </div>
 
-               {/* Screen Content (Menggunakan Image Placeholder yang lebih niat) */}
+            
                <div className="relative w-full h-full bg-white">
                     <Image 
-                        // Ganti dengan screenshot aplikasi asli Anda jika ada!
-                        // Untuk sementara pakai placeholder yang relevan.
                         src="https://placehold.co/240x480/1e3a8a/ffffff?text=Info+BMKG+App+Screen" 
                         alt="Info BMKG App Screenshot" 
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {/* Overlay agar teks putih di atasnya terbaca */}
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent"></div>
                     
                     <div className="absolute bottom-8 left-0 w-full text-center text-white p-4">

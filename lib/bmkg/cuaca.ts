@@ -1,16 +1,13 @@
-// lib/bmkg/cuaca.ts
-
-// Tipe Data Sesuai JSON Baru (Internal)
 export interface WeatherItem {
   datetime: string;
-  t: number;       // Suhu
-  hu: number;      // Kelembapan
+  t: number;       
+  hu: number;     
   weather_desc: string;
-  ws: number;      // Wind Speed
-  wd: string;      // Wind Direction
-  image: string;   // Icon URL dari BMKG
+  ws: number;    
+  wd: string;      
+  image: string; 
   local_datetime: string;
-  vs_text: string; // Visibilitas
+  vs_text: string; 
   tcc: number;
 }
 
@@ -22,16 +19,15 @@ export interface WeatherResponse {
     provinsi: string;
   };
   data: {
-    cuaca: WeatherItem[][]; // Array 2D (Hari -> Jam)
+    cuaca: WeatherItem[][]; 
   }[];
 }
 
-// --- PERBAIKAN: Tambahkan Interface CuacaData untuk Konsumsi Frontend ---
 export interface CuacaData {
   wilayah: string;
   cuaca: string;
   kodeCuaca: string;
-  iconUrl: string; // Tambahan field untuk URL icon resmi BMKG
+  iconUrl: string;
   suhu: string;
   kelembapan: string;
   anginSpeed: string;
@@ -43,7 +39,7 @@ export async function getCuacaDetail(kodeWilayah: string = "64.72.09.1003"): Pro
   try {
     const res = await fetch(
       `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${kodeWilayah}`,
-      { next: { revalidate: 300 } } // Cache 5 menit
+      { next: { revalidate: 300 } } 
     );
 
     if (!res.ok) throw new Error("Gagal fetch API BMKG");
@@ -55,16 +51,14 @@ export async function getCuacaDetail(kodeWilayah: string = "64.72.09.1003"): Pro
   }
 }
 
-// Fungsi Ringkas untuk Widget Home
+// Fungsi  Widget Home
 export async function getCuacaSamarinda(): Promise<CuacaData | null> {
     const data = await getCuacaDetail();
     if (!data || !data.data[0]) return null;
 
-    // Ratakan array 2D jadi 1D biar mudah cari jam terdekat
     const allForecasts = data.data[0].cuaca.flat();
     const now = new Date();
 
-    // Cari yang paling dekat dengan jam sekarang
     const current = allForecasts.reduce((prev, curr) => {
         const prevTime = new Date(prev.local_datetime).getTime();
         const currTime = new Date(curr.local_datetime).getTime();
@@ -73,10 +67,10 @@ export async function getCuacaSamarinda(): Promise<CuacaData | null> {
     });
 
     return {
-        wilayah: data.lokasi.kotkab, // "Kota Samarinda"
+        wilayah: data.lokasi.kotkab, 
         cuaca: current.weather_desc,
-        kodeCuaca: "0", // Fallback code, tapi kita akan utamakan iconUrl di frontend
-        iconUrl: current.image, // URL Icon langsung dari BMKG!
+        kodeCuaca: "0", 
+        iconUrl: current.image,
         suhu: current.t.toString(),
         kelembapan: current.hu.toString(),
         anginSpeed: current.ws.toString(),

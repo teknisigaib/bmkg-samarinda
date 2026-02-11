@@ -4,5 +4,4 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// Buat client Supabase agar bisa dipakai di mana saja (Login, Upload, dll)
 export const supabase = createClient(supabaseUrl, supabaseKey);

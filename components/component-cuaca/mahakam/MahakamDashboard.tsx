@@ -21,20 +21,15 @@ interface Props {
 
 export default function MahakamDashboard({ data }: Props) {
   
-  // STATE: Menyimpan lokasi mana yang sedang diklik (selected)
   const [selectedStation, setSelectedStation] = useState<MahakamLocation | null>(null);
   
-  // REF: Untuk auto-scroll ke bawah saat diklik
   const detailRef = useRef<HTMLDivElement>(null);
 
-  // Handler saat kolom di tabel atas diklik
   const handleStationSelect = (loc: MahakamLocation) => {
-    // Jika diklik lagi, tutup. Jika beda, ganti.
     if (selectedStation?.id === loc.id) {
         setSelectedStation(null);
     } else {
         setSelectedStation(loc);
-        // Scroll halus ke tampilan detail
         setTimeout(() => {
             detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
@@ -44,21 +39,21 @@ export default function MahakamDashboard({ data }: Props) {
   return (
     <div className="space-y-8 pb-20">
          
-         {/* 1. PETA */}
+         {/*  PETA */}
          <section>
             <RiverMap initialData={data} />
          </section>
 
-         {/* 2. TABEL RUTE (MASTER) */}
+         {/* TABEL RUTE */}
          <section className="relative z-20">
              <RouteForecastView 
                 data={data} 
-                onSelect={handleStationSelect} // Pass fungsi klik
-                activeId={selectedStation?.id} // Pass ID aktif untuk highlight
+                onSelect={handleStationSelect}
+                activeId={selectedStation?.id}
              />
          </section>
 
-         {/* 3. TABEL DETAIL (DETAIL) - Muncul jika ada selectedStation */}
+         {/* 3. TABEL DETAIL */}
          {selectedStation && (
              <section ref={detailRef} className="scroll-mt-6">
                 <StationDetailView 

@@ -3,7 +3,7 @@
 interface SimpleHeaderProps {
   title: string;
   description: string;
-  color?: "blue" | "teal" | "emerald" | "orange" | "slate"; // Pilihan warna
+  color?: "blue" | "teal" | "emerald" | "orange" | "slate";
 }
 
 export default function SimpleHeader({ 
@@ -12,7 +12,6 @@ export default function SimpleHeader({
   color = "blue" 
 }: SimpleHeaderProps) {
 
-  // Mapping style berdasarkan warna pilihan
   const theme = {
     blue: "bg-blue-50 border-blue-100 text-slate-600",
     teal: "bg-teal-50 border-teal-100 text-slate-600",
@@ -24,12 +23,12 @@ export default function SimpleHeader({
   return (
     <div className="flex flex-col items-center text-center py-10 px-4">
       
-      {/* 1. JUDUL: Bersih, Tebal, Gelap */}
+      {/* JUDUL */}
       <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-6">
         {title}
       </h2>
       
-      {/* 2. NARASI: Di dalam wrapper beraksen warna lembut */}
+      {/*  NARASI */}
       <div className={`
         relative px-6 py-4 md:px-10 md:py-6 rounded-[2rem] 
         border ${theme} max-w-3xl mx-auto

@@ -1,5 +1,3 @@
-// lib/data-karhutla.ts
-
 export interface HotspotData {
   id: string;
   lat: number;
@@ -19,7 +17,7 @@ const formatDateYMD = (date: Date) => {
   return `${yyyy}${mm}${dd}`;
 };
 
-// Helper: Fetch Data per Tanggal (Parsing TXT Manual)
+// Helper: Fetch Data per Tanggal
 async function fetchBMKGHotspot(date: Date): Promise<HotspotData[]> {
   const dateStr = formatDateYMD(date);
   
@@ -46,8 +44,6 @@ async function fetchBMKGHotspot(date: Date): Promise<HotspotData[]> {
     const cleanData = dataRows
       .map((line, index) => {
         const col = line.split('\t');
-
-        // Pastikan baris memiliki data yang cukup
         if (col.length < 10) return null;
 
         const prov = col[4]?.trim() || ""; 
@@ -57,16 +53,15 @@ async function fetchBMKGHotspot(date: Date): Promise<HotspotData[]> {
 
         return {
           id: `${dateStr}-${index}`,
-          lng: parseFloat(col[0]),        // Index 0: BUJUR
-          lat: parseFloat(col[1]),        // Index 1: LINTANG
-          conf: parseInt(col[2]) || 0,    // Index 2: KEPERCAYAAN
-          district: col[5]?.trim(),       // Index 5: KABUPATEN
-          subDistrict: col[6] ? `Kec. ${col[6].trim()}` : "Kecamatan Tdk Teridentifikasi", // Index 6
-          satellite: col[7]?.trim(),      // Index 7: SATELIT
-          date: `${col[8]} ${col[9]} WIB`,// Index 8 & 9: TGL & WAKTU
+          lng: parseFloat(col[0]),        
+          lat: parseFloat(col[1]),       
+          conf: parseInt(col[2]) || 0,    
+          district: col[5]?.trim(),       
+          subDistrict: col[6] ? `Kec. ${col[6].trim()}` : "Kecamatan Tdk Teridentifikasi", 
+          satellite: col[7]?.trim(),     
+          date: `${col[8]} ${col[9]} WIB`,
         };
       })
-      // PERBAIKAN FILTER: Menggunakan casting 'as HotspotData[]' agar lebih aman
       .filter((item) => item !== null) as HotspotData[];
 
     return cleanData;
@@ -77,14 +72,12 @@ async function fetchBMKGHotspot(date: Date): Promise<HotspotData[]> {
   }
 }
 
-// FUNGSI UTAMA 1: Ambil Data Terbaru (Hari Ini atau Kemarin)
+// Ambil Data Terbaru (Hari Ini atau Kemarin)
 export async function getHotspots(): Promise<HotspotData[]> {
   const today = new Date();
   
-  // Gunakan 'let' agar bisa diubah nilainya jika hari ini kosong
   let data = await fetchBMKGHotspot(today);
 
-  // Jika hari ini kosong, ambil kemarin
   if (data.length === 0) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -94,7 +87,7 @@ export async function getHotspots(): Promise<HotspotData[]> {
   return data;
 }
 
-// FUNGSI UTAMA 2: Ambil Trend 7 Hari Terakhir (Hanya Jumlah)
+// Ambil Trend 7 Hari Terakhir
 export async function getHotspotTrend() {
   const promises = [];
   const today = new Date();
@@ -117,12 +110,11 @@ export async function getHotspotTrend() {
   });
 }
 
-// FUNGSI UTAMA 3: Ambil Data RAW 7 Hari Terakhir (Untuk Peta Mingguan)
+// Ambil Data RAW 7 Hari Terakhir
 export async function getRawWeeklyHotspots(): Promise<HotspotData[]> {
   const promises = [];
   const today = new Date();
 
-  // Loop 7 hari ke belakang
   for (let i = 0; i < 7; i++) {
     const d = new Date();
     d.setDate(today.getDate() - i);
@@ -130,6 +122,5 @@ export async function getRawWeeklyHotspots(): Promise<HotspotData[]> {
   }
 
   const results = await Promise.all(promises);
-  // Menggabungkan array of arrays menjadi satu array flat
   return results.flat();
 }

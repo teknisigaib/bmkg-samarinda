@@ -2,6 +2,30 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  
+  // KONFIGURASI MAINTENANCE
+  const MAINTENANCE_PATHS: string[] = [
+     '/cuaca/maritim',     
+    // '/cuaca/penerbangan',
+  ];
+
+  const { pathname } = request.nextUrl;
+  const isTargeted = MAINTENANCE_PATHS.some((path) => pathname.startsWith(path));
+
+  // Logika Redirect:
+  if (
+      isTargeted && 
+      !pathname.startsWith('/maintenance') && 
+      !pathname.startsWith('/_next') && 
+      !pathname.startsWith('/static') &&
+      !pathname.startsWith('/admin') &&
+      !pathname.startsWith('/login')
+  ) {
+      return NextResponse.redirect(new URL('/maintenance', request.url));
+  }
+
+  // AUTH SUPABASE
+  
   let response = NextResponse.next({
     request: { headers: request.headers },
   })
@@ -16,14 +40,12 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            // --- BAGIAN INI YANG PENTING ---
             request.cookies.set(name, value)
             response = NextResponse.next({ request: { headers: request.headers } })
             
-            // Kita TIMPA opsi bawaan Supabase
             response.cookies.set(name, value, {
               ...options,
-              secure: false, // <--- WAJIB FALSE agar mau jalan di HTTP/VPN
+              secure: false,
               httpOnly: true,
               sameSite: 'lax',
             })
@@ -47,5 +69,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/login'],
+  // UPDATE MATCHER
+  matcher: [
+    '/admin/:path*', 
+    '/login',
+    '/profil/:path*',
+    '/cuaca/:path*',
+    '/gempa/:path*',
+    '/iklim/:path*',
+    '/publikasi/:path*',
+  ],
 }

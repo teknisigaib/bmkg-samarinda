@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-// Definisikan tipe props agar lebih aman (opsional tapi disarankan)
 interface SubRegionGridProps {
   title: string;
   regions: {
@@ -9,7 +8,7 @@ interface SubRegionGridProps {
     name: string;
     temp: number;
     condition: string;
-    icon: string; // URL Icon BMKG
+    icon: string;
   }[];
   onRegionClick: (id: string) => void;
 }
@@ -43,7 +42,6 @@ export default function SubRegionGrid({ title, regions, onRegionClick }: SubRegi
              
              {/* Data Cuaca & Icon */}
              <div className="flex items-end gap-3 mt-auto">
-               {/* UBAH ICON DISINI: Menggunakan <img> tag standar untuk URL BMKG */}
                <div className="w-10 h-10 flex-shrink-0 bg-slate-50 rounded-full p-1 border border-slate-100 group-hover:bg-white transition-colors">
                  <img 
                    src={region.icon} 

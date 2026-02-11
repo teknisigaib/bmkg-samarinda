@@ -4,7 +4,7 @@ import { useState } from "react";
 import ClimateViewer from "@/components/component-iklim/ClimateViewer";
 import { CloudRain, Calendar, Activity, Percent } from "lucide-react";
 
-// Tipe Data untuk Props (Sama seperti ClimateViewer)
+// Tipe Data untuk Props 
 type ClimateItem = {
   id: string;
   title: string;
@@ -64,7 +64,7 @@ export default function PrakiraanTabs({
   return (
     <div className="space-y-8">
       
-      {/* --- TAB NAVIGATION --- */}
+      {/* AB NAVIGATION */}
       <div className="flex flex-wrap gap-2 p-1 bg-gray-100 rounded-xl border border-gray-200">
         <TabButton 
             isActive={activeTab === "dasarian"} 
@@ -92,7 +92,7 @@ export default function PrakiraanTabs({
         />
       </div>
 
-      {/* --- CONTENT AREA --- */}
+      {/* CONTENT AREA */}
       <div className="min-h-[500px]">
         {renderContent()}
       </div>
@@ -118,7 +118,7 @@ function TabButton({ isActive, onClick, icon, label }: any) {
     )
 }
 
-// Komponen Empty State Sederhana
+// Komponen Empty State
 function EmptyState({ msg }: { msg: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-300 text-center">

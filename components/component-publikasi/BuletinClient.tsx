@@ -32,20 +32,19 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 1. Filter Logic (Hanya Search)
+  // Filter Logic
   const filteredData = initialData.filter((item) => {
     return item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
            item.edition.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  // 2. Pagination Logic
+  // Pagination Logic
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const currentData = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset halaman saat search berubah
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
@@ -58,7 +57,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
   return (
     <div className="w-full space-y-8">
 
-        {/* --- 1. SEARCH BAR ONLY --- */}
+        {/* SEARCH BAR */}
         <div className="max-w-md mx-auto relative group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
@@ -72,7 +71,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
             />
         </div>
 
-        {/* --- 2. GRID DATA --- */}
+        {/* GRID DATA  */}
         <div id="buletin-grid">
            {currentData.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
@@ -87,19 +86,13 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
                         className="group flex flex-col items-center text-center cursor-pointer h-full"
                         onClick={() => setSelectedBuletin(item)}
                     >
-                        {/* --- FIXED SIZE CONTAINER ---
-                           1. h-[280px]: Tinggi fix (sekitar ukuran A4 diperkecil). 
-                              Ubah angka ini jika ingin lebih tinggi/pendek.
-                           2. w-full max-w-[210px]: Lebar menyesuaikan, tapi mentok di 210px.
-                           3. mx-auto: Posisi di tengah-tengah kolom grid.
-                        */}
+                  
                         <div className="relative w-[210px] h-[280px] mx-auto rounded-md overflow-hidden shadow-lg shadow-slate-300 mb-5 transform group-hover:-translate-y-2 transition-all duration-300 bg-slate-200 border border-slate-100">
                             
                             <Image
                                 src={item.cover}
                                 alt={item.title}
                                 fill
-                                // object-cover akan memotong gambar agar pas di kotak 210x280 tanpa gepeng
                                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                                 sizes="(max-width: 768px) 150px, 210px"
                             />
@@ -141,7 +134,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
            )}
         </div>
 
-        {/* --- 3. PAGINATION --- */}
+        {/* PAGINATION  */}
         {filteredData.length > ITEMS_PER_PAGE && (
             <div className="flex justify-center gap-2 pt-8">
                 <button
@@ -164,7 +157,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
             </div>
         )}
 
-        {/* --- 4. MODAL PDF VIEWER --- */}
+        {/* MODAL PDF VIEWER  */}
         <AnimatePresence>
           {selectedBuletin && (
             <motion.div

@@ -9,7 +9,6 @@ import {
   Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
 
-// --- CONFIG CONSTANTS ---
 const THRESHOLDS = { BAIK: 15.5, SEDANG: 55.4, TIDAK_SEHAT: 150.4, SANGAT_TIDAK_SEHAT: 250.4 };
 
 const COLORS = { 
@@ -54,7 +53,7 @@ export default function AirQualityView() {
     fetchData();
   }, []);
 
-  // --- LOGIKA TREND (BARU) ---
+  // LOGIKA TREND
   const getTrendInfo = () => {
     const validHistory = data.history.filter((h: any) => h.pm25 !== null);
     
@@ -99,8 +98,7 @@ export default function AirQualityView() {
         </div>
       </div>
 
-      {/* MAIN CONTENT WRAPPER */}
-      {/* FIX 3: Gunakan max-w-7xl dan mx-auto agar konten terpusat dan tidak melebar tak terbatas */}
+      {/* CONTENT WRAPPER */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 mt-6 md:mt-8 space-y-6">
 
         {loading && (
@@ -111,17 +109,14 @@ export default function AirQualityView() {
         )}
 
         {!loading && !error && (
-          // BENTO GRID LAYOUT
-          // FIX 4: Gunakan gap-4 di mobile, gap-6 di layar besar
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             
-            {/* KARTU 1: GAUGE UTAMA */}
+            {/* GAUGE UTAMA */}
             <div className="bg-white rounded-[2rem] p-2 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[400px]">
 
                 {/* Gauge SVG Container */}
                 <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6 flex-shrink-0">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 224 224">
-                    {/* Menggunakan viewBox agar SVG responsif */}
                     <circle cx="112" cy="112" r="96" stroke="#f1f5f9" strokeWidth="12" fill="transparent" strokeLinecap="round" />
                     <circle 
                       cx="112" cy="112" r="96" stroke={currentColor} strokeWidth="12" fill="transparent" 
@@ -144,7 +139,7 @@ export default function AirQualityView() {
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
                     {statusInfo.text}
                 </h2>
-                {/* --- INDIKATOR TREN  --- */}
+                {/* INDIKATOR TREN */}
                 {trend && TrendIcon && (
                     <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-4 ${trend.bg} ${trend.color}`}>
                         <TrendIcon className="w-3.5 h-3.5" />
@@ -156,8 +151,7 @@ export default function AirQualityView() {
                 </p>
             </div>
 
-            {/* KARTU 2: GRAFIK */}
-            {/* KARTU 2: GRAFIK */}
+            {/* GRAFIK */}
             <div className="lg:col-span-2 bg-white rounded-[2rem] p-5 sm:p-6 md:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col min-h-[400px]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
                 <div>
@@ -166,9 +160,7 @@ export default function AirQualityView() {
                 </div>
               </div>
 
-              {/* FIX: Ganti flex-1/min-h dengan tinggi pasti (h-[300px]) */}
               <div className="w-full h-[300px] min-w-0 relative">
-                 {/* Cek jika data kosong, tampilkan pesan */}
                  {data.history.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm italic">
                         Belum ada data riwayat tersedia
@@ -234,11 +226,10 @@ export default function AirQualityView() {
               </div>
             </div>
 
-            {/* KARTU 3: LEGEND */}
+            {/*  LEGEND */}
             <div className="lg:col-span-3 bg-white rounded-[2rem] p-5 sm:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 text-center">Panduan Indeks Kualitas Udara</h4>
                 
-                {/* FIX 5: Grid legend dibuat responsive */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
                     {[
                         { label: "Baik", range: "0 - 15.5 µg/m³", color: COLORS.BAIK, bg: "bg-emerald-50 text-emerald-700" },
@@ -255,7 +246,7 @@ export default function AirQualityView() {
                     ))}
                 </div>
 
-                {/* --- BAGIAN BARU: DESKRIPSI PM2.5 --- */}
+                {/*  DESKRIPSI PM2.5 */}
                 <div className="pt-6 border-t border-slate-100 flex flex-col md:flex-row gap-5 items-start mt-6">
                     <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shrink-0">
                         <BookOpen className="w-6 h-6" />

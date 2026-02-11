@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Buffer } from "node:buffer";
 
-// Bypass SSL
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export async function GET(request: NextRequest) {
@@ -39,8 +38,6 @@ export async function GET(request: NextRequest) {
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "image/png",
-        // --- OPTIMASI KUNCI ---
-        // Sama seperti radar, gunakan immutable agar animasi smooth
         "Cache-Control": "public, max-age=31536000, immutable",
         "Access-Control-Allow-Origin": "*",
       },

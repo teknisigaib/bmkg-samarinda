@@ -1,6 +1,3 @@
-// lib/bmkg/maritim.ts
-
-// --- Tipe Data untuk API Detail (Per Area) ---
 export interface MaritimeForecast {
   valid_from: string;
   valid_to: string;
@@ -23,10 +20,10 @@ export interface MaritimeData {
   data: MaritimeForecast[];
 }
 
-// --- Tipe Data untuk API Overview (Untuk Peta) ---
+
 export interface WaveOverviewItem {
   issued: string;
-  today: string;    // "Sedang", "Rendah", dll
+  today: string;  
   tomorrow: string;
   h2: string;
   h3: string;
@@ -34,20 +31,19 @@ export interface WaveOverviewItem {
 
 export type OverviewData = Record<string, WaveOverviewItem>;
 
-// --- Helper Warna Gelombang ---
+// Helper Warna Gelombang
 export const getWaveColor = (category: string) => {
   const cat = (category || "").toLowerCase();
-  if (cat.includes("tenang")) return "#10b981"; // Emerald-500 (0.1 - 0.5 m)
-  if (cat.includes("rendah")) return "#3b82f6"; // Blue-500 (0.5 - 1.25 m)
-  if (cat.includes("sedang")) return "#eab308"; // Yellow-500 (1.25 - 2.5 m)
-  if (cat.includes("tinggi")) return "#f97316"; // Orange-500 (2.5 - 4.0 m)
-  if (cat.includes("ekstrem")) return "#ef4444"; // Red-500 (> 4.0 m)
-  return "#cbd5e1"; // Slate-300 (Tidak ada data)
+  if (cat.includes("tenang")) return "#10b981"; 
+  if (cat.includes("rendah")) return "#3b82f6"; 
+  if (cat.includes("sedang")) return "#eab308";
+  if (cat.includes("tinggi")) return "#f97316";
+  if (cat.includes("ekstrem")) return "#ef4444"; 
+  return "#cbd5e1";
 };
 
-// --- Fetcher Functions ---
 
-// 1. Fetch Detail (Dipanggil SAAT KLIK area)
+//  Fetch Detail
 export async function getMaritimeWeather(code: string, name: string): Promise<MaritimeData | null> {
   try {
     const encodedName = encodeURIComponent(name); 
@@ -61,7 +57,7 @@ export async function getMaritimeWeather(code: string, name: string): Promise<Ma
   }
 }
 
-// 2. Fetch Overview (Dipanggil SAAT LOAD halaman)
+//  Overview 
 export async function getWaveOverview(): Promise<OverviewData | null> {
   try {
     const url = "https://peta-maritim.bmkg.go.id/public_api/overview/gelombang.json";
@@ -78,7 +74,7 @@ export async function getWaveOverview(): Promise<OverviewData | null> {
 
 
 
-// --- TIPE DATA PELABUHAN ---
+//  TIPE DATA PELABUHAN 
 export interface PortForecastItem {
   issued: string;
   valid_from: string;
@@ -92,13 +88,13 @@ export interface PortForecastItem {
   wind_speed_max: number;
   wave_desc: string;
   wave_cat: string;
-  visibility: number; // Jarak pandang (km/m)
+  visibility: number;
   temp_min: number;
   temp_max: number;
   rh_min: number;
   rh_max: number;
-  high_tide: number; // Pasang (m)
-  low_tide: number;  // Surut (m)
+  high_tide: number; 
+  low_tide: number;  
 }
 
 export interface PortData {
@@ -110,16 +106,10 @@ export interface PortData {
   data: PortForecastItem[];
 }
 
-// ... (Fetcher Overview & MaritimeWeather tetap ada) ...
 
-// 3. FETCH PELABUHAN (Satu per satu)
+// ETCH PELABUHAN
 export async function getPortWeather(portId: string, portName: string): Promise<PortData | null> {
   try {
-    // Format nama file biasanya: {ID}_{Nama}.json
-    // Contoh: 0194_Samarinda.json
-    // Kita perlu memastikan nama sesuai format URL BMKG. 
-    // Untuk keamanan, biasanya kita cukup pakai ID jika backend mendukung, 
-    // tapi karena URL BMKG statis, kita construct manual.
     
     const encodedName = encodeURIComponent(portName);
     const url = `https://peta-maritim.bmkg.go.id/public_api/pelabuhan/${portId}_${encodedName}.json`;
@@ -133,20 +123,10 @@ export async function getPortWeather(portId: string, portName: string): Promise<
   }
 }
 
-
-
-// ... (Kode sebelumnya tetap ada) ...
-
-// Import Data GeoJSON untuk mencocokkan kode dengan nama wilayah
-// Pastikan path import ini sesuai dengan lokasi file geojson.ts Anda
 import { MARITIME_GEOJSON } from "@/components/component-cuaca/cuaca-maritim/geojson";
 
-// 3. FETCH WARNINGS (Untuk Running Text Home)
-// lib/bmkg/maritim.ts
 
-// ... (Import & Code sebelumnya tetap sama) ...
-
-// 3. FETCH WARNINGS (Updated: Include "Sedang")
+// FETCH WARNINGS
 export async function getMaritimeWarnings(): Promise<string[]> {
   try {
     const overview = await getWaveOverview();
@@ -154,24 +134,19 @@ export async function getMaritimeWarnings(): Promise<string[]> {
 
     const warnings: string[] = [];
 
-    // Loop data GeoJSON untuk cek setiap wilayah
     MARITIME_GEOJSON.features.forEach((feature: any) => {
       const code = feature.properties.WP_1;
       const name = feature.properties.WP_IMM;
       
-      // Ambil status hari ini
       const statusToday = overview[code]?.today;
 
-      // Filter: Sedang, Tinggi, dan Ekstrem
       if (["Sedang", "Tinggi", "Ekstrem"].includes(statusToday)) {
          let height = "";
          
-         // Tentukan label tinggi gelombang
          if (statusToday === "Sedang") height = "1.25-2.50 m";
          else if (statusToday === "Tinggi") height = "2.50-4.0 m";
          else if (statusToday === "Ekstrem") height = "> 4.0 m";
 
-         // Format Pesan
          warnings.push(`GELOMBANG ${statusToday.toUpperCase()} (${height}) di ${name}`);
       }
     });

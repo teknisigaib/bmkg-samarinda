@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ChevronRight, Home, CloudSun, Plane, Anchor, Map as MapIcon } from "lucide-react";
 
-// Tipe halaman yang didukung (tambah jika perlu)
 type PageType = 'forecast' | 'aviation' | 'maritime' | 'default';
 
 interface PageHeaderProps {
@@ -20,7 +19,6 @@ export default function PageHeader({
   breadcrumbs = [] 
 }: PageHeaderProps) {
 
-  // Konfigurasi tampilan berdasarkan tipe halaman
   const getConfig = (t: PageType) => {
     switch (t) {
       case 'forecast':
@@ -60,7 +58,7 @@ export default function PageHeader({
     <header className="w-full bg-white border-b border-slate-200 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-6 md:py-8">
         
-        {/* --- 1. BREADCRUMBS (Navigasi Atas) --- */}
+        {/* BREADCRUMBS*/}
         <nav className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-4 md:mb-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <Link href="/" className="hover:text-slate-600 transition-colors flex items-center gap-1">
             <Home className="w-3.5 h-3.5" />
@@ -83,7 +81,7 @@ export default function PageHeader({
           ))}
         </nav>
 
-        {/* --- 2. JUDUL & IKON --- */}
+        {/* JUDUL & IKON */}
         <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
           
           {/* Icon Box */}

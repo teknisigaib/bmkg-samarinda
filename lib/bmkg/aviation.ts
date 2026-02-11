@@ -2,10 +2,10 @@
 
 import { ParsedMetar, RawMetar } from "./aviation-utils";
 
-// Token Rahasia
+// Token 
 const API_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwNzNlNmUwOGU0ZjQzMzdkYzFmNjRkNzgzZGJmYmU5MzQ3ZGFmY2FiYTBhM2U5MzVjZDJmODlhOWQ1NjMwNWYiLCJpYXQiOjE3Njk5MDQwMDAsImV4cCI6MjU1NjA1NzYwMH0.s010WqlLrBY8WqPkiDRENEFdZIFCaLI8jSSJ7_6tLlY";
 
-// --- FETCHERS ---
+// FETCHERS
 
 export async function getAllAirportsWeather(): Promise<ParsedMetar[]> {
   try {
@@ -23,7 +23,6 @@ export async function getAllAirportsWeather(): Promise<ParsedMetar[]> {
   }
 }
 
-// PERUBAHAN DI SINI: Menerima parameter 'icao'
 export async function getRawMetar(icao: string): Promise<RawMetar[]> {
   try {
     const url = `https://cuaca.bmkg.go.id/api/v1/aviation/metar/${icao}?api_token=${API_TOKEN}`;
@@ -34,8 +33,6 @@ export async function getRawMetar(icao: string): Promise<RawMetar[]> {
 
     const json = await res.json();
     
-    // API mengembalikan object dengan key dinamis, misal: { "WALL": [...] }
-    // Kita akses menggunakan [icao]
     return json[icao] || [];
   } catch (error) {
     console.error(`Error fetching raw METAR (${icao}):`, error);
@@ -43,7 +40,7 @@ export async function getRawMetar(icao: string): Promise<RawMetar[]> {
   }
 }
 
-// 2. Get Raw SPECI (BARU)
+// 2. Get Raw SPECI 
 export async function getRawSpeci(icao: string): Promise<RawMetar[]> {
   try {
     const url = `https://cuaca.bmkg.go.id/api/v1/aviation/speci/${icao}?api_token=${API_TOKEN}`;
@@ -56,7 +53,7 @@ export async function getRawSpeci(icao: string): Promise<RawMetar[]> {
   }
 }
 
-// 3. Get Raw TAF (BARU)
+// 3. Get Raw TAF
 export async function getRawTaf(icao: string): Promise<RawMetar[]> {
   try {
     const url = `https://cuaca.bmkg.go.id/api/v1/aviation/taf/${icao}?api_token=${API_TOKEN}`;

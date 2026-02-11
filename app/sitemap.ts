@@ -1,20 +1,19 @@
 export const dynamic = 'force-dynamic';
 import { MetadataRoute } from 'next';
-import prisma from "@/lib/prisma"; // Pastikan import prisma benar
+import prisma from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 1. Tentukan Base URL (Gunakan Environment Variable atau Fallback)
+  // 1. Tentukan Base URL
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://stametsamarinda.bmkg.go.id';
 
-  // 2. Daftar Halaman Statis (Manual)
+  // 2. Daftar Halaman Statis
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily', // Homepage sering update cuaca
+      changeFrequency: 'daily',
       priority: 1,
     },
-    // --- PROFIL (Jarang Berubah -> Monthly) ---
     {
       url: `${baseUrl}/profil/visi-misi`,
       lastModified: new Date(),
@@ -33,47 +32,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
-    // --- CUACA & DATA (Sering Berubah -> Hourly/Daily) ---
     {
       url: `${baseUrl}/cuaca/prakiraan-cuaca`,
       lastModified: new Date(),
-      changeFrequency: 'hourly', // Cuaca berubah tiap jam
+      changeFrequency: 'hourly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/cuaca/peringatan-dini`,
       lastModified: new Date(),
-      changeFrequency: 'always', // Sangat kritis
+      changeFrequency: 'always',
       priority: 1.0, 
     },
     {
-      url: `${baseUrl}/cuaca/aws`, // Data AWS Realtime
+      url: `${baseUrl}/cuaca/aws`,
       lastModified: new Date(),
       changeFrequency: 'always',
       priority: 0.9,
     },
-    // ... Tambahkan halaman statis lain di sini ...
   ];
 
   // 3. Ambil Data Berita/Artikel dari Database (Dinamis)
-  // Ini kunci agar artikel baru langsung terindeks!
   const posts = await prisma.post.findMany({
     select: {
       id: true,
-      slug: true, // Asumsi Anda punya field slug. Jika tidak, pakai ID.
+      slug: true,
       updatedAt: true,
     },
     orderBy: {
       createdAt: 'desc',
     },
-    take: 1000, // Batasi agar sitemap tidak terlalu berat (Google max 50k URLs)
+    take: 1000,
   });
 
   // 4. Buat URL untuk setiap Berita
   const dynamicRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${baseUrl}/berita/${post.slug}`, // Sesuaikan dengan struktur URL detail berita Anda
+    url: `${baseUrl}/berita/${post.slug}`, 
     lastModified: post.updatedAt,
-    changeFrequency: 'weekly', // Berita lama jarang berubah setelah rilis
+    changeFrequency: 'weekly',
     priority: 0.7,
   }));
 

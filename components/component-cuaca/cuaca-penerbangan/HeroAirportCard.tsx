@@ -8,13 +8,11 @@ import { ParsedMetar, RawMetar, getPublicSummary } from "@/lib/bmkg/aviation-uti
 import { getRawMetar, getRawSpeci, getRawTaf } from "@/lib/bmkg/aviation";
 import { TicketMetricItem, RawDataBlock } from "./FlightSharedUI";
 
-// --- HELPER LOGIC: WIND CALCULATION ---
+// WIND CALCULATION
 const calculateWindComponents = (windSpeed: string, windDir: string, runwayHeading: number) => {
     const speed = parseInt(windSpeed) || 0;
-    // Jika VRB (Variable), gunakan runwayHeading sebagai fallback untuk perhitungan
     const dir = (windDir === "VRB" || isNaN(parseInt(windDir))) ? runwayHeading : parseInt(windDir);
     
-    // Perhitungan Komponen Angin (Headwind/Crosswind)
     const angleRad = (dir - runwayHeading) * (Math.PI / 180);
     const crosswind = Math.abs(Math.round(Math.sin(angleRad) * speed));
     const headwind = Math.round(Math.cos(angleRad) * speed);
@@ -23,7 +21,7 @@ const calculateWindComponents = (windSpeed: string, windDir: string, runwayHeadi
         crosswind, 
         headwind, 
         isHeadwind: headwind >= 0,
-        dir, // Arah angin asli (0-360)
+        dir,
         speed
     };
 };
@@ -34,13 +32,11 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
     const [rawData, setRawData] = useState<{metar: RawMetar[], speci: RawMetar[], taf: RawMetar[]} | null>(null);
     const [loadingRaw, setLoadingRaw] = useState(false);
 
-    // --- KONFIGURASI RUNWAY SAMARINDA (WALS) ---
-    // Runway 04 mengarah ke 40 derajat (Timur Laut)
+    // KONFIGURASI RUNWAY SAMARINDA
     const RUNWAY_HEADING = 40; 
     
     const windData = calculateWindComponents(airport.wind_speed, airport.wind_direction, RUNWAY_HEADING);
 
-    // Fetch Data Effect
     useEffect(() => {
         if (showDetail) {
             setLoadingRaw(true);
@@ -53,13 +49,11 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
 
     return (
         <div className="w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden relative transition-all duration-500">
-            
-            {/* Background Gradient */}
             <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-blue-50/50 via-blue-50/20 to-transparent pointer-events-none" />
 
             <div className="relative z-10 px-6 pt-8 md:px-10 md:pt-10 pb-8">
                 
-                {/* 1. HEADER */}
+                {/* HEADER */}
                 <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-8">
                     <div className="space-y-3">
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
@@ -91,17 +85,16 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
                     </div>
                 </div>
 
-                {/* 2. MAIN BODY (RUNWAY VISUALIZER & METRICS) */}
+                {/* (RUNWAY VISUALIZER & METRICS) */}
                 <div className="flex flex-col xl:flex-row gap-10 xl:items-center">
                     
                     {/* KIRI: RUNWAY & TEMP VISUALIZER */}
                     <div className="flex flex-col sm:flex-row items-center gap-8 shrink-0 bg-white/60 p-5 rounded-[2rem] border border-blue-100/50 backdrop-blur-sm shadow-sm">
                         
-                        {/* --- VISUALISASI RUNWAY (BRIGHT THEME) --- */}
-                        {/* Ubah bg-slate-800 menjadi gradient biru muda cerah */}
+                        {/* VISUALISASI RUNWAY - */}
                         <div className="relative w-44 h-44 flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-50 rounded-full border-[5px] border-white shadow-[0_8px_20px_-6px_rgba(59,130,246,0.15)] overflow-hidden shrink-0 group">
                             
-                            {/* Grid Kompas (Ubah warna menjadi biru transparan) */}
+                            {/* Grid Kompas */}
                             <div className="absolute inset-0 border border-blue-200/60 rounded-full m-5"></div>
                             <div className="absolute inset-0 border border-blue-100/40 rounded-full m-10"></div>
                             <div className="absolute top-2 text-[9px] font-black text-blue-400">N</div>
@@ -109,7 +102,7 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
                             <div className="absolute right-2 text-[9px] font-bold text-blue-300/70">E</div>
                             <div className="absolute left-2 text-[9px] font-bold text-blue-300/70">W</div>
                             
-                            {/* Runway Strip (Ubah menjadi abu-abu terang seperti beton) */}
+                            {/* Runway Strip  */}
                             <div 
                                 className="w-14 h-36 bg-slate-300 rounded-lg flex flex-col justify-between items-center py-2 relative z-10 shadow-md border-2 border-slate-200"
                                 style={{ transform: `rotate(${RUNWAY_HEADING}deg)` }}
@@ -128,21 +121,20 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
                                 style={{ transform: `rotate(${windData.dir + 180}deg)` }}
                             >
                                 <div className="flex flex-col items-center -translate-y-14">
-                                    {/* Panah dibuat lebih menonjol dengan drop shadow */}
                                     <ArrowUp className="w-10 h-10 text-rose-500 fill-rose-500 animate-bounce drop-shadow-lg filter contrast-125" strokeWidth={2.5} />
                                 </div>
                             </div>
 
-                            {/* Wind Label (Ubah background jadi cerah atau senada dengan panah) */}
+                            {/* Wind Label */}
                             <div className="absolute z-30 bg-rose-500 text-white px-2.5 py-1 rounded-full text-[10px] font-bold bottom-4 border-2 border-white shadow-md">
                                 {airport.wind_speed} KT
                             </div>
                         </div>
 
-                        {/* --- INFO SUHU & KOMPONEN ANGIN --- */}
+                        {/*  INFO SUHU & KOMPONEN ANGIN */}
                         <div className="text-center sm:text-left space-y-5">
                             
-                            {/* Temperature Block */}
+                            {/* Temperature  */}
                             <div>
                                 <div className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Temperature</div>
                                 <div className="text-6xl font-black text-slate-800 flex items-start leading-none tracking-tighter justify-center sm:justify-start">
@@ -153,7 +145,7 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
                                 </div>
                             </div>
 
-                            {/* Wind Component Mini Stats (Dipercantik) */}
+                            {/* Wind Component */}
                             <div className="flex gap-3 justify-center sm:justify-start">
                                 <div className={`bg-white border ${windData.isHeadwind ? 'border-emerald-100 bg-emerald-50/50' : 'border-rose-100 bg-rose-50/50'} p-2.5 rounded-xl shadow-sm flex flex-col items-center min-w-[75px]`}>
                                     <span className="text-[9px] font-bold text-slate-500 uppercase">Headwind</span>
@@ -161,7 +153,7 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
                                         {Math.abs(windData.headwind)} <span className="text-[10px] font-bold opacity-60">kt</span>
                                     </span>
                                 </div>
-                                <div className="bg-white border border-amber-100 bg-amber-50/50 p-2.5 rounded-xl shadow-sm flex flex-col items-center min-w-[75px]">
+                                <div className="border border-amber-100 bg-amber-50/50 p-2.5 rounded-xl shadow-sm flex flex-col items-center min-w-[75px]">
                                     <span className="text-[9px] font-bold text-slate-500 uppercase">X-Wind</span>
                                     <span className="text-base font-black text-amber-500">
                                         {windData.crosswind} <span className="text-[10px] font-bold opacity-60">kt</span>
@@ -204,7 +196,7 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
                 </div>
             </div>
 
-            {/* Tear Line & Footer (Sama seperti sebelumnya) */}
+            {/* Tear Line & Footer */}
             <div className="relative w-full h-8 my-2 bg-slate-50/50">
                 <div className="absolute top-1/2 left-0 w-full border-t-2 border-dashed border-slate-300"></div>
                 <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-gray-100 rounded-full shadow-[inset_-2px_0_4px_rgba(0,0,0,0.05)]"></div>

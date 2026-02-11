@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Calendar, Info, Maximize2, X, Flame, Wind, Layers, ChevronDown } from "lucide-react";
 
-// --- KONFIGURASI DATA ---
+// KONFIGURASI DATA
 const MAP_TYPES = [
   {
     id: "ffmc",
@@ -53,9 +53,6 @@ export default function KarhutlaStaticMaps() {
 
   return (
     <div className="space-y-6">
-      
-      {/* 1. FILTER TANGGAL (Ganti Scrollbar dengan Dropdown) */}
-      {/* Layout Flex: Label di kiri, Dropdown di kanan/full di mobile */}
       <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-gray-700">
               <Calendar className="w-5 h-5 text-gray-500" />
@@ -81,7 +78,7 @@ export default function KarhutlaStaticMaps() {
           </div>
       </div>
 
-      {/* 2. GRID PETA */}
+      {/* GRID PETA */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {MAP_TYPES.map((type) => {
           const code = getUrlCode(selectedDayIndex);
@@ -111,7 +108,6 @@ export default function KarhutlaStaticMaps() {
                    className="relative aspect-[4/3] bg-gray-50 cursor-zoom-in overflow-hidden border-b border-gray-100" 
                    onClick={() => setPreviewImage({ src: imageUrl, title: type.title })}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                     src={imageUrl} 
                     alt={`${type.title}`}
@@ -141,7 +137,7 @@ export default function KarhutlaStaticMaps() {
         })}
       </div>
 
-      {/* 3. LIGHTBOX PREVIEW */}
+      {/* LIGHTBOX PREVIEW */}
       {previewImage && (
         <div className="fixed inset-0 z-[2000] bg-black/95 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200" onClick={() => setPreviewImage(null)}>
             <div className="relative w-full md:h-auto md:max-w-4xl md:max-h-[85vh] bg-white md:rounded-2xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
@@ -157,7 +153,6 @@ export default function KarhutlaStaticMaps() {
                     </button>
                 </div>
                 <div className="flex-1 bg-gray-100 overflow-auto flex items-center justify-center p-2 relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                         src={previewImage.src} 
                         alt="Preview" 

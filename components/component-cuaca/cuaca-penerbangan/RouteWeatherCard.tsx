@@ -9,10 +9,9 @@ export default function RouteWeatherCard({ origin, destination }: { origin: Pars
 
     return (
         <div className="w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden relative transition-all duration-500">
-            {/* Header Gradient */}
             <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none" />
             
-            {/* --- TOP SECTION: FLIGHT INFO --- */}
+            {/* FLIGHT INFO */}
             <div className="relative z-10 px-6 pt-10 pb-6 md:px-10">
                 <div className="flex justify-between items-center mb-8">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
@@ -59,7 +58,7 @@ export default function RouteWeatherCard({ origin, destination }: { origin: Pars
                 </div>
             </div>
 
-            {/* --- TEAR LINE --- */}
+            {/* TEAR LINE  */}
             <div className="relative w-full h-8 my-2 bg-slate-50/50">
                 <div className="absolute top-1/2 left-0 w-full border-t-2 border-dashed border-slate-300"></div>
                 <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-gray-100 rounded-full shadow-inner"></div>
@@ -67,7 +66,7 @@ export default function RouteWeatherCard({ origin, destination }: { origin: Pars
                 <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 bg-slate-50 px-3 text-slate-300"><span className="text-[10px] font-mono tracking-widest uppercase">Weather Details</span></div>
             </div>
 
-            {/* --- BOTTOM SECTION: WEATHER DETAILS --- */}
+            {/*  WEATHER DETAILS */}
             <div className="relative z-10 px-6 pb-8 pt-6 md:px-10 md:pb-10 bg-slate-50/50">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                     <WeatherColumnTicket airport={origin} label="Origin Conditions" />
@@ -79,7 +78,7 @@ export default function RouteWeatherCard({ origin, destination }: { origin: Pars
     );
 }
 
-// --- UPDATED WEATHER COLUMN (SIDE-BY-SIDE LAYOUT) ---
+// UPDATED WEATHER COLUMN
 function WeatherColumnTicket({ airport, label }: { airport: ParsedMetar, label: string }) {
     const { humanWeather } = getPublicSummary(airport.visibility, airport.weather);
     const visStatus = getVisibilityStatus(airport.visibility);
@@ -87,7 +86,7 @@ function WeatherColumnTicket({ airport, label }: { airport: ParsedMetar, label: 
 
     return (
         <div className="flex flex-col h-full">
-            {/* 1. Header: Label & Status */}
+            {/* Header */}
             <div className="flex items-center justify-between mb-5">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-2 py-1 rounded shadow-sm border border-slate-100">{label}</span>
                 <div className={`px-2 py-1 rounded-md border flex items-center gap-1.5 ${visStatus.className}`}>
@@ -96,15 +95,13 @@ function WeatherColumnTicket({ airport, label }: { airport: ParsedMetar, label: 
                 </div>
             </div>
 
-            {/* 2. Main Weather Info (HORIZONTAL LAYOUT) */}
+            {/* 2. Main Weather*/}
             <div className="flex items-center justify-center gap-5 mb-6 flex-1">
-                {/* Icon di Kiri */}
                 <div className="w-20 h-20 shrink-0 bg-white rounded-2xl p-2 shadow-sm border border-slate-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={iconUrl} alt="Weather Icon" className="w-full h-full object-contain drop-shadow-md" />
                 </div>
                 
-                {/* Text di Kanan */}
+                {/* Text Kanan */}
                 <div className="flex flex-col items-start">
                     <div className="text-5xl font-black text-slate-800 flex items-start tracking-tighter leading-none">
                         {airport.temp}<span className="text-2xl text-slate-400 font-medium mt-1 ml-0.5">°C</span>
@@ -115,7 +112,7 @@ function WeatherColumnTicket({ airport, label }: { airport: ParsedMetar, label: 
                 </div>
             </div>
 
-            {/* 3. Metrics Grid */}
+            {/* Metrics Grid */}
             <div className="grid grid-cols-2 gap-3 mt-auto">
                 <TicketMetricItem icon={<Wind className="w-3.5 h-3.5" />} label="Wind" value={`${airport.wind_speed} km/j`} mini={true} />
                 <TicketMetricItem icon={<Eye className="w-3.5 h-3.5" />} label="Vis" value={`${airport.visibility} km`} mini={true} />

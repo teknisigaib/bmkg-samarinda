@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
 
-// --- HELPER: AUTO ZOOM ---
+// HELPER AUTO ZOOM
 const AutoZoom = ({ polygons }: { polygons: [number, number][][] }) => {
   const map = useMap();
 
@@ -24,14 +24,13 @@ const AutoZoom = ({ polygons }: { polygons: [number, number][][] }) => {
   return null;
 };
 
-// --- HELPER: WARNA BERDASARKAN SEVERITY ---
+// HELPER WARNA BERDASARKAN SEVERITY 
 const getSeverityColor = (severity: string) => {
-  // Normalisasi string (jaga-jaga huruf besar/kecil)
   const level = severity?.toLowerCase() || "";
   
-  if (level.includes("extreme")) return "#ef4444"; // Merah (Awas)
-  if (level.includes("severe")) return "#f97316";  // Oranye (Siaga)
-  return "#eab308"; // Kuning (Moderate/Waspada) - Default
+  if (level.includes("extreme")) return "#ef4444";
+  if (level.includes("severe")) return "#f97316";
+  return "#eab308";
 };
 
 interface WarningMapProps {
@@ -59,7 +58,7 @@ export default function WarningMap({ data }: WarningMapProps) {
   return (
     <div className="relative h-[400px] md:h-[600px] w-full rounded-2xl overflow-hidden shadow-sm border border-gray-200">
       
-      {/* 1. MAP CONTAINER */}
+      {/* MAP CONTAINER */}
       <MapContainer 
         center={[-0.5, 117]} 
         zoom={6} 
@@ -95,7 +94,7 @@ export default function WarningMap({ data }: WarningMapProps) {
         ))}
       </MapContainer>
 
-      {/* 2. FLOATING INFO CARD (Standardized) */}
+      {/* FLOATING INFO CARD*/}
       <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300">
         <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
              {activeInfo ? activeInfo.title : "Info Peringatan"}
@@ -124,7 +123,7 @@ export default function WarningMap({ data }: WarningMapProps) {
         )}
       </div>
 
-      {/* 3. LEGEND (Bottom Loop) */}
+      {/* LEGEND  */}
       <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/20 text-xs">
           <span className="font-bold text-gray-500 uppercase tracking-wider text-[10px] block mb-2">Keterangan Level:</span>
           <div className="space-y-1">

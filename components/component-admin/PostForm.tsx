@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react"; // Tambah useEffect
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { createPost, updatePost } from "@/app/(admin)/admin/actions";
 import RichTextEditor from "./RichTextEditor";
 import { Image as ImageIcon, X, Save, Calendar } from "lucide-react";
 
-// ... (Interface PostData & Helper formatDateForInput TETAP SAMA seperti sebelumnya) ...
 export interface PostData {
   id: string;
   title: string;
@@ -32,7 +31,6 @@ const formatDateForInput = (dateString?: Date | string) => {
 };
 
 export default function PostForm({ initialData, onCancel, onSuccess }: PostFormProps) {
-  // ... (State: imageUrl, uploading, content, date, isSubmitting TETAP SAMA) ...
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
   const [uploading, setUploading] = useState(false);
   const [content, setContent] = useState(initialData?.content || "");
@@ -46,7 +44,7 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
     return () => { document.body.style.overflow = "unset"; };
   }, []);
 
-  // ... (Fungsi handleUpload & handleSubmit TETAP SAMA) ...
+  //  Fungsi handleUpload & handleSubmit
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -72,13 +70,13 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
   };
 
   return (
-    // --- 1. OVERLAY (Backdrop Gelap) ---
+    //  OVERLAY
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
       
-      {/* --- 2. CARD MODAL --- */}
+      {/* CARD MODAL */}
       <div className="bg-white w-full max-w-5xl max-h-[80vh] overflow-y-auto rounded-2xl shadow-2xl border border-slate-200 flex flex-col animate-in zoom-in-95 duration-200">
         
-        {/* Header (Sticky) */}
+        {/* Header */}
         <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex justify-between items-center rounded-t-2xl">
             <div>
                 <h2 className="text-xl font-bold text-slate-800">
@@ -94,7 +92,7 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
             </button>
         </div>
 
-        {/* Content Form (Scrollable) */}
+        {/* Content Form  */}
         <div className="p-6 sm:p-8 space-y-8">
              <form id="post-form" action={handleSubmit} className="space-y-6">
                 
@@ -180,7 +178,7 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
              </form>
         </div>
 
-        {/* Footer (Sticky Bottom) */}
+        {/* Footer  */}
         <div className="sticky bottom-0 z-10 bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end gap-3 rounded-b-2xl">
             <button 
                 type="button" 
@@ -190,7 +188,7 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
                 Batal
             </button>
             
-            {/* Tombol Simpan (Target Form ID) */}
+            {/* Tombol Simpan */}
             <button 
                 onClick={() => (document.getElementById('post-form') as HTMLFormElement)?.requestSubmit()}
                 disabled={uploading || isSubmitting} 

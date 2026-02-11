@@ -1,10 +1,9 @@
 import { parseMetar, IMetar, ICloud, IWeatherCondition, IMetarTrend, Remark } from "metar-taf-parser";
 
-// 1. Interface Tambahan untuk Trend & Remark
 export interface ParsedTrend {
-  type: string;        // "TEMPO", "BECMG", "NOSIG"
-  fullText: string;    // Raw text trend-nya, misal "TEMPO 4000 RA"
-  summary: string;     // Penjelasan singkat (opsional)
+  type: string;      
+  fullText: string;   
+  summary: string;   
 }
 
 export interface ParsedWeather {
@@ -64,7 +63,7 @@ export function parseRawMetar(rawString: string): ParsedWeather | null {
         if (result.wind.direction === "VRB") {
             windDir = "VRB";
         } else {
-            // Perbaikan: Gunakan 'degrees' jika ada, atau fallback ke parsing manual jika perlu
+
             windDir = result.wind.degrees ?? 0;
         }
     }
@@ -93,13 +92,11 @@ export function parseRawMetar(rawString: string): ParsedWeather | null {
         visText = "CAVOK (Clear)";
     }
 
-    // 4. TEMP & DEW (PERBAIKAN UTAMA DI SINI)
-    // Berdasarkan d.ts: temperature?: number; (Bukan object)
+    // 4. TEMP & DEW
     const temp = result.temperature ?? null;
     const dew = result.dewPoint ?? null;
 
-    // 5. PRESSURE / ALTIMETER (PERBAIKAN UTAMA DI SINI)
-    // Berdasarkan d.ts: altimeter?: IAltimeter; (Tidak ada property .pressure di IMetar)
+    // 5. PRESSURE / ALTIMETER
     let qnh: number | null = null;
     
     if (result.altimeter) {
@@ -107,7 +104,6 @@ export function parseRawMetar(rawString: string): ParsedWeather | null {
              // Konversi inHg ke hPa
              qnh = Math.round(result.altimeter.value * 33.8639);
          } else {
-             // Asumsi hPa (Library mungkin mengembalikan unit 'hPa' atau lainnya untuk QNH)
              qnh = Math.round(result.altimeter.value);
          }
     }
@@ -139,23 +135,20 @@ export function parseRawMetar(rawString: string): ParsedWeather | null {
         });
     }
 
-    // --- 8. LOGIKA BARU: TRENDS (TEMPO/BECMG) ---
+    // --- 8. TRENDS (TEMPO/BECMG) ---
     let parsedTrends: ParsedTrend[] = [];
     
     if (result.trends && result.trends.length > 0) {
         parsedTrends = result.trends.map((t: IMetarTrend) => {
-            // Kita ambil raw text dari trend tersebut agar akurat
-            // Library menyimpan raw string parsial di property .raw
             return {
-                type: t.type, // TEMPO, BECMG, etc
-                fullText: t.raw, // "TEMPO 4000 RA"
-                summary: "" // Bisa dikembangkan nanti
+                type: t.type, 
+                fullText: t.raw, 
+                summary: "" 
             };
         });
     }
 
     // --- 9. LOGIKA BARU: REMARKS (RMK) ---
-    // Contoh: RMK CB TO SW (Awan Cumulonimbus di arah Barat Daya)
     let parsedRemarks: string[] = [];
     if (result.remarks && result.remarks.length > 0) {
         parsedRemarks = result.remarks.map((r: Remark) => r.raw);
@@ -164,7 +157,7 @@ export function parseRawMetar(rawString: string): ParsedWeather | null {
     return {
       raw: cleanRaw,
       station: result.station, 
-      time: obsTime, // Ganti dengan variabel obsTime dari logika time yang akurat
+      time: obsTime, 
       wind: {
         direction: windDir,
         speed: result.wind?.speed ?? 0,

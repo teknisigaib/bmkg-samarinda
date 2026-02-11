@@ -4,12 +4,12 @@ import { XMLParser } from "fast-xml-parser";
 export interface CAPData {
   headline: string;
   description: string;
-  severity: string; // Moderate, Severe
+  severity: string; 
   event: string;
   sent: string;
   effective: string;
   expires: string;
-  polygons: [number, number][][]; // Array of Array of [Lat, Lng]
+  polygons: [number, number][][];
   areaDesc: string;
   web: string | null;
 }
@@ -17,7 +17,7 @@ export interface CAPData {
 export async function getCAPAlertDetail(url: string): Promise<CAPData | null> {
   try {
     // 1. Fetch XML Detail
-    const res = await fetch(url, { next: { revalidate: 300 } }); // Cache 5 menit
+    const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) return null;
 
     const xmlText = await res.text();
@@ -25,7 +25,6 @@ export async function getCAPAlertDetail(url: string): Promise<CAPData | null> {
     // 2. Parser Config
     const parser = new XMLParser({
       ignoreAttributes: true,
-      // Pastikan 'polygon' selalu dianggap array meskipun cuma 1
       isArray: (name) => name === "polygon", 
     });
 
@@ -34,11 +33,10 @@ export async function getCAPAlertDetail(url: string): Promise<CAPData | null> {
 
     if (!info) return null;
 
-    // 3. Ambil Raw Polygons (String)
-    // Struktur XML: <area><polygon>...</polygon><polygon>...</polygon></area>
+    // 3. Ambil Raw Polygons 
     const rawPolygons = info.area?.polygon as string[] || [];
 
-    // 4. Konversi String "Lat,Long Lat,Long" menjadi Array [[Lat, Long], ...]
+    // 4. Konversi String 
     const cleanPolygons = rawPolygons.map((polyStr) => {
         return polyStr.trim().split(" ").map((coordPair) => {
             const [lat, lng] = coordPair.split(",");

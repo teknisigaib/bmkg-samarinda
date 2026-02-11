@@ -1,30 +1,29 @@
 import React from 'react';
-import { ArrowRight, Wind, MapPin } from 'lucide-react'; // Tambah MapPin biar manis
+import { ArrowRight, Wind, MapPin } from 'lucide-react';
 import { WeatherData } from '@/lib/types';
 
 export default function CurrentWeather({ data }: { data: WeatherData }) {
   if (!data) return null;
 
-  // Cek apakah ini tampilan range (Provinsi)
+  // Cek tampilan(Provinsi)
   const isRange = !!data.tempRange;
 
   return (
     <div className="lg:col-span-2 flex flex-col h-full">
       <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-full min-h-[300px]">
         
-        {/* Blob Decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-60 -translate-y-10 translate-x-10 pointer-events-none"></div>
         
         <div className="relative z-10 flex justify-between items-start">
           <div>
-            {/* Header Lokasi Kecil */}
+            {/* Header Lokasi */}
             <div className="flex items-center gap-1 text-slate-400 mb-1 text-sm font-medium">
                <MapPin className="w-4 h-4" />
                {data.location}
             </div>
 
             <div className="flex items-start">
-              {/* LOGIKA TAMPILAN SUHU */}
+              {/* SUHU */}
               {isRange ? (
                   // Tampilan Range (Provinsi)
                   <div className="flex flex-col">
@@ -67,7 +66,7 @@ export default function CurrentWeather({ data }: { data: WeatherData }) {
           
           <div className="flex flex-wrap gap-6 text-sm font-semibold text-slate-400">
             
-            {/* Detail Angin & RealFeel (Hanya tampil jika BUKAN range/provinsi) */}
+            {/* Detail Angin & RealFeel  */}
             {!isRange && (
               <>
                 <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full">

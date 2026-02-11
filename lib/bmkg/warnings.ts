@@ -9,9 +9,8 @@ interface RSSItem {
   pubDate: string;
 }
 
-// Return type sekarang selalu string (tidak pernah null)
 export async function getPeringatanDiniKaltim(): Promise<string> {
-  // Pesan Default jika aman
+ 
   const DEFAULT_MSG = "Tidak ada peringatan dini cuaca signifikan untuk wilayah Kalimantan Timur saat ini.";
 
   try {
@@ -32,16 +31,15 @@ export async function getPeringatanDiniKaltim(): Promise<string> {
       return DEFAULT_MSG;
     }
 
-    // Cari peringatan khusus Kaltim
+    // peringatan khusus Kaltim
     const kaltimWarning = items.find((item) =>
       item.title?.toLowerCase().includes("kalimantan timur")
     );
 
     if (!kaltimWarning) {
-      return DEFAULT_MSG; // Kaltim tidak ada di list = Aman
+      return DEFAULT_MSG;
     }
 
-    // Bersihkan teks peringatan jika ada
     let cleanText = kaltimWarning.description || "";
     cleanText = cleanText.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
 
@@ -49,7 +47,7 @@ export async function getPeringatanDiniKaltim(): Promise<string> {
 
   } catch (error) {
     console.error("Error parsing BMKG RSS:", error);
-    return DEFAULT_MSG; // Fail-safe ke pesan aman
+    return DEFAULT_MSG;
   }
 }
 
@@ -69,7 +67,6 @@ export async function getLinkPeringatanDiniKaltim(): Promise<string | null> {
 
     if (!items || items.length === 0) return null;
 
-    // Cari item yang judulnya Kaltim
     const kaltimItem = items.find((item) =>
       item.title?.toLowerCase().includes("kalimantan timur")
     );

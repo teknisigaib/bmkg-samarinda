@@ -1,11 +1,8 @@
-// LOKASI FILE: app/api/cuaca/pelabuhan/[id]/route.ts
 import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, context: any) {
-  // 🧩 PERBAIKAN UTAMA:
-  // Ambil params dengan await (menghindari warning “params should await”)
   const params = await context.params;
   const id = params?.id;
 
@@ -16,7 +13,6 @@ export async function GET(request: Request, context: any) {
     );
   }
 
-  // Encoding ID agar format seperti "0193_Semayang, Balikpapan" aman di URL
   const encodedId = encodeURIComponent(id);
   const url = `https://peta-maritim.bmkg.go.id/public_api/pelabuhan/${encodedId}.json`;
 
@@ -26,7 +22,7 @@ export async function GET(request: Request, context: any) {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
       },
-      next: { revalidate: 3600 }, // cache 1 jam
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
@@ -42,7 +38,6 @@ export async function GET(request: Request, context: any) {
     return NextResponse.json(jsonData);
 
   } catch (error: any) {
-    console.error(`❌ Error di API Route Pelabuhan untuk ID: ${id}:`, error.message);
     return NextResponse.json(
       { message: "Terjadi kesalahan pada server: " + error.message },
       { status: 500 }

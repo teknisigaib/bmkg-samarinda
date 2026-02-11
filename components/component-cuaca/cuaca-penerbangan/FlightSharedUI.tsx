@@ -1,8 +1,6 @@
-// components/component-cuaca/cuaca-penerbangan/FlightSharedUI.tsx
 import { ParsedMetar, getPublicSummary, getVisibilityStatus } from "@/lib/bmkg/aviation-utils";
 import { Thermometer} from "lucide-react";
 
-// 1. Metric Item (Kotak Kecil) - TIDAK ADA PERUBAHAN
 export function TicketMetricItem({ icon, label, value, sub, mini = false }: any) {
     return (
         <div className={`bg-white rounded-xl border border-slate-200 shadow-sm flex ${mini ? 'flex-row items-center gap-3 p-2' : 'flex-col gap-2 p-4'} relative overflow-hidden group hover:border-blue-300 transition-all`}>
@@ -21,7 +19,7 @@ export function TicketMetricItem({ icon, label, value, sub, mini = false }: any)
     )
 }
 
-// 2. Raw Data Block (METAR/TAF Text) - TIDAK ADA PERUBAHAN
+// METAR/TAF 
 export function RawDataBlock({ title, data, colorClass, bgClass, borderClass, isTaf = false }: any) {
     return (
         <div className={`rounded-2xl p-4 border ${bgClass} ${borderClass}`}>
@@ -44,13 +42,11 @@ export function RawDataBlock({ title, data, colorClass, bgClass, borderClass, is
     )
 }
 
-// 3. Small Airport Card (Kartu Grid) - DIPERBARUI
+// 3. Small Airport Card
 export function SmallAirportCard({ airport }: { airport: ParsedMetar }) {
-    // 1. Dapatkan status umum (icon, cuaca manusia)
     const { humanWeather } = getPublicSummary(airport.visibility, airport.weather);
     const iconUrl = `https://web-aviation.bmkg.go.id/images/weathers/${airport.symbol}.png`;
 
-    // 2. Dapatkan status visibilitas detail menggunakan helper baru
     const visStatus = getVisibilityStatus(airport.visibility);
 
     return (
@@ -65,14 +61,13 @@ export function SmallAirportCard({ airport }: { airport: ParsedMetar }) {
                         {airport.icao_id}
                     </span>
                 </div>
-                {/* Dot Status Visibilitas di pojok kanan atas */}
+                {/* Dot Status Visibilitas */}
                 <div className={`w-2.5 h-2.5 rounded-full ${visStatus.dot} ring-2 ring-white shadow-sm`}></div>
             </div>
 
-            {/* Content: Cuaca & Suhu */}
+            {/* Cuaca & Suhu */}
             <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 shrink-0 bg-slate-50 rounded-lg p-1 border border-slate-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={iconUrl} alt="icon" className="w-full h-full object-contain" />
                 </div>
                 <div className="min-w-0">

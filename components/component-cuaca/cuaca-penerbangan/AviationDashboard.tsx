@@ -28,10 +28,10 @@ export default function AviationDashboard({ airports }: DashboardProps) {
   return (
     <div className="space-y-10 text-slate-800">
       
-      {/* 1. HERO SECTION & ANALYSIS */}
+      {/*  HERO SECTION */}
       <div id="hero-section" className="space-y-6 transition-all duration-500">
         
-        {/* A. Main Card (Hero or Route) */}
+        {/* Main Card*/}
         {walsData ? (
             isRouteMode ? (
                 <RouteWeatherCard origin={walsData} destination={selectedData as ParsedMetar} />
@@ -43,7 +43,7 @@ export default function AviationDashboard({ airports }: DashboardProps) {
         )}
       </div>
 
-      {/* 2. PETA */}
+      {/*  PETA */}
       <section className="space-y-4">
         <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export default function AviationDashboard({ airports }: DashboardProps) {
         </div>
       </section>
 
-      {/* 3. GRID BANDARA LAIN */}
+      {/* GRID BANDARA LAIN */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 px-1">
             <Plane className="w-5 h-5 text-blue-600" />

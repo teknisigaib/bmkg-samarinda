@@ -8,12 +8,12 @@ interface StatProps {
 
 export default function KarhutlaStats({ trend }: StatProps) {
   // Cari nilai max untuk skala grafik
-  const maxVal = Math.max(...trend.map(t => t.count), 1); // Min scale 1 agar bisa bagi
+  const maxVal = Math.max(...trend.map(t => t.count), 1);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       
-      {/* 1. GRAFIK TREN (CSS Chart) */}
+      {/* GRAFIK TREN*/}
       <div className="md:col-span-2 bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col">
         <div className="flex items-center gap-2 mb-6">
             <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
@@ -28,10 +28,8 @@ export default function KarhutlaStats({ trend }: StatProps) {
         {/* Chart Container */}
         <div className="flex items-end justify-between gap-2 h-40 mt-auto px-2">
             {trend.map((item, idx) => {
-                // Format Tanggal (cth: 22 Des)
                 const dateLabel = new Date(item.date).toLocaleDateString("id-ID", { day: 'numeric', month: 'short' });
-                // Tinggi Bar (Pixel calculation for stability)
-                const MAX_BAR_HEIGHT = 100; // px (Available space inside h-40 minus labels)
+                const MAX_BAR_HEIGHT = 100;
                 const barHeight = (item.count / maxVal) * MAX_BAR_HEIGHT;
                 
                 return (
@@ -54,7 +52,7 @@ export default function KarhutlaStats({ trend }: StatProps) {
         </div>
       </div>
 
-      {/* 2. HIMBAUAN / KONTAK (Info Card) */}
+      {/* HIMBAUAN  */}
       <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-between">
          <div>
             <div className="flex items-center gap-2 mb-3 text-red-700">
@@ -74,7 +72,7 @@ export default function KarhutlaStats({ trend }: StatProps) {
              </div>
              <div>
                  <div className="text-[10px] uppercase font-bold text-gray-400">Call Center Karhutla</div>
-                 <div className="font-bold text-lg text-gray-900">112 / 113</div>
+                 <div className="font-bold text-lg text-gray-900">112</div>
              </div>
          </div>
       </div>

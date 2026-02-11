@@ -11,17 +11,14 @@ export default function LocationSearch({ onSelectLocation }: LocationSearchProps
   const [results, setResults] = useState<RegionOption[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   
-  // STATE BARU: Melacak index yang sedang disorot (-1 berarti tidak ada yang dipilih)
   const [activeIndex, setActiveIndex] = useState(-1);
   
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const resultListRef = useRef<HTMLDivElement>(null); // Ref untuk auto-scroll
-
-  // LOGIKA PENCARIAN
+  const resultListRef = useRef<HTMLDivElement>(null);
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    setActiveIndex(-1); // Reset sorotan saat ketik ulang
+    setActiveIndex(-1);
     
     if (value.length > 0) {
       setIsOpen(true);
@@ -48,17 +45,17 @@ export default function LocationSearch({ onSelectLocation }: LocationSearchProps
 
     switch (e.key) {
       case "ArrowDown":
-        e.preventDefault(); // Cegah kursor teks pindah
+        e.preventDefault();
         setActiveIndex(prev => {
           const nextIndex = prev < results.length - 1 ? prev + 1 : prev;
-          scrollToItem(nextIndex); // Auto scroll
+          scrollToItem(nextIndex);
           return nextIndex;
         });
         break;
       case "ArrowUp":
         e.preventDefault();
         setActiveIndex(prev => {
-          const nextIndex = prev > 0 ? prev - 1 : 0; // Stop di 0, jangan balik ke input (-1) biar smooth
+          const nextIndex = prev > 0 ? prev - 1 : 0;
           scrollToItem(nextIndex);
           return nextIndex;
         });
@@ -79,7 +76,7 @@ export default function LocationSearch({ onSelectLocation }: LocationSearchProps
   const scrollToItem = (index: number) => {
     const list = resultListRef.current;
     if (list) {
-      const item = list.children[index + 1] as HTMLElement; // +1 karena ada header "Hasil Pencarian"
+      const item = list.children[index + 1] as HTMLElement;
       if (item) {
         item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
@@ -109,7 +106,6 @@ export default function LocationSearch({ onSelectLocation }: LocationSearchProps
           type="text" 
           value={query}
           onChange={handleSearch}
-          // PASANG HANDLER KEYBOARD DISINI
           onKeyDown={handleKeyDown}
           onFocus={() => query.length > 0 && setIsOpen(true)}
           className="block w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-full text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-sm text-sm font-medium" 
@@ -126,7 +122,7 @@ export default function LocationSearch({ onSelectLocation }: LocationSearchProps
         )}
       </div>
 
-      {/* DROPDOWN HASIL */}
+      {/* DROPDOWN */}
       {isOpen && results.length > 0 && (
         <div 
           ref={resultListRef}
@@ -137,18 +133,15 @@ export default function LocationSearch({ onSelectLocation }: LocationSearchProps
           </div>
           
           {results.map((res, index) => {
-            // Cek apakah item ini sedang aktif (disorot keyboard)
             const isActive = index === activeIndex;
 
             return (
               <button 
                 key={res.id}
                 onClick={() => handleSelect(res.id)}
-                // Ubah style berdasarkan isActive
                 className={`w-full text-left px-4 py-3 flex items-center justify-between group border-b border-slate-50 last:border-0 transition-colors
                   ${isActive ? 'bg-blue-50' : 'hover:bg-slate-50'}
                 `}
-                // Event mouse enter untuk sinkronisasi mouse & keyboard (opsional)
                 onMouseEnter={() => setActiveIndex(index)}
               >
                 <div className="flex items-center gap-3">

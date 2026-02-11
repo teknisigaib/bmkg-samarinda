@@ -1,4 +1,3 @@
-// Kamus penerjemah URL ke Tipe Database
 export const CLIMATE_TYPES: Record<string, { dbType: string; title: string }> = {
   // --- HTH ---
   "hth": { 

@@ -6,12 +6,11 @@ interface LegendProps {
 }
 
 
-// --- 1. RADAR LEGEND (NEW DISCRETE STYLE) ---
+// RADAR LEGEND
 export const RadarLegend = ({ className }: LegendProps) => {
     return (
         <div className={`p-2 rounded-lg font-sans transition-all ${className || "bg-slate-900/80 backdrop-blur-md border border-slate-700 shadow-lg mb-2"}`}>
-            {/* Judul kecil (Opsional, atau bisa dihapus jika ingin persis gambar bar saja) */}
-            {/* <div className="text-[10px] font-bold text-slate-300 mb-1 uppercase tracking-wider">Reflectivity</div> */}
+
 
             <div className="flex items-center gap-2">
                 {/* Container Bar & Labels */}
@@ -50,12 +49,10 @@ export const RadarLegend = ({ className }: LegendProps) => {
     );
 };
 
-// --- 2. SATELLITE LEGEND (NEW DISCRETE STYLE) ---
+// SATELLITE LEGEND
 export const SatelliteLegend = ({ className }: LegendProps) => {
     return (
         <div className={`p-2 rounded-lg font-sans transition-all ${className || "bg-slate-900/80 backdrop-blur-md border border-slate-700 shadow-lg mb-2"}`}>
-            {/* Opsional: Judul Kecil */}
-            {/* <div className="text-[10px] font-bold text-slate-300 mb-1 uppercase tracking-wider">Cloud Top Temp (°C)</div> */}
 
             <div className="flex items-center gap-2">
                 <div className="flex-1">
@@ -93,9 +90,8 @@ export const SatelliteLegend = ({ className }: LegendProps) => {
     );
 };
 
-// --- 3. SIGMET LEGEND (NEW - CATEGORICAL) ---
+// SIGMET LEGEND
 export const SigmetLegend = ({ className }: LegendProps) => {
-    // List bahaya utama yang ingin ditampilkan
     const hazards = [
         { code: 'TS', label: 'Storm' },
         { code: 'TURB', label: 'Turbulence' },

@@ -6,7 +6,7 @@ import {
     Clock, Maximize2, ChevronDown, X, Info 
 } from "lucide-react";
 
-// --- KONFIGURASI OPSI ---
+// KONFIGURASI OPSI
 const TIMES = ["00", "06", "12", "18"];
 
 const FLIGHT_LEVELS = [
@@ -36,7 +36,7 @@ const SIGWX_TYPES = [
 type ChartCategory = 'wind' | 'cb' | 'sigwx';
 
 export default function AviationCharts() {
-  // --- STATE ---
+  // STATE
   const [selectedTime, setSelectedTime] = useState("");
   const [activeTab, setActiveTab] = useState<ChartCategory>('wind');
   
@@ -82,7 +82,7 @@ export default function AviationCharts() {
       setUseFallbackDate(false);
   }, [selectedTime, activeTab, selectedSigwx, selectedFL, selectedCB]);
 
-  // --- HELPER: DESKRIPSI DINAMIS ---
+  // HELPER DESKRIPSI
   const getChartDescription = () => {
       if (activeTab === 'wind') {
           const flLabel = FLIGHT_LEVELS.find(f => f.value === selectedFL)?.label || selectedFL;
@@ -116,7 +116,7 @@ export default function AviationCharts() {
 
   const chartInfo = getChartDescription();
 
-  // --- URL GENERATOR ---
+  // URL GENERATOR 
   const getImageUrl = () => {
       if (!dateParams) return ""; 
 
@@ -205,7 +205,7 @@ export default function AviationCharts() {
                 )}
             </div>
 
-            {/* DESCRIPTION BOX (BARU) */}
+            {/* DESCRIPTION BOX */}
             <div className="px-6 py-4 bg-blue-50/50 border-b border-blue-100 flex items-start gap-3">
                 <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <div>
@@ -219,9 +219,8 @@ export default function AviationCharts() {
                  onClick={() => currentImageUrl && setPreviewImage(currentImageUrl)}
             >
                 {dateParams ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img 
-                        key={currentImageUrl} // Force re-mount on URL change
+                        key={currentImageUrl}
                         src={currentImageUrl} 
                         alt={`Chart ${activeTab}`} 
                         className="w-full h-full object-contain"
@@ -261,7 +260,6 @@ export default function AviationCharts() {
                     <X className="w-8 h-8" />
                 </button>
                 <div className="w-full h-full flex items-center justify-center overflow-auto" onClick={(e) => e.stopPropagation()}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={previewImage} alt="Full Chart" className="max-w-none h-full object-contain md:h-auto md:w-full md:max-w-5xl shadow-2xl rounded-lg" />
                 </div>
             </div>

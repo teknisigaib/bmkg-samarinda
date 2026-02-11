@@ -1,7 +1,5 @@
-// lib/regions.ts
-import { DATA_KALTIM } from '@/data/kaltim-manual'; // Import data Anda
+import { DATA_KALTIM } from '@/data/kaltim-manual';
 
-// Tipe data untuk opsi pencarian (Format yang dibutuhkan Search Component)
 export interface RegionOption {
   id: string;
   name: string;
@@ -9,7 +7,6 @@ export interface RegionOption {
   parentName?: string;
 }
 
-// FUNGSI UNTUK MERATAKAN (FLATTEN) DATA HIERARKI
 const generateRegionList = (): RegionOption[] => {
   const options: RegionOption[] = [];
 
@@ -22,7 +19,6 @@ const generateRegionList = (): RegionOption[] => {
 
   // 2. Loop Kabupaten/Kota
   DATA_KALTIM.forEach((city) => {
-    // Masukkan Kota
     options.push({
       id: city.id,
       name: city.name,
@@ -32,22 +28,20 @@ const generateRegionList = (): RegionOption[] => {
 
     // 3. Loop Kecamatan
     city.districts.forEach((district) => {
-      // Masukkan Kecamatan
       options.push({
         id: district.id,
         name: district.name,
         level: 'district',
-        parentName: city.name // Parentnya adalah Kota
+        parentName: city.name
       });
 
       // 4. Loop Desa/Kelurahan
       district.villages.forEach((village) => {
-        // Masukkan Desa
         options.push({
           id: village.id,
           name: village.name,
           level: 'village',
-          parentName: district.name // Parentnya adalah Kecamatan
+          parentName: district.name
         });
       });
     });
@@ -56,5 +50,4 @@ const generateRegionList = (): RegionOption[] => {
   return options;
 };
 
-// Export variable regionList yang sudah berisi ribuan data flat
 export const regionList = generateRegionList();

@@ -1,4 +1,4 @@
-"use client"; // Wajib use client untuk hook usePathname
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,7 +12,7 @@ const sidebarItems = [
 ];
 
 export default function ProfilSidebar() {
-  const pathname = usePathname(); // Ini kuncinya
+  const pathname = usePathname();
 
   return (
     <aside className="w-full md:w-72 flex-shrink-0">
@@ -25,7 +25,6 @@ export default function ProfilSidebar() {
 
         <nav className="p-2 space-y-1">
           {sidebarItems.map((item) => {
-            // Cek apakah item ini sedang aktif
             const isActive = pathname === item.href;
 
             return (
@@ -40,14 +39,12 @@ export default function ProfilSidebar() {
                 `}
               >
                 <div className="flex items-center gap-3 relative z-10">
-                  {/* Ikon berubah warna jika aktif */}
                   <span className={isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"}>
                     {item.icon}
                   </span>
                   <span>{item.name}</span>
                 </div>
                 
-                {/* Chevron hanya muncul jika aktif atau hover */}
                 <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? "text-blue-600 opacity-100" : "text-gray-300 opacity-0 group-hover:opacity-100"}`} />
               </Link>
             );

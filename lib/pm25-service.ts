@@ -43,7 +43,6 @@ export async function updateDataFromFTP(): Promise<PM25Data | null> {
     await client.cd("/SAMARINDA2/WASUploaded");
 
     // 2. Ambil List Semua File
-    console.log("📂 [FTP] Mengambil daftar file...");
     const fileList = await client.list();
     
     // Filter hanya file CSV
@@ -52,7 +51,6 @@ export async function updateDataFromFTP(): Promise<PM25Data | null> {
     if (csvFiles.length === 0) throw new Error("Tidak ada file CSV.");
 
     // 3. Urutkan File (Terlama -> Terbaru)
-    // Kita gunakan 'modifiedAt' dari server FTP.
     csvFiles.sort((a, b) => {
         const timeA = a.modifiedAt ? new Date(a.modifiedAt).getTime() : 0;
         const timeB = b.modifiedAt ? new Date(b.modifiedAt).getTime() : 0;
@@ -60,13 +58,12 @@ export async function updateDataFromFTP(): Promise<PM25Data | null> {
     });
 
     // 4. Ambil 24 File Terakhir (24 Jam Terakhir)
-    // Jika file kurang dari 24, ambil semua yang ada
     const targetFiles = csvFiles.slice(-24);
     console.log(`info: Akan memproses ${targetFiles.length} file untuk grafik.`);
 
     const historyData = [];
 
-    // 5. LOOP DOWNLOAD (Satu per satu)
+    // 5. LOOP DOWNLOAD
     for (const file of targetFiles) {
         try {
             // Download isi file
@@ -76,17 +73,15 @@ export async function updateDataFromFTP(): Promise<PM25Data | null> {
             const lines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             
             if (lines.length >= 3) {
-                const dataRow = lines[2]; // Baris data
+                const dataRow = lines[2];
                 const cols = dataRow.split(',');
 
-                // Mapping Data (Sesuai info Anda)
-                // Col 0: Date, Col 1: Time, Col 2: Conc
                 if (cols.length >= 3) {
                     const rawDate = cols[0];
                     const rawTime = cols[1];
                     const val = parseFloat(cols[2]);
                     
-                    // Ambil jam (misal 14:00 -> 14)
+                    // Ambil jam 
                     const hour = rawTime.split(':')[0];
 
                     historyData.push({
@@ -101,7 +96,7 @@ export async function updateDataFromFTP(): Promise<PM25Data | null> {
         }
     }
 
-    // Ambil data paling terakhir sebagai 'Current'
+    // Ambil data paling terakhir
     const latestData = historyData[historyData.length - 1];
 
     const processedData: PM25Data = {
@@ -113,13 +108,10 @@ export async function updateDataFromFTP(): Promise<PM25Data | null> {
 
     // 6. Simpan Cache
     await fs.writeFile(CACHE_FILE, JSON.stringify(processedData, null, 2));
-    console.log(`✅ [FTP] Sukses! ${historyData.length} data history tersimpan.`);
 
     return processedData;
 
   } catch (err: any) {
-    console.error("❌ [FTP] Error Fatal:", err.message);
-    // Return cache lama jika gagal
     try {
         const oldData = await fs.readFile(CACHE_FILE, 'utf-8');
         return JSON.parse(oldData);

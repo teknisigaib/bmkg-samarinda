@@ -12,7 +12,6 @@ const poppins = Poppins({
 
 // METADATA UTAMA 
 export const metadata: Metadata = {
-  // Ganti dengan domain asli nanti
   metadataBase: new URL('http://bmkg-samarinda.vercel.app'), 
 
   title: {

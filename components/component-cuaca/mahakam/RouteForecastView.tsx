@@ -20,8 +20,7 @@ const getCardinalDirection = (deg: number) => {
     return arr[val % 16];
 };
 
-// --- LOGIC STATUS NAVIGASI ---
-// Mengembalikan tipe status: 'danger', 'warning', atau 'safe'
+
 const getNavStatus = (loc: MahakamLocation) => {
     // 1. Kriteria Bahaya (Merah)
     if (
@@ -70,10 +69,10 @@ const getNavStatus = (loc: MahakamLocation) => {
         label: 'Aman', 
         icon: CheckCircle2, 
         badgeStyle: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-        colBase: 'bg-white', // Tetap putih agar bersih
+        colBase: 'bg-white',
         colHover: 'hover:bg-slate-50',
         colActive: 'bg-blue-50 ring-2 ring-inset ring-blue-500',
-        headerBg: 'bg-slate-50', // Header abu netral
+        headerBg: 'bg-slate-50',
         headerText: 'text-slate-800',
         activeBadge: 'text-blue-600 bg-white border-blue-100'
     };
@@ -94,7 +93,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
   return (
     <div className="w-full min-w-0 animate-in fade-in slide-in-from-bottom-8 duration-700 text-slate-800">
       
-      {/* HEADER ATAS */}
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-4 px-1">
           <div className="flex items-center gap-3">
               <div className="bg-white border border-slate-200 text-slate-700 p-2 rounded-lg shadow-sm shrink-0">
@@ -115,15 +114,15 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
         <div className="w-full overflow-x-auto custom-scrollbar bg-white">
             <div className="flex min-w-max">
             
-                {/* === KOLOM LABEL (STICKY LEFT) === */}
+                {/* KOLOM LABEL */}
                 <div className="sticky left-0 z-30 w-32 shrink-0 border-r border-slate-200 bg-white shadow-[4px_0_16px_-4px_rgba(0,0,0,0.05)] text-slate-500">
                     
-                    {/* Header: PARAMETER */}
+                    {/* Header */}
                     <div className={`${ROW_H.HEADER} flex flex-col justify-center px-4 border-b border-slate-100`}>
                         <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Parameter</span>
                     </div>
 
-                    {/* Baris Baru: STATUS */}
+                    {/* STATUS */}
                     <div className={`${ROW_H.STATUS} flex items-center px-4 border-b border-slate-100 bg-slate-50/50`}>
                          <div className="flex items-center gap-3">
                             <div className="p-1 rounded-md bg-slate-200 text-slate-600 border border-slate-300">
@@ -133,7 +132,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                         </div>
                     </div>
 
-                    {/* Baris 1: CUACA */}
+                    {/* CUACA */}
                     <div className={`${ROW_H.WEATHER} flex items-center px-4 border-b border-slate-100`}>
                         <div className="flex items-center gap-3">
                             <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
@@ -143,7 +142,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                         </div>
                     </div>
                     
-                    {/* Baris 2: ANGIN */}
+                    {/* ANGIN */}
                     <div className={`${ROW_H.WIND} flex items-center px-4 border-b border-slate-100 bg-slate-50/30`}>
                         <div className="flex items-center gap-3">
                             <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
@@ -153,7 +152,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                         </div>
                     </div>
 
-                    {/* Baris 3: SUHU */}
+                    {/* SUHU */}
                     <div className={`${ROW_H.TEMP} flex items-center px-4 border-b border-slate-100`}>
                         <div className="flex items-center gap-3">
                              <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
@@ -163,7 +162,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                         </div>
                     </div>
 
-                    {/* Baris 4: JARAK PANDANG */}
+                    {/* JARAK PANDANG */}
                     <div className={`${ROW_H.VIS} flex items-center px-4 border-b border-slate-100 bg-slate-50/30`}>
                         <div className="flex items-center gap-3">
                              <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
@@ -173,7 +172,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                         </div>
                     </div>
 
-                    {/* Baris 5: RH % */}
+                    {/*  RH */}
                     <div className={`${ROW_H.HUMID} flex items-center px-4`}>
                         <div className="flex items-center gap-3">
                              <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
@@ -184,18 +183,17 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                     </div>
                 </div>
 
-                {/* === KOLOM DATA (LOOPING) === */}
+                {/* KOLOM DATA */}
                 {data.map((loc, idx) => {
                     const isActive = activeId === loc.id;
-                    const status = getNavStatus(loc); // Ambil status & style config
+                    const status = getNavStatus(loc);
 
-                    // Tentukan class background berdasarkan status & active state
                     const columnClass = isActive 
                         ? `${status.colActive} z-10` 
                         : `${status.colBase} ${status.colHover}`;
 
                     const headerClass = isActive 
-                        ? `${status.headerBg} border-b-${status.type === 'safe' ? 'blue' : status.type}-300` // Border lebih tegas saat active
+                        ? `${status.headerBg} border-b-${status.type === 'safe' ? 'blue' : status.type}-300`
                         : `${status.headerBg}`;
 
                     return (
@@ -210,7 +208,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                             {/* Overlay Hover */}
                             <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors pointer-events-none z-0" />
 
-                            {/* 1. HEADER LOKASI (Warnanya ikut status) */}
+                            {/*  HEADER LOKASI */}
                             <div className={`${ROW_H.HEADER} flex flex-col items-center justify-center p-2 border-b border-slate-200 transition-colors z-10 ${headerClass}`}>
                                 <h3 className={`text-xs font-bold leading-tight mb-1 line-clamp-2 h-8 flex items-center justify-center ${status.headerText}`}>
                                     {loc.name.replace('Stasiun Meteorologi', '').replace('Stasiun', '').trim()}
@@ -226,7 +224,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                                 )}
                             </div>
 
-                            {/* --- 1.B STATUS NAVIGASI (Badge) --- */}
+                            {/* STATUS NAVIGASI */}
                             <div className={`${ROW_H.STATUS} flex items-center justify-center p-2 border-b border-slate-100/50 z-10`}>
                                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${status.badgeStyle} shadow-sm`}>
                                     <status.icon size={12} strokeWidth={3} />

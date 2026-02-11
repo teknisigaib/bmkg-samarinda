@@ -44,8 +44,7 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-28 relative z-20 mb-12">
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col md:flex-row min-h-[220px]">
-        
-        {/* --- TAB NAVIGASI (SIDEBAR) --- */}
+    
         <div className="md:w-1/4 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 flex md:flex-col">
           
           <button 
@@ -82,14 +81,14 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
 
         </div>
 
-        {/* --- KONTEN UTAMA --- */}
+        {/*  KONTEN UTAMA */}
         <div 
             className="flex-1 p-6 md:p-8 flex flex-col justify-center relative bg-white"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
             
-            {/* 1. KONTEN CUACA */}
+            {/* KONTEN CUACA */}
             {activeTab === "cuaca" && (
                 <div className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300"> 
                     {currentCuaca ? (
@@ -176,7 +175,7 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
                 </div>
             )}
 
-            {/* 2. KONTEN GEMPA */}
+            {/* KONTEN GEMPA */}
             {activeTab === "gempa" && (
                 <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                     {dataGempa ? (
@@ -219,7 +218,7 @@ export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
                 </div>
             )}
 
-            {/* 3. KONTEN AWS REALTIME (Dipisah ke Component) */}
+            {/* KONTEN AWS REALTIME  */}
             {activeTab === "aws" && (
                 <HomeAwsWidget />
             )}

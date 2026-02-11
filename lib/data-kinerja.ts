@@ -12,11 +12,10 @@ export interface KinerjaDoc {
   fileSize: string;
 }
 
-// GET
 export async function getKinerjaDocs() {
   try {
     const data = await prisma.performanceDoc.findMany({
-      orderBy: { createdAt: 'desc' }, // Terbaru di atas
+      orderBy: { createdAt: 'desc' },
     });
     return data;
   } catch (error) {
@@ -25,11 +24,9 @@ export async function getKinerjaDocs() {
   }
 }
 
-// SAVE
 export async function saveKinerjaDoc(data: KinerjaDoc) {
   try {
     if (data.id) {
-      // Update
       await prisma.performanceDoc.update({
         where: { id: data.id },
         data: {
@@ -41,7 +38,6 @@ export async function saveKinerjaDoc(data: KinerjaDoc) {
         }
       });
     } else {
-      // Create
       await prisma.performanceDoc.create({
         data: {
           title: data.title,
