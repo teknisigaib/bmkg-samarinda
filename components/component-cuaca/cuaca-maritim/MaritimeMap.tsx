@@ -83,7 +83,7 @@ export default function MaritimeMap({ mode, onSelectArea, onSelectPort, selected
   }
 
   return (
-    <div className="relative md:min-w-[1100px] h-[500px] w-full rounded-2xl overflow-hidden shadow-md border border-blue-100 bg-blue-50">
+    <div className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-md border border-blue-100 bg-blue-50">
       <MapContainer center={[-1.2, 117.5]} zoom={7} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
         <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
         <AutoZoom />

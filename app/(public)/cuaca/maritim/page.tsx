@@ -122,10 +122,10 @@ export default function MaritimePage() {
             <div className="flex-1 w-full relative z-10">
                 <h2 className="text-2xl font-bold text-gray-800">Prakiraan Cuaca Maritim</h2>
                 <p className="text-gray-600 text-sm mt-2 leading-relaxed mx-auto md:mx-0">
-                    Monitoring kondisi tinggi gelombang, arah angin, dan cuaca signifikan di wilayah <strong className="text-blue-600">Perairan Kalimantan Timur</strong> serta pelabuhan-pelabuhan utama.
+                    Monitoring kondisi tinggi gelombang, arah angin, dan cuaca signifikan di wilayah <strong className="text-blue-600">Perairan dan Pelabuhan di Kalimantan Timur</strong>.
                 </p>
                 
-                {/* Container Controls */}
+            {/* Container Controls */}
             <div className="mt-6 flex flex-col xl:flex-row items-center justify-between gap-4 w-full">
                 {/* Mode Switcher */}
                 <div className="bg-white p-1.5 rounded-xl shadow-sm border border-blue-100 flex w-full md:w-auto">
