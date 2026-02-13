@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { ArrowRight } from "lucide-react";
+import AwosWidget from "@/components/AwosWidget";
 
 // KOMPONEN UI
 import ServiceSection from "@/components/ServiceSection";
@@ -107,6 +108,15 @@ export default async function HomePage() {
             <InfoWidgetWrapper />
          </Suspense>
       </div>
+
+      {/* Widget AWOS Baru */}
+          <Suspense fallback={
+              <div className="h-40 bg-slate-100 rounded-xl animate-pulse flex items-center justify-center text-slate-400 text-sm">
+                  Menghubungkan ke AWOS...
+              </div>
+          }>
+              <AwosWidget />
+          </Suspense>
 
       {/* 4. AVIATION SECTION (Lambat -> Dipisah) */}
       <Suspense fallback={<AviationSkeleton />}>
