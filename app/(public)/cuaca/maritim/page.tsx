@@ -16,8 +16,6 @@ import {
   PortData, 
   OverviewData 
 } from "@/lib/bmkg/maritim";
-import type { Metadata } from "next";
-
 
 const MaritimeMap = dynamic(() => import("@/components/component-cuaca/cuaca-maritim/MaritimeMap"), {
   ssr: false,
@@ -111,46 +109,69 @@ export default function MaritimePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="w-full mx-auto space-y-8 max-sm:max-w-xs ">
+      <div className="w-full mx-auto space-y-8 max-sm:max-w-xs">
         
-        {/* --- UNIFIED CONTROL BAR --- */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-2 flex flex-col lg:flex-row items-center justify-between gap-4 sticky top-4 z-40 backdrop-blur-md">
-            
-            {/* 1. Mode Switcher (Kiri) */}
-            <div className="bg-gray-100 p-1.5 rounded-2xl flex w-full lg:w-auto">
-                <button 
-                    onClick={() => toggleMode('area')}
-                    className={`flex-1 lg:flex-none px-6 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'area' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    <Waves className="w-4 h-4" /> Perairan
-                </button>
-                <button 
-                    onClick={() => toggleMode('port')}
-                    className={`flex-1 lg:flex-none px-6 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'port' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    <Anchor className="w-4 h-4" /> Pelabuhan
-                </button>
-            </div>
+        {/* HEADER */}
+        <section className="bg-blue-50 border border-blue-100 rounded-[2.5rem] p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-sm relative overflow-hidden">
 
-            {/* 2. Date Selector (Kanan) - Scrollable Pill List */}
-            <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-hide">
-                {availableDays.map((label, idx) => (
+            {/* Ikon */}
+            <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0 relative z-10">
+                <Ship className="w-10 h-10 text-blue-600" />
+            </div>
+    
+            <div className="flex-1 w-full relative z-10">
+                <h2 className="text-2xl font-bold text-gray-800">Prakiraan Cuaca Maritim</h2>
+                <p className="text-gray-600 text-sm mt-2 leading-relaxed mx-auto md:mx-0">
+                    Monitoring kondisi tinggi gelombang, arah angin, dan cuaca signifikan di wilayah <strong className="text-blue-600">Perairan Kalimantan Timur</strong> serta pelabuhan-pelabuhan utama.
+                </p>
+                
+                {/* Container Controls */}
+            <div className="mt-6 flex flex-col xl:flex-row items-center justify-between gap-4 w-full">
+                {/* Mode Switcher */}
+                <div className="bg-white p-1.5 rounded-xl shadow-sm border border-blue-100 flex w-full md:w-auto">
+                    <button 
+                        onClick={() => toggleMode('area')}
+                        className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                        viewMode === 'area' 
+                        ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200' 
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        <Waves className="w-4 h-4" /> Perairan
+                    </button>
+                    <button 
+                        onClick={() => toggleMode('port')}
+                        className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                        viewMode === 'port' 
+                        ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200' 
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        <Anchor className="w-4 h-4" /> Pelabuhan
+                    </button>
+                </div>
+
+                {/* Date Selector */}
+                <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide xl:justify-end"> {/* PERUBAHAN 2: tambah 'xl:justify-end' */}
+                    {availableDays.map((label, idx) => (
                     <button
                         key={idx}
                         onClick={() => setSelectedDayIndex(idx)}
-                        className={`whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+                        className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-bold transition-all border ${
                             selectedDayIndex === idx 
                             ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200' 
-                            : 'bg-white border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-200'
-                        }`}
-                    >
+                            : 'bg-white border-blue-100 text-gray-500 hover:bg-blue-50 hover:border-blue-200'
+                            }`}
+                        >
                         {label}
-                    </button>
-                ))}
-            </div>
-        </div>
+                    </button>))}
+                </div>
 
-        {/* --- MAP --- */}
+                </div>
+            </div>
+        </section>
+
+        {/* MAP  */}
         <div className="relative z-0">
             {loadingOverview && (
                 <div className="absolute inset-0 z-50 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-2xl">
@@ -171,7 +192,7 @@ export default function MaritimePage() {
             />
         </div>
 
-        {/* --- DETAIL SECTION --- */}
+        {/* DETAIL SECTION  */}
         <div className="scroll-mt-24" id="forecast-detail">
             {loadingDetail ? (
                 <div className="h-80 bg-white rounded-[2.5rem] animate-pulse flex flex-col items-center justify-center text-gray-300 border border-dashed border-gray-200">
@@ -180,7 +201,7 @@ export default function MaritimePage() {
                 </div>
             ) : (
                 <>
-                    {/* --- DETAIL PERAIRAN (AREA) --- */}
+                    {/* DETAIL PERAIRAN */}
                     {viewMode === 'area' && areaData && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="flex items-center justify-between px-2">
@@ -310,7 +331,7 @@ export default function MaritimePage() {
                         </div>
                     )}
 
-                    {/* --- DETAIL PELABUHAN  */}
+                    {/* DETAIL PELABUHAN  */}
                     {viewMode === 'port' && portData && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                              
@@ -435,7 +456,7 @@ export default function MaritimePage() {
                         </div>
                     )}
 
-                    {/* --- EMPTY STATE --- */}
+                    {/* EMPTY STATE */}
                     {!areaData && !portData && (
                         <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200">
                             <div className="p-6 bg-blue-50 rounded-full mb-6 animate-pulse">

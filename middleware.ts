@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   
   // KONFIGURASI MAINTENANCE
   const MAINTENANCE_PATHS: string[] = [
-     '/cuaca/maritim',     
+    // '/cuaca/maritim',     
     // '/cuaca/penerbangan',
   ];
 
