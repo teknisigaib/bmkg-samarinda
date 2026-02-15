@@ -12,7 +12,7 @@ const poppins = Poppins({
 
 // METADATA UTAMA 
 export const metadata: Metadata = {
-  metadataBase: new URL('http://bmkg-samarinda.vercel.app'), 
+  metadataBase: new URL('http://stamet-samarinda.devbmkg.my.id'), 
 
   title: {
     template: '%s | BMKG APT Pranoto Samarinda',
@@ -51,7 +51,8 @@ export const metadata: Metadata = {
 
   icons: {
     icon: '/logo-bmkg.png',
-    apple: '/apple-icon.png',
+    shortcut: "/logo-bmkg.png",
+    apple: '/logo-bmkg.png',
   },
 };
 
