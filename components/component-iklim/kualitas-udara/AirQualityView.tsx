@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { 
-  MapPin, RefreshCw, BookOpen, TrendingUp, TrendingDown, Minus,
-  Wind,
-  Clock
+  MapPin, Wind, Clock, TrendingUp, TrendingDown, Minus 
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
 
+// --- KONFIGURASI WARNA & BATAS ---
 const THRESHOLDS = { BAIK: 15.5, SEDANG: 55.4, TIDAK_SEHAT: 150.4, SANGAT_TIDAK_SEHAT: 250.4 };
 
 const COLORS = { 
@@ -37,28 +36,18 @@ const getStatusInfo = (val: number) => {
   return { text: "Berbahaya", desc: "Kualitas udara sangat buruk, tetap di dalam ruangan." };
 };
 
-export default function AirQualityView() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [data, setData] = useState<any>({ history: [], current: 0, lastUpdate: "-" });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('/api/pm25');
-        const json = await res.json();
-        if (json.success) setData(json);
-        else setError("Gagal memuat data server.");
-      } catch (err) { setError("Koneksi timeout."); } 
-      finally { setLoading(false); }
-    };
-    fetchData();
-  }, []);
+// COMPONENT UTAMA
+export default function AirQualityView({ initialData }: { initialData: any }) {
+  
+  // Langsung pakai data dari props
+  const data = initialData;
+  const isError = !data.success && data.history.length === 0;
 
   // LOGIKA TREND
   const getTrendInfo = () => {
+    if (!data.history || data.history.length < 2) return null;
+
     const validHistory = data.history.filter((h: any) => h.pm25 !== null);
-    
     if (validHistory.length < 2) return null;
 
     const current = validHistory[validHistory.length - 1].pm25;
@@ -70,16 +59,17 @@ export default function AirQualityView() {
     return { icon: Minus, text: "Stabil", color: "text-slate-500", bg: "bg-slate-50 border-slate-100" };
   };
 
-  const statusInfo = getStatusInfo(data.current);
-  const currentColor = getPm25Color(data.current);
+  const currentVal = data.current || 0;
+  const statusInfo = getStatusInfo(currentVal);
+  const currentColor = getPm25Color(currentVal);
   const trend = getTrendInfo();
   const TrendIcon = trend ? trend.icon : null;
 
   return (
     <div className="w-full min-h-screen text-slate-800 overflow-x-hidden">
       
+      {/* HEADER SECTION */}
       <section className="bg-emerald-50 border border-emerald-100 rounded-[2rem] p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          {/* Icon Container */}
           <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0">
             <Wind className="w-8 h-8 text-emerald-600" />
           </div>
@@ -90,65 +80,51 @@ export default function AirQualityView() {
               Monitoring konsentrasi Particulate Matter (<strong className="text-emerald-600">PM2.5</strong>) secara real-time di Stasiun Meteorologi APT Pranoto.
             </p>
             
-            {/* Container Badge */}
             <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
-              
-              {/* Badge Status (Online/Gangguan) */}
+              {/* Badge Status */}
               <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-bold shadow-sm">
                  <span className="relative flex h-2.5 w-2.5">
-                   {!loading && !error && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                   <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${!loading && !error ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                   {!isError && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+                   <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${!isError ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
                  </span>
-                 {!loading && !error ? 'Status: Online' : 'Status: Connecting...'}
+                 {!isError ? 'Status: Online' : 'Status: Offline / No Data'}
               </div>
           
-              {/* Badge Lokasi */}
               <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
                   <MapPin className="w-3.5 h-3.5 text-emerald-500" />
                   BMKG APT Pranoto
               </div>
 
-              {/* Badge Waktu Update */}
               <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
                   <Clock className="w-3.5 h-3.5 text-emerald-500" />
                   Update: {data.lastUpdate}
               </div>
-
             </div>
           </div>
-        </section>
+      </section>
 
       {/* CONTENT WRAPPER */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 mt-6 md:mt-8 space-y-6">
 
-        {loading && (
-           <div className="h-64 flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-200 shadow-sm animate-pulse">
-              <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mb-3" />
-              <span className="text-sm font-medium text-slate-500">Mengambil Data . . .</span>
-           </div>
-        )}
-
-        {!loading && !error && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             
             {/* GAUGE UTAMA */}
             <div className="bg-white rounded-[2rem] p-2 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[400px]">
 
-                {/* Gauge SVG Container */}
                 <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6 flex-shrink-0">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 224 224">
                     <circle cx="112" cy="112" r="96" stroke="#f1f5f9" strokeWidth="12" fill="transparent" strokeLinecap="round" />
                     <circle 
                       cx="112" cy="112" r="96" stroke={currentColor} strokeWidth="12" fill="transparent" 
                       strokeDasharray={2 * Math.PI * 96}
-                      strokeDashoffset={2 * Math.PI * 96 * (1 - Math.min(data.current, 250) / 250)} 
+                      strokeDashoffset={2 * Math.PI * 96 * (1 - Math.min(currentVal, 250) / 250)} 
                       strokeLinecap="round"
                       className="transition-all duration-1000 ease-out drop-shadow-lg"
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-5xl sm:text-6xl font-extrabold text-slate-800 tracking-tighter drop-shadow-sm">
-                      {data.current}
+                      {currentVal}
                     </span>
                     <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-widest mt-2 bg-slate-50 px-2 py-1 rounded">
                       PM<sub>2.5</sub> µg/m³
@@ -159,7 +135,6 @@ export default function AirQualityView() {
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
                     {statusInfo.text}
                 </h2>
-                {/* INDIKATOR TREN */}
                 {trend && TrendIcon && (
                     <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-4 ${trend.bg} ${trend.color}`}>
                         <TrendIcon className="w-3.5 h-3.5" />
@@ -181,7 +156,7 @@ export default function AirQualityView() {
               </div>
 
               <div className="w-full h-[300px] min-w-0 relative">
-                 {data.history.length === 0 ? (
+                 {(!data.history || data.history.length === 0) ? (
                     <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm italic">
                         Belum ada data riwayat tersedia
                     </div>
@@ -224,7 +199,7 @@ export default function AirQualityView() {
                                 const color = getPm25Color(val);
                                 return (
                                     <div className="bg-white/95 backdrop-blur px-3 py-2 border border-slate-100 shadow-xl rounded-md text-xs z-50">
-                                    <p className="font-bold text-slate-700 mb-0.5">Jam {label}:00</p>
+                                    <p className="font-bold text-slate-700 mb-0.5">Jam {label}</p>
                                     <div className="flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full" style={{background: color}}></div>
                                         <span className=" font-bold text-sm">{val}</span>
@@ -246,7 +221,7 @@ export default function AirQualityView() {
               </div>
             </div>
 
-            {/*  LEGEND */}
+            {/* LEGEND */}
             <div className="lg:col-span-3 bg-white rounded-[2rem] p-5 sm:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 text-center">Panduan Indeks Kualitas Udara</h4>
                 
@@ -265,23 +240,9 @@ export default function AirQualityView() {
                         </div>
                     ))}
                 </div>
-
-                {/*  DESKRIPSI PM2.5 */}
-                <div className="pt-6 border-t border-slate-100 flex flex-col md:flex-row gap-5 items-start mt-6">
-                    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shrink-0">
-                        <BookOpen className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h5 className="font-bold text-slate-800 text-sm mb-2">Apa itu PM2.5?</h5>
-                        <p className="text-xs text-slate-500 leading-relaxed max-w-4xl">
-                            <strong>PM2.5 (Particulate Matter 2.5)</strong> adalah partikel udara yang berukuran sangat kecil (kurang dari 2.5 mikrometer). Ukuran ini kira-kira 3% dari diameter rambut manusia. Karena sangat halus, partikel ini dapat menembus sistem pernapasan hingga ke paru-paru bagian dalam dan bahkan masuk ke aliran darah. Paparan jangka panjang dapat berisiko bagi kesehatan jantung dan pernapasan.
-                        </p>
-                    </div>
-                </div>
             </div>
 
           </div>
-        )}
       </div>
     </div>
   );
