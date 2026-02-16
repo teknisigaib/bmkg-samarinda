@@ -139,15 +139,13 @@ export async function GET(request: Request) {
       data: finalData 
     });
 
-  } catch (error: any) { // Tambahkan type :any agar properti .message terbaca
+  } catch (error: any) { 
     console.error("[Cron] Error Detail:", error);
-    
-    // Kembalikan pesan error asli agar tahu penyebabnya (Password/Timeout/Permission)
     return NextResponse.json({ 
       success: false, 
       error: 'Gagal update data',
-      debug_message: error.message || 'Unknown error', // Ini yang paling penting
-      debug_stack: error.stack // Opsional: Untuk melihat baris mana yang error
+      debug_message: error.message || 'Unknown error',
+      debug_stack: error.stack
     }, { status: 500 });
     
   } finally {
