@@ -36,7 +36,7 @@ export default function HomeAwsWidget() {
   // TAMPILAN LOADING
   if (loading) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 animate-pulse min-h-[180px]">
+      <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 animate-pulse ">
          <Loader2 className="w-8 h-8 animate-spin text-blue-300" />
          <span className="text-xs font-medium">Memuat Data AWS...</span>
       </div>
@@ -46,7 +46,7 @@ export default function HomeAwsWidget() {
   // TAMPILAN ERROR
   if (!data) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center text-red-400 min-h-[180px]">
+      <div className="w-full h-full flex flex-col items-center justify-center text-red-400">
         <span className="text-sm font-medium">Data AWS Tidak Tersedia</span>
         <button 
             onClick={fetchData}

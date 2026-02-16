@@ -10,7 +10,7 @@ interface AwsWidgetContentProps {
 
 export default function AwsWidgetContent({ data }: AwsWidgetContentProps) {
   return (
-    <div className="w-full h-full flex items-center animate-in fade-in slide-in-from-right-4 duration-500">
+    <div className="w-full flex items-center animate-in fade-in slide-in-from-right-4 duration-500">
       
       {/* CONTAINER UTAMA */}
       <div className="w-full flex flex-col md:flex-row items-center gap-4 md:gap-8">

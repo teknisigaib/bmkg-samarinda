@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 import prisma from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 1. Tentukan Base URL
+  //  Base URL
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://stametsamarinda.bmkg.go.id';
 
   // 2. Daftar Halaman Statis

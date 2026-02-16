@@ -1,42 +1,28 @@
 import { NextResponse } from 'next/server';
-import { getCachedData, updateDataFromFTP } from '@/lib/pm25-service';
+import fs from 'fs';
+import path from 'path';
 
-const REVALIDATE_TIME = 30 * 60 * 1000; 
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Ambil data dari file lokal 
-    let cachedData = await getCachedData();
-    const now = Date.now();
+    const filePath = path.join(process.cwd(), 'public', 'data', 'pm25-cache.json');
 
-    // Jika file tidak ada sama sekali
-    if (!cachedData) {
-      console.log("⚠️ Cache kosong, melakukan fetch awal (User menunggu)...");
-      cachedData = await updateDataFromFTP();
-      
-      if (!cachedData) {
-        return NextResponse.json({ success: false, error: "Gagal mengambil data awal" }, { status: 500 });
-      }
-      return NextResponse.json({ success: true, ...cachedData });
+    if (!fs.existsSync(filePath)) {
+      return NextResponse.json({ 
+        success: false, 
+        current: 0,
+        history: [],
+        lastUpdate: "Menunggu Update..."
+      });
     }
 
-    // 3. Konsep STALE-WHILE-REVALIDATE
-    const dataAge = now - cachedData.timestamp;
-    
-    if (dataAge > REVALIDATE_TIME) {
-      updateDataFromFTP().catch(err => console.error("Background update failed", err));
-    } else {
-      console.log("Menggunakan data cache");
-    }
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const data = JSON.parse(fileContent);
 
-    // 4.  kembalikan data
-    return NextResponse.json({ 
-      success: true, 
-      ...cachedData 
-    });
+    return NextResponse.json({ success: true, ...data });
 
   } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Internal Error" }, { status: 500 });
   }
 }
