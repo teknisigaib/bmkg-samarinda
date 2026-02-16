@@ -8,11 +8,44 @@ import { ParsedMetar, RawMetar, getPublicSummary } from "@/lib/bmkg/aviation-uti
 import { getRawMetar, getRawSpeci, getRawTaf } from "@/lib/bmkg/aviation";
 import { TicketMetricItem, RawDataBlock } from "./FlightSharedUI";
 
-// WIND CALCULATION
+// HELPER: Ubah Teks Arah
+const getDegreeFromText = (dirText: string): number | null => {
+    const text = dirText.toLowerCase().trim();
+    
+    // Arah Angin
+    const compass: { [key: string]: number } = {
+        "utara": 0, "n": 0, "north": 0,
+        "timur laut": 45, "ne": 45, "northeast": 45,
+        "timur": 90, "e": 90, "east": 90,
+        "tenggara": 135, "se": 135, "southeast": 135,
+        "selatan": 180, "s": 180, "south": 180,
+        "barat daya": 225, "sw": 225, "southwest": 225,
+        "barat": 270, "w": 270, "west": 270,
+        "barat laut": 315, "nw": 315, "northwest": 315
+    };
+    
+    return compass[text] !== undefined ? compass[text] : null;
+};
+
+// WIND CALCULATION 
 const calculateWindComponents = (windSpeed: string, windDir: string, runwayHeading: number) => {
     const speed = parseInt(windSpeed) || 0;
-    const dir = (windDir === "VRB" || isNaN(parseInt(windDir))) ? runwayHeading : parseInt(windDir);
-    
+    let dir = runwayHeading;
+
+    const parsedDir = parseInt(windDir);
+
+    if (!isNaN(parsedDir)) {
+        dir = parsedDir;
+    } else {
+        if (windDir === "VRB") {
+            dir = runwayHeading;
+        } else {
+            const textDir = getDegreeFromText(windDir);
+            if (textDir !== null) dir = textDir;
+        }
+    }
+
+    // Hitung Komponen Angin (Crosswind/Headwind)
     const angleRad = (dir - runwayHeading) * (Math.PI / 180);
     const crosswind = Math.abs(Math.round(Math.sin(angleRad) * speed));
     const headwind = Math.round(Math.cos(angleRad) * speed);
@@ -36,6 +69,8 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
     const RUNWAY_HEADING = 40; 
     
     const windData = calculateWindComponents(airport.wind_speed, airport.wind_direction, RUNWAY_HEADING);
+    console.log("Input Angin:", airport.wind_direction);
+    console.log("Hasil Kalkulasi:", windData.dir);
 
     useEffect(() => {
         if (showDetail) {
@@ -118,7 +153,7 @@ export default function HeroAirportCard({ airport }: { airport: ParsedMetar }) {
                             {/* Wind Arrow */}
                             <div 
                                 className="absolute inset-0 flex items-center justify-center transition-transform duration-1000 ease-out z-20"
-                                style={{ transform: `rotate(${windData.dir + 180}deg)` }}
+                                style={{ transform: `rotate(${windData.dir}deg)` }}
                             >
                                 <div className="flex flex-col items-center -translate-y-14">
                                     <ArrowUp className="w-10 h-10 text-rose-500 fill-rose-500 animate-bounce drop-shadow-lg filter contrast-125" strokeWidth={2.5} />

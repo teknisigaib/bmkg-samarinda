@@ -3,6 +3,7 @@ import { Client } from "basic-ftp";
 import fs from 'fs';
 import path from 'path';
 import { Writable } from 'stream';
+import os from 'os';
 
 const FTP_CONFIG = {
   host: process.env.FTP_HOST,
@@ -126,16 +127,15 @@ export async function GET(request: Request) {
     };
 
     // 7. Simpan ke File Cache
-    const CACHE_FILE_PATH = path.join('/tmp', 'pm25-cache.json');
-
-    fs.writeFileSync(CACHE_FILE_PATH, JSON.stringify(finalData, null, 2));
-
-    console.log("[Cron] Sukses update data PM2.5");
+    const tempDir = os.tmpdir();
+    const filePath = path.join(tempDir, 'pm25-cache.json');
     
-    return NextResponse.json({ 
-      success: true, 
-      data: finalData 
-    });
+    // Simpan File
+    fs.writeFileSync(filePath, JSON.stringify(finalData, null, 2));
+    
+    console.log(`[Cron] Sukses update data ke: ${filePath}`);
+
+    return NextResponse.json({ success: true, data: finalData });
 
   } catch (error: any) { 
     console.error("[Cron] Error Detail:", error);

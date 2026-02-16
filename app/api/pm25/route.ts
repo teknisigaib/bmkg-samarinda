@@ -1,19 +1,21 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const filePath = path.join('/tmp', 'pm25-cache.json');
+    const tempDir = os.tmpdir();
+    const filePath = path.join(tempDir, 'pm25-cache.json');
 
     if (!fs.existsSync(filePath)) {
       return NextResponse.json({ 
         success: false, 
-        current: 0,
-        history: [],
-        lastUpdate: "Menunggu Update..."
+        current: 0, 
+        history: [], 
+        lastUpdate: "Menunggu Update..." 
       });
     }
 
