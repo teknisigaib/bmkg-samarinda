@@ -126,11 +126,9 @@ export async function GET(request: Request) {
     };
 
     // 7. Simpan ke File Cache
-    const filePath = path.join(process.cwd(), 'public', 'data', 'pm25-cache.json');
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const CACHE_FILE_PATH = path.join('/tmp', 'pm25-cache.json');
 
-    fs.writeFileSync(filePath, JSON.stringify(finalData, null, 2));
+    fs.writeFileSync(CACHE_FILE_PATH, JSON.stringify(finalData, null, 2));
 
     console.log("[Cron] Sukses update data PM2.5");
     

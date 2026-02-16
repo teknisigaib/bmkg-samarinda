@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'public', 'data', 'pm25-cache.json');
+    const filePath = path.join('/tmp', 'pm25-cache.json');
 
     if (!fs.existsSync(filePath)) {
       return NextResponse.json({ 
