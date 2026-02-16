@@ -65,10 +65,9 @@ jobs:
       - name: Update Database (Prisma)
         run: |
           docker exec -u 0 \
-          -e HOME=/root \
           -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
           ${{ env.CONTAINER_NAME }} \
           npx prisma@5.22.0 db push --skip-generate
-
+          
       - name: Bersih-bersih Image Sampah
         run: docker image prune -f
