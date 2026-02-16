@@ -11,7 +11,7 @@ env:
   ENV_PATH: /www/wwwroot/bmkg-samarinda/.env 
 
 jobs:
-  # TAHAP 1: BUILD (Dikerjakan oleh GitHub Public Server)
+  # TAHAP 1: BUILD 
   build_and_push:
     runs-on: ubuntu-latest
     steps:
@@ -30,11 +30,9 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE_NAME }}
-          # Agar Env Supabase masuk saat Build ---
           build-args: |
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # ---------------------------------------------------------------
 
   # TAHAP 2: DEPLOY
   deploy_local:
@@ -64,8 +62,18 @@ jobs:
 
       - name: Update Database (Prisma)
         run: |
+          # 1. Ambil DATABASE_URL dari file .env
+          DB_URL=$(grep "^DATABASE_URL=" ${{ env.ENV_PATH }} | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+          
+          # 2. Cek apakah URL berhasil diambil
+          if [ -z "$DB_URL" ]; then
+            echo "Error: DATABASE_URL tidak ditemukan di ${{ env.ENV_PATH }}"
+            exit 1
+          fi
+
+          # 3. Jalankan Prisma
           docker exec -u 0 \
-          -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+          -e DATABASE_URL="$DB_URL" \
           ${{ env.CONTAINER_NAME }} \
           npx prisma@5.22.0 db push --skip-generate
           
