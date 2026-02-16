@@ -7,17 +7,15 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
       
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* --- HEADER BARU --- */}
+        {/* HEADER  */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-gray-200 pb-6">
             
             {/* Bagian Judul */}
             <div>
-                {/* 2. Panggil Component Breadcrumbs di sini */}
-                {/* Kita cuma perlu kirim item 'Profil' karena 'Home' sudah otomatis ada di dalam component */}
-                <div className="-mb-4"> {/* Sedikit margin negatif agar tidak terlalu jauh dari Judul */}
+                <div className="-mb-4"> 
                     <Breadcrumbs 
                         items={[
-                            { label: "Profil" } // Tidak pakai href karena ini sedang aktif (text only)
+                            { label: "Profil" } 
                         ]} 
                     />
                 </div>
@@ -31,7 +29,7 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
             </div>
         </div>
 
-        {/* --- LAYOUT UTAMA --- */}
+        {/* LAYOUT UTAMA  */}
         <div className="flex flex-col md:flex-row gap-8 lg:gap-10">
           
           <ProfilSidebar />
