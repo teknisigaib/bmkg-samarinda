@@ -15,10 +15,9 @@ import FlyerSection from "@/components/FlyerSection";
 // WRAPPERS (Komponen yang fetch data lambat)
 import InfoWidgetWrapper from "@/components/InfoWidgetWrapper";
 import RunningTextWrapper from "@/components/RunningTextWrapper";
-import AviationSection from "@/components/AviationSection"; // Pastikan ini sudah fetch sendiri
+import AviationSection from "@/components/AviationSection";
 
-// SKELETONS (Tampilan Loading Sementara)
-// Anda bisa buat komponen cantik, tapi div sederhana cukup untuk tes
+// SKELETONS
 const WidgetSkeleton = () => (
   <div className="w-full h-64 bg-gray-200 animate-pulse rounded-xl shadow-sm flex items-center justify-center text-gray-400">
     Memuat Data BMKG...
@@ -34,8 +33,7 @@ const RunningTextSkeleton = () => (
 export default async function HomePage() {
   const isBuildTime = !process.env.DATABASE_URL || process.env.DATABASE_URL.includes('placeholder');
 
-  // --- 1. FETCH HANYA DATABASE (DATA CEPAT) ---
-  // Kita biarkan ini mem-block halaman sebentar karena database biasanya < 0.5s
+  //  FETCH HANYA DATABASE
   let heroPost: { id: string; title: string; slug: string; category: string; content: string; excerpt: string; imageUrl: string | null; author: string; isFeatured: boolean; createdAt: Date; updatedAt: Date; } | null = null;
   let latestPosts: any[] = [];
   let formattedBulletin = null;
@@ -67,28 +65,24 @@ export default async function HomePage() {
     } catch (e) { console.error("DB Error", e); }
   }
 
-  // --- 2. RENDER (STREAMING) ---
+  //  2. RENDER (STREAMING)
   return (
     <main className="min-h-screen max-w-7xl mx-auto bg-gray-50 mt-6">
       
-      {/* 1. RUNNING TEXT (Lambat -> Dipisah) */}
+      {/* 1. RUNNING TEXT  */}
       <Suspense fallback={<RunningTextSkeleton />}>
           <RunningTextWrapper />
       </Suspense>
 
-      {/* 2. HERO SECTION (Cepat -> Langsung Tampil) */}
       {/* 2. HERO SECTION */}
       {heroPost && (
         <section className="relative bg-blue-900 text-white overflow-hidden pb-24">
-          {/* ... (Isi Hero Section tetap sama) ... */}
           <div className="absolute inset-0 z-0">
-             {/* ... Gambar ... */}
              <Image src={heroPost.imageUrl || "/placeholder.jpg"} alt="" fill className="object-cover opacity-20" priority />
              <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-transparent to-transparent" />
           </div>
 
           <div className="relative z-10 w-full mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 flex flex-col justify-center min-h-[50vh]">
-             {/* ... Konten Teks Hero ... */}
              <span className="inline-block bg-yellow-400 text-blue-900 font-bold px-3 py-1 rounded-full text-xs w-fit mb-4 uppercase tracking-wider shadow-lg">Berita Utama</span>
              <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4 max-w-4xl drop-shadow-md">{heroPost.title}</h1>
              <p className="text-blue-100 text-lg mb-8 max-w-2xl line-clamp-2 drop-shadow-sm">{heroPost.excerpt}</p>
@@ -101,19 +95,19 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 3. WIDGET CUACA & GEMPA (Sangat Lambat -> Dipisah) */}
+      {/* 3. WIDGET CUACA & GEMPA */}
       <div className="-mt-4 relative z-20">
          <Suspense fallback={<WidgetSkeleton />}>
             <InfoWidgetWrapper />
          </Suspense>
       </div>
 
-      {/* 4. AVIATION SECTION (Lambat -> Dipisah) */}
+      {/* 4. AVIATION SECTION */}
       <Suspense fallback={<AviationSkeleton />}>
           <AviationSection />
       </Suspense>
 
-      {/* 5. BAGIAN LAIN (Statis/Cepat) */}
+      {/* 5. BAGIAN LAIN */}
       <ServiceSection />
       <FlyerSection flyers={flyers} />
       <NewsBulletinSection posts={latestPosts} bulletin={formattedBulletin} />

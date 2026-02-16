@@ -7,7 +7,7 @@ import { Writable } from 'stream';
 const FTP_CONFIG = {
   host: process.env.FTP_HOST,
   user: process.env.FTP_USER,
-  password: process.env.FTP_PASSWORD,
+  password: (process.env.FTP_PASSWORD || "").replace(/["']/g, ""),
   secure: false,
   port: Number(process.env.FTP_PORT) || 21, 
 };
@@ -140,7 +140,7 @@ export async function GET(request: Request) {
     });
 
   } catch (error: any) { // Tambahkan type :any agar properti .message terbaca
-    console.error("❌ [Cron] Error Detail:", error);
+    console.error("[Cron] Error Detail:", error);
     
     // Kembalikan pesan error asli agar tahu penyebabnya (Password/Timeout/Permission)
     return NextResponse.json({ 
