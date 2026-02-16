@@ -94,7 +94,7 @@ export default async function HomePage() {
              <p className="text-blue-100 text-lg mb-8 max-w-2xl line-clamp-2 drop-shadow-sm">{heroPost.excerpt}</p>
              <div className="flex gap-4">
                <Link href={`/publikasi/berita-kegiatan/${heroPost.slug}`} className="bg-white text-blue-900 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition flex items-center gap-2 shadow-lg">
-                 Baca Selengkapnya ...<ArrowRight className="w-4 h-4" />
+                 Baca Selengkapnya<ArrowRight className="w-4 h-4" />
                </Link>
              </div>
           </div>
