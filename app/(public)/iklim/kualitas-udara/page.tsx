@@ -3,6 +3,9 @@ import AirQualityView from "@/components/component-iklim/kualitas-udara/AirQuali
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic'; 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Kualitas Udara | BMKG APT Pranoto Samarinda",
   description: "Monitoring Kualitas Udara (PM2.5) Kota Samarinda secara real-time.",
