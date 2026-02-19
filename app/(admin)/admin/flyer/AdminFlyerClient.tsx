@@ -7,11 +7,24 @@ import { createFlyer, deleteFlyer, toggleFlyerStatus } from "@/app/(admin)/admin
 import { Loader2, Plus, Trash2, Link as LinkIcon, UploadCloud, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+// --- IMPORT LIBRARY KOMPRESI ---
+import imageCompression from 'browser-image-compression'; 
+
 // Inisialisasi Supabase Client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
+
+// --- HELPER: SANITIZE FILENAME ---
+const sanitizeFileName = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-') // Ganti simbol aneh dengan dash
+    .replace(/-+/g, '-')        // Hapus dash beruntun
+    .replace(/^-|-$/g, '')      // Hapus dash di awal/akhir
+    .slice(0, 50);              // Batasi panjang
+};
 
 export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
   const [isUploading, setIsUploading] = useState(false);
@@ -26,6 +39,7 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
 
     const formData = new FormData(e.currentTarget);
     const file = formData.get("file") as File;
+    const title = formData.get("title") as string;
 
     // Cek file
     if (!file || file.size === 0) {
@@ -34,24 +48,54 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
       return;
     }
 
+    // Validasi Ukuran Awal (>10MB tolak)
+    if (file.size > 10 * 1024 * 1024) {
+        alert("File terlalu besar. Maksimal 10MB.");
+        setIsUploading(false);
+        return;
+    }
+
     try {
-      // 1. Upload ke Supabase: Bucket 'bmkg-public', Folder 'flyers'
-      const fileName = `flyers/${Date.now()}-${file.name.replace(/\s/g, "-")}`;
+      // 1. KOMPRESI GAMBAR
+      // Banner biasanya butuh resolusi agak besar, kita set max 1280px atau 1600px
+      const options = {
+        maxSizeMB: 0.7,           // Target max 700KB (sedikit lebih besar dari berita karena banner)
+        maxWidthOrHeight: 1280,   // Resize lebar max 1280px
+        useWebWorker: true,
+        fileType: "image/webp"    // Convert ke WebP
+      };
+
+      // console.log("Mengompresi...");
+      const compressedFile = await imageCompression(file, options);
+
+      // 2. BUAT NAMA FILE RAPI
+      // Format: flyers/YYYY-MM-DD-judul-banner-timestamp.webp
+      const cleanTitle = title ? sanitizeFileName(title) : "banner-info";
+      const datePrefix = new Date().toISOString().split('T')[0];
+      const timestamp = Date.now().toString().slice(-4);
       
+      const fileName = `flyers/${datePrefix}-${cleanTitle}-${timestamp}.webp`;
+      
+      // 3. UPLOAD KE SUPABASE
       const { error: uploadError } = await supabase.storage
-        .from("bmkg-public") // Nama Bucket Anda
-        .upload(fileName, file);
+        .from("bmkg-public") 
+        .upload(fileName, compressedFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'image/webp'
+        });
 
       if (uploadError) throw new Error("Gagal upload ke Storage: " + uploadError.message);
 
-      // 2. Ambil Public URL
+      // 4. AMBIL PUBLIC URL
       const { data: urlData } = supabase.storage
         .from("bmkg-public")
         .getPublicUrl(fileName);
 
       const publicUrl = urlData.publicUrl;
 
-      // 3. Simpan URL ke Database via Server Action
+      // 5. SIMPAN KE DATABASE
+      // Update formData dengan URL gambar baru
       formData.set("imageUrl", publicUrl);
       
       const result = await createFlyer(formData);
@@ -59,10 +103,9 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
       if (result.error) {
         alert(result.error);
       } else {
-        alert("Flyer berhasil ditambahkan!");
+        // Reset Form
         formRef.current?.reset();
         setPreview(null);
-        // router.refresh() tidak selalu cukup cepat, tapi kita coba
         router.refresh(); 
       }
     } catch (err: any) {
@@ -112,7 +155,7 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
             {/* Upload Area */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Gambar Banner</label>
-              <div className="border-2 border-dashed border-slate-300 rounded-lg h-32 relative hover:bg-slate-50 transition-colors flex flex-col items-center justify-center text-slate-400">
+              <div className="border-2 border-dashed border-slate-300 rounded-lg h-32 relative hover:bg-slate-50 transition-colors flex flex-col items-center justify-center text-slate-400 overflow-hidden group">
                   <input 
                       name="file" 
                       type="file" 
@@ -120,17 +163,23 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
                       required 
                       onChange={handleFileChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      disabled={isUploading}
                   />
                   {preview ? (
-                      <div className="absolute inset-0 p-2">
-                        <div className="relative w-full h-full rounded overflow-hidden">
+                      <div className="absolute inset-0 p-2 bg-white">
+                        <div className="relative w-full h-full rounded overflow-hidden border border-slate-100">
                            <Image src={preview} alt="Preview" fill className="object-cover" />
+                           {/* Overlay Ganti */}
+                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold">
+                                Ganti Gambar
+                           </div>
                         </div>
                       </div>
                   ) : (
                       <>
-                          <UploadCloud className="w-8 h-8 mb-2" />
+                          <UploadCloud className="w-8 h-8 mb-2 opacity-50" />
                           <span className="text-xs">Klik untuk upload gambar</span>
+                          <span className="text-[10px] mt-1 text-emerald-600 font-medium">Auto-Convert WebP</span>
                       </>
                   )}
               </div>
@@ -141,7 +190,7 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
               disabled={isUploading}
               className="w-full h-10 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 flex justify-center items-center gap-2"
             >
-              {isUploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</> : "Simpan Banner"}
+              {isUploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Mengompres & Upload...</> : "Simpan Banner"}
             </button>
           </div>
         </form>
@@ -160,24 +209,25 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
             </thead>
             <tbody className="divide-y divide-slate-100">
                 {flyers.length === 0 ? (
-                     <tr><td colSpan={4} className="p-8 text-center text-slate-400">Belum ada banner tersimpan.</td></tr>
+                      <tr><td colSpan={4} className="p-8 text-center text-slate-400">Belum ada banner tersimpan.</td></tr>
                 ) : (
                     flyers.map((flyer) => (
                         <tr key={flyer.id} className="hover:bg-slate-50 group">
                             <td className="px-6 py-4">
                                 <div className="relative w-32 h-16 rounded-md overflow-hidden border border-slate-200 bg-slate-100">
-                                    <Image src={flyer.image} alt={flyer.title} fill className="object-cover" />
+                                    <Image src={flyer.image} alt={flyer.title} fill className="object-cover" sizes="150px" />
                                 </div>
                             </td>
                             <td className="px-6 py-4">
                                 <div className="font-bold text-slate-800 text-base">{flyer.title}</div>
-                                <div className="text-xs text-slate-400">{flyer.link || "Tidak ada link"}</div>
-                                <div className="text-[10px] text-slate-300 mt-1">ID: {flyer.id}</div>
+                                <div className="text-xs text-slate-400 truncate max-w-[200px]">
+                                    {flyer.link ? <a href={flyer.link} target="_blank" className="text-blue-500 hover:underline">{flyer.link}</a> : "Tidak ada link"}
+                                </div>
+                                <div className="text-[10px] text-slate-300 mt-1">ID: {flyer.id.slice(0,8)}...</div>
                             </td>
                             <td className="px-6 py-4 text-center">
                                 <button 
                                     onClick={async () => {
-                                      // Optimistic update bisa ditambahkan, tapi ini cara simpel:
                                       await toggleFlyerStatus(flyer.id, flyer.isActive);
                                       router.refresh();
                                     }}

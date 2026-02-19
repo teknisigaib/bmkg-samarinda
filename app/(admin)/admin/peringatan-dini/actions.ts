@@ -66,41 +66,21 @@ export async function resetAllRegions(type: "HUJAN" | "KEKERINGAN") {
 }
 
 // --- UPLOAD DOKUMEN ---
-export async function uploadDocument(formData: FormData) {
-  
-  // --- PERUBAHAN 2: Tidak perlu await createClient() ---
-  // Kita langsung pakai variabel 'supabase' yang diimport di atas
-
-  const file = formData.get("file") as File;
-  const title = formData.get("title") as string;
-  const type = formData.get("type") as string;
-  const date = formData.get("date") as string;
-
-  if (!file) throw new Error("File tidak ditemukan");
-
-  const fileName = `${Date.now()}-${file.name.replace(/\s/g, "_")}`;
-  const filePath = `pdie/${fileName}`;
-
-  // Upload ke Supabase Storage (Bucket: 'documents')
-  const { error: uploadError } = await supabase.storage
-    .from("bmkg-public") 
-    .upload(filePath, file);
-
-  if (uploadError) throw new Error("Gagal upload file ke storage: " + uploadError.message);
-
-  // Dapatkan Public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from("bmkg-public")
-    .getPublicUrl(filePath);
-
-  const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+export async function uploadDocument(
+  title: string, 
+  type: string, 
+  date: string, 
+  fileUrl: string, 
+  filePath: string, 
+  fileSizeMB: string
+) {
   
   // Simpan Metadata ke Database via Prisma
   await prisma.pdieDocument.create({
     data: {
       title,
-      fileUrl: publicUrl,
-      filePath,
+      fileUrl,
+      filePath, // Penting disimpan agar nanti bisa dihapus
       fileSize: fileSizeMB,
       type,
       date,

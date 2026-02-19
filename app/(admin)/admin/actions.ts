@@ -121,7 +121,7 @@ export async function createPublication(formData: FormData) {
   revalidatePath("/publikasi/buletin");
   revalidatePath("/publikasi/artikel"); // atau /makalah
   revalidatePath("/admin/publikasi");
-  redirect("/admin/publikasi");
+  return { success: true };
 }
 
 export async function updatePublication(id: string, formData: FormData) {
@@ -151,7 +151,7 @@ export async function updatePublication(id: string, formData: FormData) {
   revalidatePath("/publikasi/buletin");
   revalidatePath("/publikasi/artikel");
   revalidatePath("/admin/publikasi");
-  redirect("/admin/publikasi");
+  return { success: true };
 }
 
 export async function deletePublication(id: string) {

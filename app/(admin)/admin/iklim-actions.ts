@@ -2,7 +2,6 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 // --- CREATE ---
 export async function createClimateData(formData: FormData) {
@@ -31,7 +30,7 @@ export async function createClimateData(formData: FormData) {
   // Tambahkan revalidate lain nanti
 
   revalidatePath("/admin/iklim/hth");
-  redirect("/admin/iklim/hth");
+  return { success: true };
 }
 
 // --- UPDATE ---
@@ -53,7 +52,7 @@ export async function updateClimateData(id: string, formData: FormData) {
 
   if (type === "HTH") revalidatePath("/iklim/hari-tanpa-hujan");
   revalidatePath("/admin/iklim/hth");
-  redirect("/admin/iklim/hth");
+ return { success: true };
 }
 
 // --- DELETE ---

@@ -6,12 +6,22 @@ import { Plus, Trash2, X, Loader2, UploadCloud, FileText } from "lucide-react";
 import { getKinerjaDocs, saveKinerjaDoc, deleteKinerjaDoc, KinerjaDoc } from "@/lib/data-kinerja";
 import { supabase } from "@/lib/supabase";
 
-// Konstanta Label (Agar konsisten dengan halaman publik)
+// Label
 const CATEGORY_LABELS: Record<string, string> = {
-    Renstra: "Rencana Strategis",
-    RencanaKinerja: "Rencana Kinerja Tahunan",
-    PerjanjianKinerja: "Perjanjian Kinerja",
-    LaporanKinerja: "Laporan Kinerja Instansi Pemerintah"
+  Renstra: "Rencana Strategis",
+  RencanaKinerja: "Rencana Kinerja Tahunan",
+  PerjanjianKinerja: "Perjanjian Kinerja",
+  LaporanKinerja: "Laporan Kinerja Instansi Pemerintah"
+};
+
+// --- HELPER: SANITIZE FILENAME ---
+const sanitizeFileName = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-') 
+    .replace(/-+/g, '-')        
+    .replace(/^-|-$/g, '')      
+    .slice(0, 50);           
 };
 
 export default function AdminKinerjaPage() {
@@ -42,13 +52,11 @@ export default function AdminKinerjaPage() {
 
   useEffect(() => { loadData(); }, []);
 
-  // --- AUTOMATIC NAMING MAGIC (FORM) ---
   // Update judul di form saat kategori/tahun berubah
   useEffect(() => {
     const label = CATEGORY_LABELS[formData.category] || formData.category;
     const autoTitle = `${label} ${formData.year}`;
     
-    // Hanya update jika judul kosong atau formatnya sesuai format otomatis (agar tidak menimpa editan manual jika ada)
     setFormData(prev => ({ ...prev, title: autoTitle }));
   }, [formData.category, formData.year]);
 
@@ -62,29 +70,48 @@ export default function AdminKinerjaPage() {
     loadData();
   };
 
+  // --- UPGRADED UPLOAD FUNCTION ---
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      if (file.type !== "application/pdf") return alert("Hanya boleh upload file PDF!");
+      // 1. Validasi Tipe File
+      if (file.type !== "application/pdf") {
+        alert("Hanya boleh upload file PDF!");
+        return;
+      }
+
+      // 2. Validasi Ukuran Max 2MB
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Ukuran file terlalu besar! Maksimal 2MB.");
+        return;
+      }
 
       setUploading(true);
       const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + " MB";
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `kinerja/${fileName}`;
+      
+      // 3. GENERATE NAMA FILE
+      const cleanCategory = sanitizeFileName(CATEGORY_LABELS[formData.category] || formData.category);
+      const timestamp = Date.now().toString().slice(-4);
+      const fileName = `kinerja/${formData.year}-${cleanCategory}-${timestamp}.pdf`;
 
-      const { error } = await supabase.storage.from('bmkg-public').upload(filePath, file);
+      // 4. UPLOAD KE SUPABASE
+      const { error } = await supabase.storage.from('bmkg-public').upload(fileName, file, {
+        contentType: 'application/pdf', 
+        upsert: false
+      });
+
       if (error) throw error;
 
-      const { data: urlData } = supabase.storage.from('bmkg-public').getPublicUrl(filePath);
+      // 5. AMBIL PUBLIC URL
+      const { data: urlData } = supabase.storage.from('bmkg-public').getPublicUrl(fileName);
 
       setFormData(prev => ({ ...prev, fileUrl: urlData.publicUrl, fileSize: sizeMB }));
 
     } catch (error) {
       console.error(error);
-      alert("Gagal upload file.");
+      alert("Gagal upload file. Cek koneksi atau nama file.");
     } finally {
       setUploading(false);
     }
@@ -133,7 +160,6 @@ export default function AdminKinerjaPage() {
             {loading ? <tr><td colSpan={4} className="p-8 text-center text-gray-400">Loading...</td></tr> : 
              data.map((item) => {
               
-              // --- PERBAIKAN DI SINI ---
               // Jika item.title kosong, gunakan label kategori + tahun
               const label = CATEGORY_LABELS[item.category] || item.category;
               const displayTitle = item.title || `${label} ${item.year}`;
@@ -141,7 +167,7 @@ export default function AdminKinerjaPage() {
               return (
                 <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4">
-                      {/* Gunakan displayTitle, bukan item.title langsung */}
+
                       <div className="font-bold text-gray-900">{displayTitle}</div>
                       
                       <a href={item.fileUrl} target="_blank" className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-1">
@@ -166,7 +192,7 @@ export default function AdminKinerjaPage() {
         </table>
       </div>
 
-      {/* MODAL FORM (Sama seperti sebelumnya) */}
+      {/* MODAL FORM */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6 animate-in fade-in zoom-in duration-200">

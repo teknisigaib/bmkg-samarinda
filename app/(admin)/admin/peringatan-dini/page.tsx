@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { 
-  CloudRain, Sun, Save, RotateCcw, FileText, Trash2, Plus, Calendar, Loader2, CheckCircle2
+  CloudRain, Sun, Save, RotateCcw, FileText, Trash2, Plus, Calendar, Loader2, Image as ImageIcon
 } from "lucide-react";
 import { 
   getPdieData, updateRegionStatus, updatePeriodeLabel, resetAllRegions, uploadDocument, deleteDocument 
 } from "./actions";
+
+// IMPORT SUPABASE & COMPRESSION
+import { supabase } from "@/lib/supabase";
+import imageCompression from 'browser-image-compression'; 
 
 // --- TIPE DATA ---
 type WarningLevel = "AWAS" | "SIAGA" | "WASPADA" | "AMAN";
@@ -14,8 +18,8 @@ type WarningLevel = "AWAS" | "SIAGA" | "WASPADA" | "AMAN";
 interface RegionData {
   id: string;
   name: string;
-  rainLevel: WarningLevel;    // Sesuaikan dengan Prisma (camelCase)
-  droughtLevel: WarningLevel; // Sesuaikan dengan Prisma (camelCase)
+  rainLevel: WarningLevel;
+  droughtLevel: WarningLevel;
 }
 
 interface DokumenItem {
@@ -23,8 +27,8 @@ interface DokumenItem {
   title: string;
   date: string;
   type: string;
-  fileUrl: string; // Sesuaikan dengan Prisma
-  filePath: string; // Untuk keperluan hapus
+  fileUrl: string; 
+  filePath: string; 
 }
 
 // --- HELPER WARNA ---
@@ -36,6 +40,11 @@ const getStatusColor = (level: string) => {
     case "AMAN": return "bg-emerald-100 text-emerald-700 border-emerald-200 ring-emerald-500";
     default: return "bg-slate-100 text-slate-600 border-slate-200";
   }
+};
+
+// --- HELPER RENAME ---
+const sanitizeFileName = (text: string) => {
+    return text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
 };
 
 export default function AdminPeringatanPage() {
@@ -51,8 +60,9 @@ export default function AdminPeringatanPage() {
   // State Form Upload
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
+  const [isUploadingFile, setIsUploadingFile] = useState(false); // State khusus untuk progress upload Supabase
   
-  // State Feedback Update per Item (id -> status)
+  // State Feedback Update per Item
   const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>({});
 
   // 1. Fetch Data
@@ -60,8 +70,7 @@ export default function AdminPeringatanPage() {
     async function initData() {
       try {
         const data = await getPdieData();
-        // Mapping manual jika perlu, atau langsung set jika nama field sama
-        // @ts-ignore: Memastikan tipe aman dari return server action
+        // @ts-ignore
         setRegions(data.regions);
         setPeriodeLabel(data.periodeLabel);
         // @ts-ignore
@@ -75,31 +84,25 @@ export default function AdminPeringatanPage() {
     initData();
   }, []);
 
-  // 2. Handler Update Status (Optimistic + Feedback)
+  // 2. Handler Update Status
   const handleStatusChange = async (id: string, newLevel: WarningLevel) => {
-    // Simpan state lama untuk rollback
     const previousRegions = [...regions];
 
-    // 1. Optimistic Update UI
     setRegions(prev => prev.map(r => r.id === id ? {
        ...r, 
        rainLevel: activeTab === "HUJAN" ? newLevel : r.rainLevel,
        droughtLevel: activeTab === "KEKERINGAN" ? newLevel : r.droughtLevel
     } : r));
 
-    // 2. Set Loading State untuk item spesifik
     setUpdatingItems(prev => ({ ...prev, [id]: true }));
 
     try {
-        // 3. Kirim ke Server via Server Action
         await updateRegionStatus(id, activeTab, newLevel);
     } catch (err) {
-        console.error("Gagal update status:", err);
-        alert("Gagal mengupdate status. Periksa koneksi.");
-        // Revert UI jika gagal
+        console.error(err);
+        alert("Gagal mengupdate status.");
         setRegions(previousRegions);
     } finally {
-        // 4. Hapus loading state (delay dikit biar kelihatan transisinya)
         setTimeout(() => {
             setUpdatingItems(prev => {
                 const newState = { ...prev };
@@ -110,20 +113,16 @@ export default function AdminPeringatanPage() {
     }
   };
 
-  // 3. Handler Save Label
   const handleSaveLabel = () => {
     startTransition(async () => {
       await updatePeriodeLabel(periodeLabel);
-      // Opsional: Toast notification
     });
   };
 
-  // 4. Handler Reset All
   const handleResetAll = () => {
     if (confirm(`Yakin reset semua status ${activeTab} menjadi AMAN?`)) {
       startTransition(async () => {
         await resetAllRegions(activeTab);
-        // Refresh Data Lokal Manual agar sinkron
         const data = await getPdieData();
         // @ts-ignore
         setRegions(data.regions);
@@ -131,33 +130,77 @@ export default function AdminPeringatanPage() {
     }
   };
 
-  // 5. Handler Upload
+  // 5. UPLOAD LANGSUNG KE SUPABASE DARI CLIENT
   const handleUpload = async () => {
     if (!uploadFile || !uploadTitle) return alert("Pilih file dan isi judul!");
     
-    const formData = new FormData();
-    formData.append("file", uploadFile);
-    formData.append("title", uploadTitle);
-    formData.append("type", activeTab); 
-    formData.append("date", new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' }));
+    // Validasi Ukuran (Maks 10MB)
+    if (uploadFile.size > 10 * 1024 * 1024) return alert("Ukuran file maksimal 10MB.");
 
-    startTransition(async () => {
-        try {
-            await uploadDocument(formData);
-            setUploadFile(null);
-            setUploadTitle("");
-            const data = await getPdieData();
-            // @ts-ignore
-            setDocuments(data.documents);
-            alert("Berhasil diupload!");
-        } catch (e: any) {
-            console.error(e);
-            alert("Gagal upload: " + e.message);
+    setIsUploadingFile(true);
+
+    try {
+        let finalFileToUpload = uploadFile;
+        let fileExtension = uploadFile.name.split('.').pop()?.toLowerCase();
+        let mimeType = uploadFile.type;
+        const cleanTitle = sanitizeFileName(uploadTitle);
+        const timestamp = Date.now().toString().slice(-4);
+
+        // Jika gambar, kompres dan ubah ke WebP
+        if (uploadFile.type.startsWith("image/")) {
+            const compressed = await imageCompression(uploadFile, {
+                maxSizeMB: 1, maxWidthOrHeight: 1600, useWebWorker: true, fileType: "image/webp"
+            });
+            finalFileToUpload = compressed;
+            fileExtension = "webp";
+            mimeType = "image/webp";
         }
-    });
+
+        // Buat Nama File (Auto-Rename)
+        // Format: pdie/hujan/2026-analisis-dasarian-8392.pdf
+        const folderTab = activeTab.toLowerCase();
+        const filePath = `pdie/${folderTab}/${cleanTitle}-${timestamp}.${fileExtension}`;
+
+        // Upload ke Supabase
+        const { error: uploadError } = await supabase.storage
+            .from("bmkg-public")
+            .upload(filePath, finalFileToUpload, {
+                contentType: mimeType,
+                upsert: false
+            });
+
+        if (uploadError) throw new Error("Gagal upload ke Storage: " + uploadError.message);
+
+        // Ambil URL
+        const { data: { publicUrl } } = supabase.storage.from("bmkg-public").getPublicUrl(filePath);
+        
+        // Hitung Size untuk disimpan di DB
+        const fileSizeMB = (finalFileToUpload.size / (1024 * 1024)).toFixed(1) + " MB";
+        const todayDate = new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' });
+
+        // Simpan ke Database via Server Action
+        await uploadDocument(uploadTitle, activeTab, todayDate, publicUrl, filePath, fileSizeMB);
+
+        // Reset Form & Refresh Data Lokal
+        setUploadFile(null);
+        setUploadTitle("");
+        
+        // Gunakan input element untuk reset value agar tidak nyangkut
+        const fileInput = document.getElementById('pdie-upload') as HTMLInputElement;
+        if(fileInput) fileInput.value = "";
+
+        const newData = await getPdieData();
+        // @ts-ignore
+        setDocuments(newData.documents);
+        
+    } catch (e: any) {
+        console.error(e);
+        alert(e.message || "Gagal upload file.");
+    } finally {
+        setIsUploadingFile(false);
+    }
   };
 
-  // 6. Handler Hapus Dokumen
   const handleDeleteDoc = (id: string, path: string) => {
     if(confirm("Hapus dokumen ini permanen?")) {
         startTransition(async () => {
@@ -180,8 +223,8 @@ export default function AdminPeringatanPage() {
                 <p className="text-slate-500 text-sm mt-1">Kelola status peringatan dini hujan & kekeringan per dasarian.</p>
             </div>
             {isPending && (
-                <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium animate-pulse">
-                    <Loader2 className="w-4 h-4 animate-spin"/> Menyimpan Perubahan...
+                <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin"/> Menyimpan...
                 </div>
             )}
         </div>
@@ -196,8 +239,7 @@ export default function AdminPeringatanPage() {
                         type="text" 
                         value={periodeLabel}
                         onChange={(e) => setPeriodeLabel(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-slate-700 transition"
-                        placeholder="Contoh: Dasarian II Januari 2026"
+                        className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 outline-none"
                     />
                 </div>
                 <button 
@@ -205,7 +247,7 @@ export default function AdminPeringatanPage() {
                     disabled={isPending}
                     className="px-6 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-black transition-all flex items-center gap-2 disabled:opacity-70"
                 >
-                    <Save className="w-4 h-4" /> Simpan
+                    <Save className="w-4 h-4" /> Simpan Label
                 </button>
             </div>
         </div>
@@ -238,15 +280,13 @@ export default function AdminPeringatanPage() {
                     onClick={handleResetAll} 
                     className="text-xs flex items-center gap-1.5 text-slate-600 hover:text-red-600 font-semibold px-3 py-1.5 bg-white border border-slate-200 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all shadow-sm"
                 >
-                    <RotateCcw className="w-3.5 h-3.5" /> Reset Semua ke Aman
+                    <RotateCcw className="w-3.5 h-3.5" /> Reset ke Aman
                 </button>
             </div>
 
             {/* Grid Wilayah */}
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto">
                 {regions.map((item) => {
-                    // Logic PENTING: Pilih field berdasarkan Active Tab
-                    // Pastikan field 'rainLevel' dan 'droughtLevel' sesuai dengan interface RegionData
                     const currentLevel = activeTab === "HUJAN" ? item.rainLevel : item.droughtLevel;
                     const isUpdating = updatingItems[item.id];
 
@@ -258,7 +298,7 @@ export default function AdminPeringatanPage() {
                                 ) : (
                                     <div className={`w-2 h-2 rounded-full ${activeTab === "HUJAN" ? 'bg-blue-500' : 'bg-orange-500'}`}></div>
                                 )}
-                                <span className={`font-semibold ${isUpdating ? 'text-blue-700' : 'text-slate-700'}`}>
+                                <span className={`font-semibold text-sm ${isUpdating ? 'text-blue-700' : 'text-slate-700'}`}>
                                     {item.name}
                                 </span>
                             </div>
@@ -268,18 +308,15 @@ export default function AdminPeringatanPage() {
                                     value={currentLevel}
                                     onChange={(e) => handleStatusChange(item.id, e.target.value as WarningLevel)}
                                     disabled={isUpdating}
-                                    className={`appearance-none pl-4 pr-10 py-2 rounded-lg text-xs font-bold uppercase cursor-pointer border shadow-sm transition-all focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${getStatusColor(currentLevel)}`}
+                                    className={`appearance-none pl-4 pr-10 py-2 rounded-lg text-xs font-bold uppercase cursor-pointer border shadow-sm outline-none transition-all disabled:opacity-50 ${getStatusColor(currentLevel)}`}
                                 >
                                     <option value="AMAN">🟢 Aman</option>
                                     <option value="WASPADA">🟡 Waspada</option>
                                     <option value="SIAGA">🟠 Siaga</option>
                                     <option value="AWAS">🔴 Awas</option>
                                 </select>
-                                {/* Custom Chevron Icon */}
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-60">
-                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
+                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                 </div>
                             </div>
                         </div>
@@ -302,24 +339,26 @@ export default function AdminPeringatanPage() {
                         placeholder="Judul Dokumen (Misal: Analisis Dasarian II...)" 
                         value={uploadTitle}
                         onChange={(e) => setUploadTitle(e.target.value)}
-                        className="flex-[2] px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="flex-[2] px-4 py-2.5 border border-slate-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                     <div className="flex-1 relative">
                         <input 
+                            id="pdie-upload"
                             type="file" 
+                            accept=".pdf,image/*" // Boleh PDF atau Gambar
                             onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                             className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer border border-slate-300 rounded-lg bg-white" 
                         />
                     </div>
                     <button 
                         onClick={handleUpload} 
-                        disabled={isPending} 
-                        className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
+                        disabled={isUploadingFile || !uploadFile || !uploadTitle} 
+                        className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm transition-all"
                     >
-                        {isPending ? <Loader2 className="animate-spin w-4 h-4"/> : <Plus className="w-4 h-4" />} Upload
+                        {isUploadingFile ? <><Loader2 className="animate-spin w-4 h-4"/> Mengupload...</> : <><Plus className="w-4 h-4" /> Upload</>}
                     </button>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-2">*Format PDF/Gambar, Maks 5MB. Dokumen akan muncul di tab {activeTab} halaman publik.</p>
+                <p className="text-[10px] text-slate-400 mt-2 font-medium">Gambar akan otomatis dikompres ke WebP. Dokumen ini akan muncul di tab {activeTab} halaman publik.</p>
             </div>
 
             <div className="space-y-3">
@@ -335,13 +374,16 @@ export default function AdminPeringatanPage() {
                     <div key={doc.id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-sm transition-all group">
                         <div className="flex items-center gap-4">
                             <div className={`p-3 rounded-lg bg-slate-50 border ${doc.type === 'HUJAN' ? 'border-blue-100 text-blue-600' : 'border-orange-100 text-orange-600'}`}>
-                                <FileText className="w-6 h-6"/>
+                                {/* Tampilkan icon Image jika WebP/JPG/PNG, sisanya PDF */}
+                                {doc.filePath.endsWith('.webp') || doc.filePath.endsWith('.jpg') || doc.filePath.endsWith('.png') 
+                                    ? <ImageIcon className="w-6 h-6"/> 
+                                    : <FileText className="w-6 h-6"/>
+                                }
                             </div>
                             <div>
                                 <h4 className="text-sm font-bold text-slate-800 group-hover:text-blue-700 transition-colors">{doc.title}</h4>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">{doc.date}</span>
-                                    {/* <span className="text-[10px] text-slate-400">PDF</span> */}
+                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold">{doc.date}</span>
                                 </div>
                             </div>
                         </div>
