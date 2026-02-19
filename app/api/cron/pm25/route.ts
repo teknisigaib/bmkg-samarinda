@@ -3,7 +3,6 @@ import { Client } from "basic-ftp";
 import fs from 'fs';
 import path from 'path';
 import { Writable } from 'stream';
-import os from 'os';
 
 const FTP_CONFIG = {
   host: process.env.FTP_HOST,
@@ -19,6 +18,8 @@ const REMOTE_FOLDER = process.env.FTP_REMOTE_FOLDER || "/SAMARINDA2/WASUploaded"
 // Secret Key 
 const CRON_SECRET = process.env.CRON_SECRET;
 
+export const dynamic = 'force-dynamic';
+
 // HELPER: Download File ke String
 async function downloadFileToString(client: Client, fileName: string): Promise<string> {
   const chunks: any[] = [];
@@ -30,23 +31,27 @@ async function downloadFileToString(client: Client, fileName: string): Promise<s
   });
   
   const remoteFilePath = `${REMOTE_FOLDER}/${fileName}`;
-  await client.downloadTo(writableStream, remoteFilePath);
   
-  return Buffer.concat(chunks).toString('utf-8');
+  try {
+      await client.downloadTo(writableStream, remoteFilePath);
+      return Buffer.concat(chunks).toString('utf-8');
+  } catch (err) {
+      console.error(`Gagal download file ${fileName}:`, err);
+      return "";
+  }
 }
 
 export async function GET(request: Request) {
-  // 1. Cek Secret Key
+  // 1. Cek Secret Key (Keamanan)
   const { searchParams } = new URL(request.url);
   const key = searchParams.get('key');
 
-  //  CRON_SECRET
   if (!CRON_SECRET || key !== CRON_SECRET) { 
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized: Invalid Cron Key' }, { status: 401 });
   }
 
-  // Validasi config FTP sebelum konek
-  if (!FTP_CONFIG.host || !FTP_CONFIG.user || !FTP_CONFIG.password) {
+  // Validasi config FTP
+  if (!FTP_CONFIG.host || !FTP_CONFIG.user) {
     return NextResponse.json({ error: 'FTP Config Missing in .env' }, { status: 500 });
   }
 
@@ -59,22 +64,25 @@ export async function GET(request: Request) {
     await client.access(FTP_CONFIG);
     await client.cd(REMOTE_FOLDER);
 
-    // 2. Ambil List Semua File & Filter CSV
+    // 2. Ambil List File CSV
     const fileList = await client.list();
     let csvFiles = fileList.filter(f => f.name.toLowerCase().endsWith('.csv'));
 
-    if (csvFiles.length === 0) throw new Error("Tidak ada file CSV di server FTP.");
+    if (csvFiles.length === 0) {
+        throw new Error("Tidak ada file CSV di server FTP.");
+    }
 
-    // 3. Urutkan File (Terlama -> Terbaru)
+    // 3. Urutkan File (Terlama -> Terbaru) berdasarkan Modified Date
     csvFiles.sort((a, b) => {
+
         const timeA = a.modifiedAt ? new Date(a.modifiedAt).getTime() : 0;
         const timeB = b.modifiedAt ? new Date(b.modifiedAt).getTime() : 0;
         return timeA - timeB;
     });
 
-    // 4. Ambil 24 File Terakhir
+    // 4. Ambil 24 File Terakhir 
     const targetFiles = csvFiles.slice(-24);
-    console.log(`[Cron] Memproses ${targetFiles.length} file terbaru.`);
+    console.log(`[Cron] Memproses ${targetFiles.length} file terbaru dari total ${csvFiles.length}.`);
 
     const historyData = [];
     let currentVal = 0;
@@ -84,6 +92,8 @@ export async function GET(request: Request) {
     for (const file of targetFiles) {
         try {
             const content = await downloadFileToString(client, file.name);
+            if (!content) continue;
+
             const lines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             
             if (lines.length >= 3) {
@@ -95,7 +105,8 @@ export async function GET(request: Request) {
                     const val = parseFloat(cols[2]);
                     const pm25 = isNaN(val) || val < 0 ? 0 : val;
                     
-                    const hourLabel = rawTime.split(':')[0] + ":00";
+                    // Format Jam
+                    const hourLabel = rawTime.includes(':') ? rawTime.split(':')[0] + ":00" : rawTime;
 
                     historyData.push({
                         time: hourLabel,
@@ -114,39 +125,46 @@ export async function GET(request: Request) {
                 }
             }
         } catch (err) {
-            console.warn(`Gagal proses file ${file.name}, skip.`);
+            console.warn(`[Cron] Skip file ${file.name} karena error parsing.`);
         }
     }
 
-    // 6. Siapkan Data JSON
+    // 6. Siapkan Object Data Final
     const finalData = {
+        success: true,
         lastUpdate: lastUpdateStr,
         current: currentVal,
         history: historyData,
         timestamp: Date.now()
     };
-
-    // 7. Simpan ke File Cache
-    const tempDir = os.tmpdir();
-    const filePath = path.join(tempDir, 'pm25-cache.json');
     
-    // Simpan File
+    // Tentukan path folder tujuan
+    const publicDataDir = path.join(process.cwd(), 'public', 'data');
+    
+    // Buat folder jika belum ada
+    if (!fs.existsSync(publicDataDir)){
+        fs.mkdirSync(publicDataDir, { recursive: true });
+    }
+
+    const filePath = path.join(publicDataDir, 'pm25-cache.json');
+    
     fs.writeFileSync(filePath, JSON.stringify(finalData, null, 2));
     
-    console.log(`[Cron] Sukses update data ke: ${filePath}`);
 
-    return NextResponse.json({ success: true, data: finalData });
+    return NextResponse.json({ 
+        message: 'Data PM2.5 updated successfully', 
+        path: filePath,
+        data: finalData 
+    });
 
   } catch (error: any) { 
-    console.error("[Cron] Error Detail:", error);
     return NextResponse.json({ 
       success: false, 
       error: 'Gagal update data',
-      debug_message: error.message || 'Unknown error',
-      debug_stack: error.stack
+      message: error.message
     }, { status: 500 });
     
   } finally {
-    client.close();
+    client.close(); // tutup koneksi FTP
   }
 }
