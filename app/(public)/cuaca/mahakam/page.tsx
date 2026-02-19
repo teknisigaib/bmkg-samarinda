@@ -5,7 +5,7 @@ export default async function Page() {
   const data = await getMahakamDataFull();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
        <MahakamDashboard data={data} />
     </div>
   );

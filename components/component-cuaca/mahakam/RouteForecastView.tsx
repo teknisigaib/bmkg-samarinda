@@ -105,7 +105,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
               </div>
           </div>
           
-          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm whitespace-nowrap shrink-0">
+          <div className="hidden md:flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm whitespace-nowrap shrink-0">
               Geser <ArrowRight size={12} className="animate-pulse"/>
           </div>
       </div>
@@ -115,7 +115,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
             <div className="flex min-w-max">
             
                 {/* KOLOM LABEL */}
-                <div className="sticky left-0 z-30 w-32 shrink-0 border-r border-slate-200 bg-white shadow-[4px_0_16px_-4px_rgba(0,0,0,0.05)] text-slate-500">
+                <div className="sticky left-0 z-30 w:28 md:w-32 item-center text-center shrink-0 border-r border-slate-200 bg-white shadow-[4px_0_16px_-4px_rgba(0,0,0,0.05)] text-slate-500">
                     
                     {/* Header */}
                     <div className={`${ROW_H.HEADER} flex flex-col justify-center px-4 border-b border-slate-100`}>
@@ -168,7 +168,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                              <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
                                 <Eye size={16}/>
                              </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Jarak</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Visibilitas</span>
                         </div>
                     </div>
 
@@ -218,7 +218,7 @@ export default function RouteForecastView({ data, onSelect, activeId }: Props) {
                                         Terpilih
                                     </span>
                                 ) : (
-                                    <div className="inline-flex items-center gap-1 text-[9px] font-mono text-slate-500 bg-white/50 px-2 py-0.5 rounded border border-slate-200/50 opacity-60 group-hover:opacity-100 transition-opacity">
+                                    <div className="inline-flex items-center gap-1 text-[9px]  text-slate-500 bg-white/50 px-2 py-0.5 rounded border border-slate-200/50 opacity-60 group-hover:opacity-100 transition-opacity">
                                         <MousePointerClick size={10} /> Detail
                                     </div>
                                 )}

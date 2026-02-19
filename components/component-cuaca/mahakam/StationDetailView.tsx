@@ -86,7 +86,7 @@ export default function StationDetailView({ data, onClose }: Props) {
                                     {/* WAKTU & TANGGAL */}
                             <td className="px-6 py-4 whitespace-nowrap align-middle">
                                 <div className="flex flex-col">
-                                    <span className="text-base font-black text-slate-900 font-mono">
+                                    <span className="text-base font-black text-slate-900 ">
                                         {/* Jam */}
                                         {fc.time.includes(' ') ? fc.time.split(' ')[1].slice(0,5) : fc.time}
                                     </span>

@@ -1,6 +1,6 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
-import { Suspense } from "react"; // IMPORT PENTING
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
@@ -78,7 +78,7 @@ export default async function HomePage() {
       {heroPost && (
         <section className="relative bg-blue-900 text-white overflow-hidden pb-24">
           <div className="absolute inset-0 z-0">
-             <Image src={heroPost.imageUrl || "/placeholder.jpg"} alt="" fill className="object-cover opacity-20" priority />
+             <Image src={heroPost.imageUrl || "/placeholder.jpg"} alt="Background Hero" fill sizes="100vw" quality={60} priority={true} className="object-cover opacity-20"/>
              <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-transparent to-transparent" />
           </div>
 

@@ -74,7 +74,7 @@ export default function ClimateMapClient({ geoJsonData, warningData, warningType
   };
 
   return (
-    <div className="relative h-full w-full md:min-w-[1100px] rounded-3xl overflow-hidden">
+    <div className="relative h-full w-full  rounded-3xl overflow-hidden">
       <MapContainer 
         center={[0.5, 116.5]} 
         zoom={7} 

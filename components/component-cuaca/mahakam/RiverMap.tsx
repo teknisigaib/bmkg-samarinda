@@ -85,7 +85,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
   return (
     <div className="w-full relative z-0 font-sans">
       
-      <div className="h-[500px] w-full rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-xl relative group bg-slate-100">
+      <div className="h-[500px] w-full rounded-2xl overflow-hidden border border-slate-200 shadow-xl relative group bg-slate-100">
         
         {selectedLoc ? (
             <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300 animate-in slide-in-from-top-2 fade-in">
