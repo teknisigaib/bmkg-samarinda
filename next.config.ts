@@ -97,6 +97,13 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
+  serverActions: {
+    allowedOrigins: [
+      'stamet-samarinda.devbmkg.my.id', 
+      '*.devbmkg.my.id'
+    ],
+  },
+
 };
 
 export default nextConfig;
