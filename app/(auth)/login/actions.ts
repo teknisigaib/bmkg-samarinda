@@ -10,7 +10,6 @@ const MAX_ATTEMPTS = 5;          // Maksimal 5x percobaan
 const WINDOW_TIME = 15 * 60 * 1000; // Dalam waktu 15 Menit
 
 // Penyimpanan sementara di Memori Server (Map)
-// Key: IP Address, Value: { count, firstAttemptTime }
 const loginAttempts = new Map<string, { count: number; firstAttemptTime: number }>();
 
 // --- HELPER: CEK RATE LIMIT ---
@@ -18,26 +17,22 @@ async function checkRateLimit(ip: string): Promise<boolean> {
   const now = Date.now();
   const record = loginAttempts.get(ip);
 
-  // Jika belum ada record, buat baru
   if (!record) {
     loginAttempts.set(ip, { count: 1, firstAttemptTime: now });
-    return true; // Boleh lanjut
+    return true; 
   }
 
-  // Jika waktu jendela (15 menit) sudah lewat, reset hitungan
   if (now - record.firstAttemptTime > WINDOW_TIME) {
     loginAttempts.set(ip, { count: 1, firstAttemptTime: now });
-    return true; // Boleh lanjut
+    return true; 
   }
 
-  // Jika masih dalam jendela waktu, cek jumlah percobaan
   if (record.count >= MAX_ATTEMPTS) {
-    return false; // DITOLAK (Terlalu banyak mencoba)
+    return false; // DITOLAK
   }
 
-  // Tambah hitungan percobaan
   record.count += 1;
-  return true; // Boleh lanjut
+  return true; 
 }
 
 // --- FUNGSI LOGIN ---
@@ -45,17 +40,17 @@ export async function login(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   
-  // 1. Ambil IP Address User
+  // 1. Ambil IP Address User & Protokol
   const headerList = await headers();
-  // x-forwarded-for biasanya dipakai jika di balik proxy/load balancer (Docker/Nginx)
   const ip = headerList.get("x-forwarded-for") || "unknown-ip";
+  
+  // FIX: Cek apakah Nginx meneruskan request via HTTPS
+  const isHttps = headerList.get("x-forwarded-proto") === "https" || headerList.get("origin")?.startsWith("https://") || false;
 
   // 2. Cek Rate Limit Sebelum ke Database
   const isAllowed = await checkRateLimit(ip);
   
   if (!isAllowed) {
-    // Jika kena limit, jangan panggil Supabase. Langsung tolak.
-    // Opsional: Tambah delay 2 detik biar hacker kesal
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return redirect(`/login?error=${encodeURIComponent("Terlalu banyak percobaan. Coba lagi dalam 15 menit.")}`);
   }
@@ -73,12 +68,12 @@ export async function login(formData: FormData) {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              // TETAP PERTAHANKAN SETTINGAN VPN ANDA
               cookieStore.set(name, value, {
                 ...options,
-                secure: false, // Wajib false untuk HTTP/VPN
+                secure: isHttps, // <-- DINAMIS SESUAI JARINGAN
                 httpOnly: true,
                 sameSite: 'lax',
+                path: '/',       // <-- WAJIB ADA
               });
             });
           } catch {
@@ -96,16 +91,11 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    // --- TEKNIK PERLAMBATAN (Artificial Delay) ---
-    // Jika password salah, tahan 2 detik. 
-    // Ini mencegah serangan timing attack dan memperlambat brute force.
     await new Promise((resolve) => setTimeout(resolve, 2000));
-
     return redirect(`/login?error=${encodeURIComponent("Email atau Password Salah")}`);
   }
 
-  // 4. Jika Sukses, Hapus Record Rate Limit (Reset)
-  // Agar user yang asli tidak terblokir jika login sukses
+  // 4. Jika Sukses, Reset Rate Limit
   if (loginAttempts.has(ip)) {
     loginAttempts.delete(ip);
   }
@@ -114,9 +104,11 @@ export async function login(formData: FormData) {
   redirect("/admin");
 }
 
-// --- FUNGSI LOGOUT (Tetap Sama) ---
+// --- FUNGSI LOGOUT ---
 export async function signout() {
   const cookieStore = await cookies();
+  const headerList = await headers();
+  const isHttps = headerList.get("x-forwarded-proto") === "https" || headerList.get("origin")?.startsWith("https://") || false;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -131,9 +123,10 @@ export async function signout() {
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, {
                 ...options,
-                secure: false, // Wajib false
+                secure: isHttps, // <-- DINAMIS SESUAI JARINGAN
                 httpOnly: true,
                 sameSite: 'lax',
+                path: '/',       // <-- WAJIB ADA
               });
             });
           } catch {

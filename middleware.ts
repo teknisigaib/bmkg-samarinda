@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  
   // KONFIGURASI MAINTENANCE
   const MAINTENANCE_PATHS: string[] = [
     // '/cuaca/maritim',     
@@ -12,7 +11,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isTargeted = MAINTENANCE_PATHS.some((path) => pathname.startsWith(path));
 
-  // Logika Redirect:
+  // Logika Redirect Maintenance:
   if (
       isTargeted && 
       !pathname.startsWith('/maintenance') && 
@@ -24,11 +23,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/maintenance', request.url));
   }
 
-  // AUTH SUPABASE
-  
+  // --- AUTH SUPABASE ---
   let response = NextResponse.next({
     request: { headers: request.headers },
   })
+
+  // FIX: Deteksi apakah request ini dari Domain (HTTPS) atau Lokal/VPN (HTTP)
+  const isHttps = request.headers.get('x-forwarded-proto') === 'https' || request.url.startsWith('https://');
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,9 +46,10 @@ export async function middleware(request: NextRequest) {
             
             response.cookies.set(name, value, {
               ...options,
-              secure: false,
+              secure: isHttps, // <-- DINAMIS: True untuk Domain, False untuk IP Lokal
               httpOnly: true,
               sameSite: 'lax',
+              path: '/',       // <-- WAJIB: Agar cookie berlaku di semua halaman (/admin, dll)
             })
           })
         },
