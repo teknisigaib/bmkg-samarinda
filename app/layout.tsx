@@ -12,7 +12,7 @@ const poppins = Poppins({
 
 // METADATA UTAMA 
 export const metadata: Metadata = {
-  metadataBase: new URL('http://stamet-samarinda.devbmkg.my.id'), 
+  metadataBase: new URL('https://stamet-samarinda.bmkg.go.id'), 
 
   title: {
     template: '%s | BMKG APT Pranoto Samarinda',
