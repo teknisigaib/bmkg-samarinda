@@ -99,8 +99,8 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   serverActions: {
     allowedOrigins: [
-      'stamet-samarinda.devbmkg.my.id', 
-      '*.devbmkg.my.id'
+      'stamet-samarinda.bmkg.go.id', 
+      '*.bmkg.go.id'
     ],
   },
 
