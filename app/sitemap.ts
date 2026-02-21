@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'always',
       priority: 1,
     },
     {
@@ -42,6 +42,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/cuaca/peringatan-dini`,
       lastModified: new Date(),
       changeFrequency: 'always',
+      priority: 1.0, 
+    },
+    {
+      url: `${baseUrl}/cuaca/penerbangan`,
+      lastModified: new Date(),
+      changeFrequency: 'always',
+      priority: 1.0, 
+    },
+    {
+      url: `${baseUrl}/cuaca/maritim`,
+      lastModified: new Date(),
+      changeFrequency: 'hourly',
+      priority: 1.0, 
+    },
+    {
+      url: `${baseUrl}/cuaca/satelit`,
+      lastModified: new Date(),
+      changeFrequency: 'hourly',
+      priority: 1.0, 
+    },
+    {
+      url: `${baseUrl}/cuaca/karhutla`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
       priority: 1.0, 
     },
     {
