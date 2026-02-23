@@ -6,12 +6,10 @@ import { globalDelete } from "@/app/(admin)/admin/actions/global-delete";
 
 interface ButtonProps {
   id: string;
-  // 1. Tambahkan "kinerja" ke daftar model
-  model: "post" | "flyer" | "publication" | "pegawai" | "kinerja"; 
+  model: "post" | "flyer" | "publication" | "pegawai" | "kinerja" | "pdieDocument" | "iklim";
   fileUrl?: string | null;
   bucketName?: string;
   revalidateUrl: string;
-  // 2. Tambahkan properti onSuccess (opsional)
   onSuccess?: () => void; 
 }
 
