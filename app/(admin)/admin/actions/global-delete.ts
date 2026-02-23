@@ -16,9 +16,6 @@ export async function globalDelete(params: DeleteProps) {
   const { id, model, fileUrl, bucketName, revalidateUrl } = params;
 
   try {
-    // ==========================================
-    // 1. HAPUS FILE DI STORAGE DENGAN KUNCI DEWA
-    // ==========================================
     if (fileUrl && bucketName && fileUrl.includes("supabase.co")) {
       const basePath = `/storage/v1/object/public/${bucketName}/`;
       const filePath = fileUrl.includes(basePath) ? fileUrl.split(basePath)[1] : null;
@@ -34,9 +31,8 @@ export async function globalDelete(params: DeleteProps) {
       }
     }
 
-    // ==========================================
-    // 2. HAPUS DATA DI DATABASE (PRISMA)
-    // ==========================================
+   
+    // 2. HAPUS DATA DI DATABASE (PRISMA) 
     switch (model) {
       case "post":
         await prisma.post.delete({ where: { id } });
@@ -50,12 +46,12 @@ export async function globalDelete(params: DeleteProps) {
 
       // 2. TAMBAHKAN CASE KINERJA DI SINI
       case "kinerja":
-        // Sesuaikan "kinerjaDoc" dengan nama model di schema.prisma Anda
+        
         await prisma.performanceDoc.delete({ where: { id } }); 
         break;
 
         case "pegawai":
-        await prisma.employee.delete({ where: { id } }); // Sesuaikan "pegawai" dengan nama model di schema.prisma
+        await prisma.employee.delete({ where: { id } });
         break;
 
         case "pdieDocument":
@@ -63,16 +59,15 @@ export async function globalDelete(params: DeleteProps) {
         break;
 
         case "iklim":
-        await prisma.climateData.delete({ where: { id } }); // Sesuaikan dengan nama model Prisma Anda
+        await prisma.climateData.delete({ where: { id } }); 
         break;
 
       default:
         throw new Error("Tabel tidak dikenali!");
     }
 
-    // ==========================================
     // 3. REFRESH HALAMAN ADMIN
-    // ==========================================
+   
     revalidatePath(revalidateUrl);
     return { success: true, message: "Data dan file berhasil dihapus!" };
 
