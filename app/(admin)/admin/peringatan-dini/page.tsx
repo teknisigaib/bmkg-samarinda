@@ -2,17 +2,16 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { 
-  CloudRain, Sun, Save, RotateCcw, FileText, Trash2, Plus, Calendar, Loader2, Image as ImageIcon
+  CloudRain, Sun, Save, RotateCcw, FileText, Plus, Calendar, Loader2, Image as ImageIcon
 } from "lucide-react";
 import { 
-  getPdieData, updateRegionStatus, updatePeriodeLabel, resetAllRegions, uploadDocument, deleteDocument 
-} from "./actions";
+  getPdieData, updateRegionStatus, updatePeriodeLabel, resetAllRegions, uploadDocument 
+} from "./actions"; // deleteDocument dihapus
 
-// IMPORT SUPABASE & COMPRESSION
 import { supabase } from "@/lib/supabase";
 import imageCompression from 'browser-image-compression'; 
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
 
-// --- TIPE DATA ---
 type WarningLevel = "AWAS" | "SIAGA" | "WASPADA" | "AMAN";
 
 interface RegionData {
@@ -31,7 +30,6 @@ interface DokumenItem {
   filePath: string; 
 }
 
-// --- HELPER WARNA ---
 const getStatusColor = (level: string) => {
   switch (level) {
     case "AWAS": return "bg-red-100 text-red-700 border-red-200 ring-red-500";
@@ -42,7 +40,6 @@ const getStatusColor = (level: string) => {
   }
 };
 
-// --- HELPER RENAME ---
 const sanitizeFileName = (text: string) => {
     return text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
 };
@@ -52,39 +49,37 @@ export default function AdminPeringatanPage() {
   const [isPending, startTransition] = useTransition(); 
   const [isLoading, setIsLoading] = useState(true);
 
-  // State Data
   const [regions, setRegions] = useState<RegionData[]>([]);
   const [periodeLabel, setPeriodeLabel] = useState("");
   const [documents, setDocuments] = useState<DokumenItem[]>([]);
   
-  // State Form Upload
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
-  const [isUploadingFile, setIsUploadingFile] = useState(false); // State khusus untuk progress upload Supabase
+  const [isUploadingFile, setIsUploadingFile] = useState(false); 
   
-  // State Feedback Update per Item
   const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>({});
 
-  // 1. Fetch Data
-  useEffect(() => {
-    async function initData() {
-      try {
+  const loadLocalData = async () => {
+    try {
         const data = await getPdieData();
         // @ts-ignore
         setRegions(data.regions);
         setPeriodeLabel(data.periodeLabel);
         // @ts-ignore
         setDocuments(data.documents);
-      } catch (e) {
+    } catch (e) {
         console.error("Gagal ambil data", e);
-      } finally {
-        setIsLoading(false);
-      }
+    }
+  };
+
+  useEffect(() => {
+    async function initData() {
+      await loadLocalData();
+      setIsLoading(false);
     }
     initData();
   }, []);
 
-  // 2. Handler Update Status
   const handleStatusChange = async (id: string, newLevel: WarningLevel) => {
     const previousRegions = [...regions];
 
@@ -123,18 +118,13 @@ export default function AdminPeringatanPage() {
     if (confirm(`Yakin reset semua status ${activeTab} menjadi AMAN?`)) {
       startTransition(async () => {
         await resetAllRegions(activeTab);
-        const data = await getPdieData();
-        // @ts-ignore
-        setRegions(data.regions);
+        await loadLocalData();
       });
     }
   };
 
-  // 5. UPLOAD LANGSUNG KE SUPABASE DARI CLIENT
   const handleUpload = async () => {
     if (!uploadFile || !uploadTitle) return alert("Pilih file dan isi judul!");
-    
-    // Validasi Ukuran (Maks 10MB)
     if (uploadFile.size > 10 * 1024 * 1024) return alert("Ukuran file maksimal 10MB.");
 
     setIsUploadingFile(true);
@@ -146,7 +136,6 @@ export default function AdminPeringatanPage() {
         const cleanTitle = sanitizeFileName(uploadTitle);
         const timestamp = Date.now().toString().slice(-4);
 
-        // Jika gambar, kompres dan ubah ke WebP
         if (uploadFile.type.startsWith("image/")) {
             const compressed = await imageCompression(uploadFile, {
                 maxSizeMB: 1, maxWidthOrHeight: 1600, useWebWorker: true, fileType: "image/webp"
@@ -156,12 +145,9 @@ export default function AdminPeringatanPage() {
             mimeType = "image/webp";
         }
 
-        // Buat Nama File (Auto-Rename)
-        // Format: pdie/hujan/2026-analisis-dasarian-8392.pdf
         const folderTab = activeTab.toLowerCase();
         const filePath = `pdie/${folderTab}/${cleanTitle}-${timestamp}.${fileExtension}`;
 
-        // Upload ke Supabase
         const { error: uploadError } = await supabase.storage
             .from("bmkg-public")
             .upload(filePath, finalFileToUpload, {
@@ -171,27 +157,20 @@ export default function AdminPeringatanPage() {
 
         if (uploadError) throw new Error("Gagal upload ke Storage: " + uploadError.message);
 
-        // Ambil URL
         const { data: { publicUrl } } = supabase.storage.from("bmkg-public").getPublicUrl(filePath);
         
-        // Hitung Size untuk disimpan di DB
         const fileSizeMB = (finalFileToUpload.size / (1024 * 1024)).toFixed(1) + " MB";
         const todayDate = new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' });
 
-        // Simpan ke Database via Server Action
         await uploadDocument(uploadTitle, activeTab, todayDate, publicUrl, filePath, fileSizeMB);
 
-        // Reset Form & Refresh Data Lokal
         setUploadFile(null);
         setUploadTitle("");
         
-        // Gunakan input element untuk reset value agar tidak nyangkut
         const fileInput = document.getElementById('pdie-upload') as HTMLInputElement;
         if(fileInput) fileInput.value = "";
 
-        const newData = await getPdieData();
-        // @ts-ignore
-        setDocuments(newData.documents);
+        await loadLocalData();
         
     } catch (e: any) {
         console.error(e);
@@ -201,22 +180,12 @@ export default function AdminPeringatanPage() {
     }
   };
 
-  const handleDeleteDoc = (id: string, path: string) => {
-    if(confirm("Hapus dokumen ini permanen?")) {
-        startTransition(async () => {
-            await deleteDocument(id, path);
-            setDocuments(prev => prev.filter(d => d.id !== id));
-        });
-    }
-  };
-
   if (isLoading) return <div className="min-h-screen flex items-center justify-center text-slate-500 gap-2"><Loader2 className="animate-spin" /> Memuat Data Admin...</div>;
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-10">
       <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* HEADER */}
         <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <div>
                 <h1 className="text-2xl font-bold text-slate-900">Admin Peringatan Dini</h1>
@@ -229,7 +198,6 @@ export default function AdminPeringatanPage() {
             )}
         </div>
 
-        {/* 1. PERIODE DASARIAN */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <label className="block text-sm font-bold text-slate-700 mb-2">Label Periode Aktif</label>
             <div className="flex gap-3">
@@ -252,9 +220,7 @@ export default function AdminPeringatanPage() {
             </div>
         </div>
 
-        {/* 2. TABEL STATUS WILAYAH */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            {/* Tab Navigasi */}
             <div className="flex border-b border-slate-200">
                 <button 
                     onClick={() => setActiveTab("HUJAN")} 
@@ -270,7 +236,6 @@ export default function AdminPeringatanPage() {
                 </button>
             </div>
 
-            {/* Toolbar Tabel */}
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Daftar Wilayah (Kabupaten/Kota)</span>
@@ -284,7 +249,6 @@ export default function AdminPeringatanPage() {
                 </button>
             </div>
 
-            {/* Grid Wilayah */}
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto">
                 {regions.map((item) => {
                     const currentLevel = activeTab === "HUJAN" ? item.rainLevel : item.droughtLevel;
@@ -325,7 +289,6 @@ export default function AdminPeringatanPage() {
             </div>
         </div>
 
-        {/* 3. UPLOAD DOKUMEN */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg">
                 <FileText className={`w-6 h-6 ${activeTab === 'HUJAN' ? 'text-blue-500' : 'text-orange-500'}`} /> 
@@ -345,7 +308,7 @@ export default function AdminPeringatanPage() {
                         <input 
                             id="pdie-upload"
                             type="file" 
-                            accept=".pdf,image/*" // Boleh PDF atau Gambar
+                            accept=".pdf,image/*" 
                             onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                             className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer border border-slate-300 rounded-lg bg-white" 
                         />
@@ -374,7 +337,6 @@ export default function AdminPeringatanPage() {
                     <div key={doc.id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-sm transition-all group">
                         <div className="flex items-center gap-4">
                             <div className={`p-3 rounded-lg bg-slate-50 border ${doc.type === 'HUJAN' ? 'border-blue-100 text-blue-600' : 'border-orange-100 text-orange-600'}`}>
-                                {/* Tampilkan icon Image jika WebP/JPG/PNG, sisanya PDF */}
                                 {doc.filePath.endsWith('.webp') || doc.filePath.endsWith('.jpg') || doc.filePath.endsWith('.png') 
                                     ? <ImageIcon className="w-6 h-6"/> 
                                     : <FileText className="w-6 h-6"/>
@@ -391,9 +353,21 @@ export default function AdminPeringatanPage() {
                             <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat">
                                 <FileText className="w-4 h-4" />
                             </a>
-                            <button onClick={() => handleDeleteDoc(doc.id, doc.filePath)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
-                                <Trash2 className="w-4 h-4" />
-                            </button>
+                            
+                            {/* --- TOMBOL HAPUS GLOBAL --- */}
+                            <GlobalDeleteButton 
+                                id={doc.id} 
+                                model="pdieDocument" 
+                                fileUrl={doc.fileUrl} 
+                                bucketName="bmkg-public" 
+                                revalidateUrl="/admin/peringatan-dini"
+                                onSuccess={() => {
+                                    // Filter data lokal secara instan agar tabel langsung update
+                                    setDocuments(prev => prev.filter(d => d.id !== doc.id));
+                                }}
+                            />
+                            {/* ------------------------- */}
+                            
                         </div>
                     </div>
                 ))}

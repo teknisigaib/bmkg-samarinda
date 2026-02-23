@@ -1,23 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Plus, Edit, Trash2, X, Save, UploadCloud, Loader2 } from "lucide-react";
+import { Plus, Edit, X, Save, UploadCloud, Loader2 } from "lucide-react"; // Trash2 dihapus
 import Image from "next/image";
-import { getPegawai, savePegawai, deletePegawai, Pegawai } from "@/lib/data-pegawai";
+import { getPegawai, savePegawai, Pegawai } from "@/lib/data-pegawai"; // deletePegawai dihapus
 import { supabase } from "@/lib/supabase"; 
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
 
 // --- IMPORT LIBRARY KOMPRESI ---
-// Pastikan sudah install: npm install browser-image-compression
 import imageCompression from 'browser-image-compression';
 
 // --- HELPER: SANITIZE FILENAME ---
 const sanitizeFileName = (text: string) => {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '-') // Ganti simbol aneh dengan dash
-    .replace(/-+/g, '-')        // Hapus dash beruntun
-    .replace(/^-|-$/g, '')      // Hapus dash di awal/akhir
-    .slice(0, 50);              // Batasi panjang
+    .replace(/[^a-z0-9]/g, '-') 
+    .replace(/-+/g, '-')        
+    .replace(/^-|-$/g, '')      
+    .slice(0, 50);              
 };
 
 export default function AdminPegawaiPage() {
@@ -49,13 +49,6 @@ export default function AdminPegawaiPage() {
     loadData();
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Yakin ingin menghapus pegawai ini?")) {
-      await deletePegawai(id);
-      loadData();
-    }
-  };
-
   const handleEdit = (pegawai: Pegawai) => {
     setFormData(pegawai);
     setIsModalOpen(true);
@@ -72,7 +65,6 @@ export default function AdminPegawaiPage() {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // Validasi Ukuran Awal (>10MB tolak)
       if (file.size > 10 * 1024 * 1024) {
         alert("File terlalu besar. Maksimal 10MB sebelum kompresi.");
         return;
@@ -80,25 +72,21 @@ export default function AdminPegawaiPage() {
 
       setUploading(true);
 
-      // 1. KOMPRESI GAMBAR
       const options = {
-        maxSizeMB: 0.5,           // Target max 500KB
-        maxWidthOrHeight: 800,    // Resize lebar/tinggi max 800px (Cukup buat foto profil bulat)
+        maxSizeMB: 0.5,           
+        maxWidthOrHeight: 800,    
         useWebWorker: true,
-        fileType: "image/webp"    // Convert ke WebP
+        fileType: "image/webp"    
       };
 
       const compressedFile = await imageCompression(file, options);
 
-      // 2. BUAT NAMA FILE RAPI
-      // Format: pegawai/nama-jabatan-timestamp.webp
       const cleanName = formData.name ? sanitizeFileName(formData.name) : "pegawai-baru";
       const cleanJob = formData.position ? sanitizeFileName(formData.position) : "staff";
       const timestamp = Date.now().toString().slice(-4);
       
       const filePath = `pegawai/${cleanName}-${cleanJob}-${timestamp}.webp`;
 
-      // 3. UPLOAD KE SUPABASE
       const { error: uploadError } = await supabase.storage
         .from('bmkg-public')
         .upload(filePath, compressedFile, {
@@ -109,12 +97,10 @@ export default function AdminPegawaiPage() {
 
       if (uploadError) throw uploadError;
 
-      // 4. AMBIL PUBLIC URL
       const { data: publicUrlData } = supabase.storage
         .from('bmkg-public')
         .getPublicUrl(filePath);
 
-      // 5. SET KE FORM
       setFormData((prev) => ({ ...prev, image: publicUrlData.publicUrl }));
 
     } catch (error) {
@@ -168,7 +154,6 @@ export default function AdminPegawaiPage() {
                     </div>
                     <div>
                       <div className="font-bold text-gray-900 text-sm sm:text-base">{item.name}</div>
-                      {/* Tampilkan jabatan di mobile view */}
                       <div className="text-xs text-gray-500 sm:hidden">{item.position}</div> 
                     </div>
                   </div>
@@ -184,9 +169,20 @@ export default function AdminPegawaiPage() {
                   </span>
                 </td>
                 <td className="p-4 text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end items-center gap-2">
                     <button onClick={() => handleEdit(item)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Hapus"><Trash2 className="w-4 h-4" /></button>
+                    
+                    {/* --- TOMBOL HAPUS GLOBAL --- */}
+                    <GlobalDeleteButton 
+                      id={item.id} 
+                      model="pegawai" 
+                      fileUrl={item.image} // Kolom foto di database bernama "image"
+                      bucketName="bmkg-public" 
+                      revalidateUrl="/admin/pegawai"
+                      onSuccess={loadData} // <-- Untuk merefresh tabel setelah dihapus
+                    />
+                    {/* ------------------------- */}
+
                   </div>
                 </td>
               </tr>
@@ -195,7 +191,7 @@ export default function AdminPegawaiPage() {
         </table>
       </div>
 
-      {/* MODAL FORM */}
+      {/* MODAL FORM (TIDAK ADA PERUBAHAN, TETAP SAMA) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto flex flex-col">
@@ -210,9 +206,7 @@ export default function AdminPegawaiPage() {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               
-              {/* --- INPUT FOTO (GRID 2 KOLOM) --- */}
               <div className="grid grid-cols-[auto_1fr] gap-5 items-start">
-                  {/* Kiri: Preview */}
                   <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 shrink-0 group">
                       {formData.image ? (
                           <Image src={formData.image} alt="Preview" fill className="object-cover" />
@@ -223,7 +217,6 @@ export default function AdminPegawaiPage() {
                           </div>
                       )}
                       
-                      {/* Loading Overlay */}
                       {uploading && (
                           <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white z-20">
                               <Loader2 className="w-6 h-6 animate-spin mb-1" />
@@ -232,7 +225,6 @@ export default function AdminPegawaiPage() {
                       )}
                   </div>
 
-                  {/* Kanan: Tombol & Info */}
                   <div className="space-y-2 pt-1">
                       <label className="block text-sm font-bold text-gray-700">Foto Profil</label>
                       <div className="flex flex-col gap-2">

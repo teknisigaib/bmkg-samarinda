@@ -59,10 +59,16 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // ==========================================
+  // PERUBAHAN DI SINI: Redirect dengan parameter
+  // ==========================================
   if (request.nextUrl.pathname.startsWith('/admin') && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    // Tambahkan ?akses=admin agar langsung menembus cache Cloudflare!
+    return NextResponse.redirect(new URL('/login?akses=admin', request.url))
   }
 
+  // Baris ini tetap aman, karena request.nextUrl.pathname hanya membaca "/login" 
+  // (parameter "?akses=admin" otomatis diabaikan dalam pengecekan string ini)
   if (request.nextUrl.pathname === '/login' && user) {
     return NextResponse.redirect(new URL('/admin', request.url))
   }

@@ -1,9 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 import prisma from "@/lib/prisma";
 import AdminFlyerClient from "./AdminFlyerClient";
 
-export const revalidate = 0; // Pastikan data selalu fresh saat dibuka
-
-export default async function Page() {
+export default async function AdminFlyerPage() {
   // Ambil semua data flyer, urutkan dari yang terbaru
   const flyers = await prisma.flyer.findMany({
     orderBy: { createdAt: "desc" },

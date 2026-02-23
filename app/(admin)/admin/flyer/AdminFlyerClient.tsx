@@ -3,9 +3,10 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
-import { createFlyer, deleteFlyer, toggleFlyerStatus } from "@/app/(admin)/admin/flyer/actions";
-import { Loader2, Plus, Trash2, Link as LinkIcon, UploadCloud, Power } from "lucide-react";
+import { createFlyer, toggleFlyerStatus } from "@/app/(admin)/admin/flyer/actions";
+import { Loader2, Plus, Link as LinkIcon, UploadCloud, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
 
 // --- IMPORT LIBRARY KOMPRESI ---
 import imageCompression from 'browser-image-compression'; 
@@ -20,10 +21,10 @@ const supabase = createClient(
 const sanitizeFileName = (text: string) => {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '-') // Ganti simbol aneh dengan dash
-    .replace(/-+/g, '-')        // Hapus dash beruntun
-    .replace(/^-|-$/g, '')      // Hapus dash di awal/akhir
-    .slice(0, 50);              // Batasi panjang
+    .replace(/[^a-z0-9]/g, '-') 
+    .replace(/-+/g, '-')        
+    .replace(/^-|-$/g, '')      
+    .slice(0, 50);              
 };
 
 export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
@@ -41,14 +42,12 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
     const file = formData.get("file") as File;
     const title = formData.get("title") as string;
 
-    // Cek file
     if (!file || file.size === 0) {
       alert("Pilih gambar terlebih dahulu!");
       setIsUploading(false);
       return;
     }
 
-    // Validasi Ukuran Awal (>10MB tolak)
     if (file.size > 10 * 1024 * 1024) {
         alert("File terlalu besar. Maksimal 10MB.");
         setIsUploading(false);
@@ -56,27 +55,21 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
     }
 
     try {
-      // 1. KOMPRESI GAMBAR
-      // Banner biasanya butuh resolusi agak besar, kita set max 1280px atau 1600px
       const options = {
-        maxSizeMB: 0.7,           // Target max 700KB (sedikit lebih besar dari berita karena banner)
-        maxWidthOrHeight: 1280,   // Resize lebar max 1280px
+        maxSizeMB: 0.7,           
+        maxWidthOrHeight: 1280,   
         useWebWorker: true,
-        fileType: "image/webp"    // Convert ke WebP
+        fileType: "image/webp"    
       };
 
-      // console.log("Mengompresi...");
       const compressedFile = await imageCompression(file, options);
 
-      // 2. BUAT NAMA FILE RAPI
-      // Format: flyers/YYYY-MM-DD-judul-banner-timestamp.webp
       const cleanTitle = title ? sanitizeFileName(title) : "banner-info";
       const datePrefix = new Date().toISOString().split('T')[0];
       const timestamp = Date.now().toString().slice(-4);
       
       const fileName = `flyers/${datePrefix}-${cleanTitle}-${timestamp}.webp`;
       
-      // 3. UPLOAD KE SUPABASE
       const { error: uploadError } = await supabase.storage
         .from("bmkg-public") 
         .upload(fileName, compressedFile, {
@@ -87,15 +80,12 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
 
       if (uploadError) throw new Error("Gagal upload ke Storage: " + uploadError.message);
 
-      // 4. AMBIL PUBLIC URL
       const { data: urlData } = supabase.storage
         .from("bmkg-public")
         .getPublicUrl(fileName);
 
       const publicUrl = urlData.publicUrl;
 
-      // 5. SIMPAN KE DATABASE
-      // Update formData dengan URL gambar baru
       formData.set("imageUrl", publicUrl);
       
       const result = await createFlyer(formData);
@@ -103,7 +93,6 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
       if (result.error) {
         alert(result.error);
       } else {
-        // Reset Form
         formRef.current?.reset();
         setPreview(null);
         router.refresh(); 
@@ -116,7 +105,6 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
     }
   };
 
-  // Preview Gambar
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) setPreview(URL.createObjectURL(file));
@@ -125,7 +113,7 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
   return (
     <div className="space-y-8">
       
-      {/* --- FORM INPUT --- */}
+      {/* --- FORM INPUT TETAP SAMA --- */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
           <Plus className="w-5 h-5 text-blue-600" /> Tambah Banner Baru
@@ -133,13 +121,11 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
         
         <form ref={formRef} onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-             {/* Judul */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Judul Banner</label>
               <input name="title" required type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Peringatan Cuaca..." />
             </div>
 
-            {/* Link */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Link Tujuan (Opsional)</label>
               <div className="flex">
@@ -152,7 +138,6 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
           </div>
 
           <div className="space-y-4">
-            {/* Upload Area */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Gambar Banner</label>
               <div className="border-2 border-dashed border-slate-300 rounded-lg h-32 relative hover:bg-slate-50 transition-colors flex flex-col items-center justify-center text-slate-400 overflow-hidden group">
@@ -169,7 +154,6 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
                       <div className="absolute inset-0 p-2 bg-white">
                         <div className="relative w-full h-full rounded overflow-hidden border border-slate-100">
                            <Image src={preview} alt="Preview" fill className="object-cover" />
-                           {/* Overlay Ganti */}
                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold">
                                 Ganti Gambar
                            </div>
@@ -242,18 +226,17 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
                                 </button>
                             </td>
                             <td className="px-6 py-4 text-right">
-                                <button 
-                                    onClick={async () => {
-                                        if(confirm("Yakin hapus banner ini?")) {
-                                            await deleteFlyer(flyer.id);
-                                            router.refresh();
-                                        }
-                                    }}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-full transition" 
-                                    title="Hapus"
-                                >
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
+                                
+                                {/* --- TOMBOL HAPUS GLOBAL --- */}
+                                <GlobalDeleteButton 
+                                  id={flyer.id} 
+                                  model="flyer" 
+                                  fileUrl={flyer.image} // Di prisma kolomnya bernama "image"
+                                  bucketName="bmkg-public" 
+                                  revalidateUrl="/admin/flyer" 
+                                />
+                                {/* ------------------------- */}
+                                
                             </td>
                         </tr>
                     ))

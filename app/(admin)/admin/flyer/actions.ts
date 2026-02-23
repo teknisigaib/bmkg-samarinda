@@ -26,9 +26,9 @@ export async function createFlyer(formData: FormData) {
       },
     });
 
-    // Refresh halaman agar data baru langsung muncul
-    revalidatePath("/"); // Refresh Homepage
-    revalidatePath("/admin/flyers"); // Refresh halaman Admin
+    // Refresh Homepage dan Admin Flyer
+    revalidatePath("/"); 
+    revalidatePath("/admin/flyer"); 
     
     return { success: true };
   } catch (error) {
@@ -37,20 +37,7 @@ export async function createFlyer(formData: FormData) {
   }
 }
 
-// --- 2. HAPUS FLYER ---
-export async function deleteFlyer(id: string) {
-  try {
-    await prisma.flyer.delete({ where: { id } });
-    
-    revalidatePath("/");
-    revalidatePath("/admin/flyers");
-    return { success: true };
-  } catch (error) {
-    return { error: "Gagal menghapus flyer." };
-  }
-}
-
-// --- 3. UBAH STATUS (AKTIF/NON-AKTIF) ---
+// --- 2. UBAH STATUS (AKTIF/NON-AKTIF) ---
 export async function toggleFlyerStatus(id: string, currentStatus: boolean) {
   try {
     await prisma.flyer.update({
@@ -59,9 +46,11 @@ export async function toggleFlyerStatus(id: string, currentStatus: boolean) {
     });
     
     revalidatePath("/");
-    revalidatePath("/admin/flyers");
+    revalidatePath("/admin/flyer");
     return { success: true };
   } catch (error) {
     return { error: "Gagal update status." };
   }
 }
+
+// Catatan: Fungsi deleteFlyer dihapus karena sudah digantikan oleh global-delete.ts

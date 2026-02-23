@@ -1,6 +1,6 @@
 import { Pencil } from "lucide-react";
 import FeaturedToggle from "@/app/(admin)/admin/berita/featured-toggle";
-import DeleteButton from "@/app/(admin)/admin/berita/delete-button";
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // Sesuaikan path jika berbeda
 
 interface PostListProps {
     data: any[];
@@ -11,6 +11,7 @@ export default function PostList({ data, onEdit }: PostListProps) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <table className="w-full text-left text-sm">
+          {/* ... THEAD TETAP SAMA ... */}
           <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 uppercase tracking-wider text-xs">
             <tr>
               <th className="p-4 text-center w-16">Utama</th>
@@ -47,7 +48,17 @@ export default function PostList({ data, onEdit }: PostListProps) {
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <DeleteButton id={post.id} />
+                  
+                  {/* --- TOMBOL HAPUS BARU --- */}
+                  <GlobalDeleteButton 
+                    id={post.id} 
+                    model="post" 
+                    fileUrl={post.imageUrl} 
+                    bucketName="bmkg-public" 
+                    revalidateUrl="/admin/berita" // Sesuaikan URL halaman admin berita Anda
+                  />
+                  {/* ------------------------- */}
+
                 </td>
               </tr>
             ))}

@@ -3,12 +3,8 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-// --- PERUBAHAN 1: Import variabel 'supabase' langsung dari file Anda ---
-import { supabase } from "@/lib/supabase"; 
-
 // --- FETCH DATA ---
 export async function getPdieData() {
-  // Prisma tetap sama
   const regions = await prisma.pdieRegion.findMany({
     orderBy: { name: 'asc' }
   });
@@ -75,12 +71,11 @@ export async function uploadDocument(
   fileSizeMB: string
 ) {
   
-  // Simpan Metadata ke Database via Prisma
   await prisma.pdieDocument.create({
     data: {
       title,
       fileUrl,
-      filePath, // Penting disimpan agar nanti bisa dihapus
+      filePath, 
       fileSize: fileSizeMB,
       type,
       date,
@@ -91,23 +86,4 @@ export async function uploadDocument(
   revalidatePath("/iklim/peringatan-dini");
 }
 
-// --- HAPUS DOKUMEN ---
-export async function deleteDocument(id: string, filePath: string) {
-  
-  // --- PERUBAHAN 3: Langsung pakai variable supabase ---
-  
-  // Hapus dari Storage
-  const { error: storageError } = await supabase.storage
-    .from("bmkg-public")
-    .remove([filePath]);
-
-  if (storageError) console.error("Gagal hapus file storage, tapi lanjut hapus DB");
-
-  // Hapus dari Database via Prisma
-  await prisma.pdieDocument.delete({
-    where: { id }
-  });
-  
-  revalidatePath("/admin/peringatan-dini");
-  revalidatePath("/iklim/peringatan-dini");
-}
+// Catatan: Fungsi deleteDocument dihapus karena menggunakan global-delete.ts

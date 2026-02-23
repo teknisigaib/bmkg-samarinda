@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Plus, Pencil, FileBarChart } from "lucide-react";
-import DeleteClimateButton from "@/app/(admin)/admin/iklim/[kategori]/delete-button";
 import ClimateForm from "./IklimForm";
 import { useRouter } from "next/navigation";
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
 
 interface IklimClientProps {
   data: any[];
@@ -80,7 +80,17 @@ export default function IklimClient({ data, config, kategori }: IklimClientProps
                   <button onClick={() => handleEdit(item)} className="text-blue-500 hover:bg-blue-50 p-2 rounded transition-colors" title="Edit">
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <DeleteClimateButton id={item.id} />
+
+                  {/* --- TOMBOL HAPUS GLOBAL --- */}
+                  <GlobalDeleteButton 
+                    id={item.id} 
+                    model="iklim" 
+                    fileUrl={item.imageUrl} // Pastikan ini sesuai dengan nama kolom Peta Anda di database
+                    bucketName="bmkg-public" 
+                    revalidateUrl={`/admin/iklim/${kategori}`} // Refresh route spesifik ini
+                  />
+                  {/* ------------------------- */}
+                  
                 </td>
               </tr>
             ))}

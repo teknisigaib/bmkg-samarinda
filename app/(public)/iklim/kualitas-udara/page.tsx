@@ -1,9 +1,9 @@
+export const dynamic = 'force-dynamic'; 
 import type { Metadata } from "next";
 import AirQualityView from "@/components/component-iklim/kualitas-udara/AirQualityView";
 import fs from 'fs';
 import path from 'path';
 
-export const dynamic = 'force-dynamic'; 
 
 export const metadata: Metadata = {
   title: "Kualitas Udara | BMKG APT Pranoto Samarinda",

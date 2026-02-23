@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Plus, Pencil, FileText } from "lucide-react";
-import DeletePublicationButton from "@/app/(admin)/admin/publikasi/delete-button";
 import PublicationForm from "./PublicationForm";
 import { useRouter } from "next/navigation";
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
 
 interface PublicationClientProps {
   data: any[];
@@ -84,7 +84,17 @@ export default function PublicationClient({ data }: PublicationClientProps) {
                   <button onClick={() => handleEdit(item)} className="text-blue-500 hover:bg-blue-50 p-2 rounded transition-colors" title="Edit">
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <DeletePublicationButton id={item.id} />
+                  
+                  {/* --- TOMBOL HAPUS GLOBAL --- */}
+                  <GlobalDeleteButton 
+                    id={item.id} 
+                    model="publication" 
+                    fileUrl={item.pdfUrl} // <-- Pastikan ini sesuai dengan nama kolom PDF Anda di database (misal pdfUrl atau fileUrl)
+                    bucketName="bmkg-public" 
+                    revalidateUrl="/admin/publikasi" 
+                  />
+                  {/* ------------------------- */}
+
                 </td>
               </tr>
             ))}

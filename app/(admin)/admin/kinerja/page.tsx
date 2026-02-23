@@ -1,10 +1,10 @@
 "use client";
-export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef } from "react";
-import { Plus, Trash2, X, Loader2, UploadCloud, FileText } from "lucide-react";
-import { getKinerjaDocs, saveKinerjaDoc, deleteKinerjaDoc, KinerjaDoc } from "@/lib/data-kinerja";
+import { Plus, X, Loader2, UploadCloud, FileText } from "lucide-react";
+import { getKinerjaDocs, saveKinerjaDoc, KinerjaDoc } from "@/lib/data-kinerja"; // deleteKinerjaDoc dihapus
 import { supabase } from "@/lib/supabase";
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
 
 // Label
 const CATEGORY_LABELS: Record<string, string> = {
@@ -14,7 +14,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   LaporanKinerja: "Laporan Kinerja Instansi Pemerintah"
 };
 
-// --- HELPER: SANITIZE FILENAME ---
 const sanitizeFileName = (text: string) => {
   return text
     .toLowerCase()
@@ -29,7 +28,6 @@ export default function AdminKinerjaPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Upload State
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -52,14 +50,11 @@ export default function AdminKinerjaPage() {
 
   useEffect(() => { loadData(); }, []);
 
-  // Update judul di form saat kategori/tahun berubah
   useEffect(() => {
     const label = CATEGORY_LABELS[formData.category] || formData.category;
     const autoTitle = `${label} ${formData.year}`;
-    
     setFormData(prev => ({ ...prev, title: autoTitle }));
   }, [formData.category, formData.year]);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,19 +65,16 @@ export default function AdminKinerjaPage() {
     loadData();
   };
 
-  // --- UPGRADED UPLOAD FUNCTION ---
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // 1. Validasi Tipe File
       if (file.type !== "application/pdf") {
         alert("Hanya boleh upload file PDF!");
         return;
       }
 
-      // 2. Validasi Ukuran Max 2MB
       if (file.size > 2 * 1024 * 1024) {
         alert("Ukuran file terlalu besar! Maksimal 2MB.");
         return;
@@ -91,12 +83,10 @@ export default function AdminKinerjaPage() {
       setUploading(true);
       const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + " MB";
       
-      // 3. GENERATE NAMA FILE
       const cleanCategory = sanitizeFileName(CATEGORY_LABELS[formData.category] || formData.category);
       const timestamp = Date.now().toString().slice(-4);
       const fileName = `kinerja/${formData.year}-${cleanCategory}-${timestamp}.pdf`;
 
-      // 4. UPLOAD KE SUPABASE
       const { error } = await supabase.storage.from('bmkg-public').upload(fileName, file, {
         contentType: 'application/pdf', 
         upsert: false
@@ -104,7 +94,6 @@ export default function AdminKinerjaPage() {
 
       if (error) throw error;
 
-      // 5. AMBIL PUBLIC URL
       const { data: urlData } = supabase.storage.from('bmkg-public').getPublicUrl(fileName);
 
       setFormData(prev => ({ ...prev, fileUrl: urlData.publicUrl, fileSize: sizeMB }));
@@ -117,13 +106,6 @@ export default function AdminKinerjaPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Hapus dokumen ini?")) {
-      await deleteKinerjaDoc(id);
-      loadData();
-    }
-  };
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -132,14 +114,7 @@ export default function AdminKinerjaPage() {
           <p className="text-gray-500 text-sm">Upload LAKIP, Renstra, dan dokumen lainnya.</p>
         </div>
         <button onClick={() => { 
-            setFormData({ 
-                id: "", 
-                title: "", 
-                category: "LaporanKinerja", 
-                year: new Date().getFullYear().toString(), 
-                fileUrl: "", 
-                fileSize: "" 
-            }); 
+            setFormData({ id: "", title: "", category: "LaporanKinerja", year: new Date().getFullYear().toString(), fileUrl: "", fileSize: "" }); 
             setIsModalOpen(true); 
         }} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium">
           <Plus className="w-4 h-4" /> Upload Dokumen
@@ -159,17 +134,13 @@ export default function AdminKinerjaPage() {
           <tbody className="divide-y divide-gray-100">
             {loading ? <tr><td colSpan={4} className="p-8 text-center text-gray-400">Loading...</td></tr> : 
              data.map((item) => {
-              
-              // Jika item.title kosong, gunakan label kategori + tahun
               const label = CATEGORY_LABELS[item.category] || item.category;
               const displayTitle = item.title || `${label} ${item.year}`;
 
               return (
                 <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4">
-
                       <div className="font-bold text-gray-900">{displayTitle}</div>
-                      
                       <a href={item.fileUrl} target="_blank" className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-1">
                           <FileText className="w-3 h-3" /> {item.fileSize || "PDF File"}
                       </a>
@@ -181,9 +152,18 @@ export default function AdminKinerjaPage() {
                   </td>
                   <td className="p-4 text-sm font-mono">{item.year}</td>
                   <td className="p-4 text-right">
-                      <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:bg-red-50 p-2 rounded transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      
+                      {/* --- TOMBOL HAPUS GLOBAL DENGAN ONSUCCESS --- */}
+                      <GlobalDeleteButton 
+                        id={item.id} 
+                        model="kinerja" 
+                        fileUrl={item.fileUrl} 
+                        bucketName="bmkg-public" 
+                        revalidateUrl="/admin/kinerja"
+                        onSuccess={loadData} // <-- Akan merefresh tabel secara instan
+                      />
+                      {/* ------------------------------------------ */}
+
                   </td>
                 </tr>
               );
@@ -192,7 +172,7 @@ export default function AdminKinerjaPage() {
         </table>
       </div>
 
-      {/* MODAL FORM */}
+      {/* --- KODE MODAL FORM SAMA SEPERTI SEBELUMNYA --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6 animate-in fade-in zoom-in duration-200">
@@ -222,7 +202,6 @@ export default function AdminKinerjaPage() {
                     </div>
                 </div>
 
-                {/* Input Judul Read-Only */}
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Dokumen (Otomatis)</label>
                     <input 
@@ -232,7 +211,6 @@ export default function AdminKinerjaPage() {
                     />
                 </div>
 
-                {/* Upload File */}
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">File PDF</label>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
