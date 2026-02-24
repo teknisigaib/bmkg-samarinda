@@ -16,12 +16,6 @@ export default function PricingLayananPage() {
       price: "Rp 0",
       period: "/ pengajuan",
       icon: GraduationCap,
-      features: [
-        "Akses data parameter lengkap",
-        "Wajib KTM & Surat Pengantar",
-        "Dukungan konsultasi dasar",
-        "Format data digital (XLS/PDF)"
-      ],
       url: "https://forms.google.com/your-form-student",
       isPopular: false
     },
@@ -32,12 +26,6 @@ export default function PricingLayananPage() {
       price: "Rp 175rb",
       period: "/ lokasi / hari",
       icon: ShieldCheck,
-      features: [
-        "Analisis cuaca historis (24 jam)",
-        "Surat keterangan resmi BMKG",
-        "Parameter hujan & angin kencang",
-        "Validasi data radar/satelit"
-      ],
       url: "https://forms.google.com/your-form-insurance",
       isPopular: false 
     },
@@ -48,12 +36,6 @@ export default function PricingLayananPage() {
       price: "Rp 250rb",
       period: "/ rute / hari",
       icon: Ship,
-      features: [
-        "Prakiraan tinggi gelombang",
-        "Peta arah & kecepatan angin",
-        "Peringatan dini cuaca laut",
-        "Rekomendasi keselamatan"
-      ],
       url: "https://forms.google.com/your-form-voyage",
       isPopular: false
     },
@@ -64,12 +46,6 @@ export default function PricingLayananPage() {
       price: "Rp 225rb",
       period: "/ lokasi / hari",
       icon: Anchor,
-      features: [
-        "Prakiraan spesifik area dermaga",
-        "Window time operasional aman",
-        "Peringatan angin kencang",
-        "Update per 6 jam"
-      ],
       url: "https://forms.google.com/your-form-port",
       isPopular: false
     },
@@ -80,12 +56,6 @@ export default function PricingLayananPage() {
       price: "Rp 65rb",
       period: "/ buku",
       icon: BarChart3,
-      features: [
-        "Buku digital (PDF High Res)",
-        "Peta isohiet & distribusi hujan",
-        "Analisis sifat hujan & hari hujan",
-        "Arsip data 10 tahun terakhir"
-      ],
       url: "https://forms.google.com/your-form-rain",
       isPopular: false
     },
@@ -96,12 +66,6 @@ export default function PricingLayananPage() {
       price: "Rp 3.75jt",
       period: "/ proyek",
       icon: MessageSquareText,
-      features: [
-        "Tim ahli meteorologi tersertifikasi",
-        "Kajian risiko bencana hidrometeo",
-        "Survei lokasi & pemasangan alat",
-        "Laporan teknis komprehensif"
-      ],
       url: "https://forms.google.com/your-form-consult",
       isPopular: false
     },
@@ -188,25 +152,7 @@ export default function PricingLayananPage() {
                 </div>
 
                 {/* Features List */}
-                <div className="flex-grow">
-                  <p className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">
-                    Yang Termasuk:
-                  </p>
-                  <ul className="space-y-3">
-                    {item.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <div className={`mt-0.5 p-0.5 rounded-full transition-colors duration-300
-                          bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600
-                        `}>
-                          <Check className="w-3 h-3" strokeWidth={3} />
-                        </div>
-                        <span className="text-sm text-slate-600 leading-snug">
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              
 
               </div>
             </div>

@@ -8,31 +8,30 @@ import imageCompression from 'browser-image-compression';
 
 interface PublicationFormProps {
   initialData?: any;
+  activeTab: "Buletin" | "ArtikelMakalah"; 
   onClose: () => void;
   onSuccess: () => void;
 }
 
-// Helper Rename File
 const sanitizeFileName = (text: string) => {
     return text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
 };
 
-export default function PublicationForm({ initialData, onClose, onSuccess }: PublicationFormProps) {
+export default function PublicationForm({ initialData, activeTab, onClose, onSuccess }: PublicationFormProps) {
   const isEditMode = !!initialData;
-  const [type, setType] = useState(initialData?.type || "Buletin");
   
-  // State File (Belum diupload, baru dipilih user)
+  const defaultType = activeTab === "Buletin" ? "Buletin" : "Artikel";
+  const [type, setType] = useState(initialData?.type || defaultType);
+  
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   
-  // State Preview URL (Untuk edit mode / preview lokal)
   const [coverPreview, setCoverPreview] = useState(initialData?.coverUrl || "");
   const [pdfName, setPdfName] = useState(initialData?.pdfUrl ? "File PDF sudah tersimpan" : "");
   
   const [uploading, setUploading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Kunci scroll background saat modal terbuka
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = "unset"; };
@@ -47,11 +46,15 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
     const cleanTitle = title ? sanitizeFileName(title) : "publikasi";
     const timestamp = Date.now().toString().slice(-4);
 
+    if (activeTab === "Buletin") {
+        formData.set("type", "Buletin");
+    }
+
     try {
       let finalCoverUrl = initialData?.coverUrl || "";
       let finalPdfUrl = initialData?.pdfUrl || "";
 
-      // 1. UPLOAD COVER (Jika ada file baru)
+      // Upload Cover (Hanya dieksekusi jika ada file cover yang dipilih)
       if (coverFile) {
         const compressedCover = await imageCompression(coverFile, {
             maxSizeMB: 0.5, maxWidthOrHeight: 800, useWebWorker: true, fileType: "image/webp"
@@ -62,7 +65,6 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
         finalCoverUrl = supabase.storage.from("bmkg-public").getPublicUrl(coverName).data.publicUrl;
       }
 
-      // 2. UPLOAD PDF (Jika ada file baru)
       if (pdfFile) {
         const pdfFileName = `dokumen/${cleanTitle}-${timestamp}.pdf`;
         const { error } = await supabase.storage.from("bmkg-public").upload(pdfFileName, pdfFile, {
@@ -72,10 +74,8 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
         finalPdfUrl = supabase.storage.from("bmkg-public").getPublicUrl(pdfFileName).data.publicUrl;
       }
 
-      // Validasi Wajib PDF
       if (!finalPdfUrl) throw new Error("File PDF wajib diupload!");
 
-      // 3. UPDATE FORMDATA & SIMPAN KE DB
       formData.set("coverUrl", finalCoverUrl);
       formData.set("pdfUrl", finalPdfUrl);
 
@@ -85,7 +85,7 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
         await createPublication(formData);
       }
 
-      onSuccess(); // Tutup modal & refresh
+      onSuccess(); 
 
     } catch (error: any) {
       console.error(error);
@@ -99,11 +99,10 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl flex flex-col">
         
-        {/* Header Modal */}
         <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex justify-between items-center rounded-t-2xl">
           <div>
             <h2 className="text-xl font-bold text-slate-800">
-                {isEditMode ? "Edit Publikasi" : "Tambah Publikasi Baru"}
+                {isEditMode ? "Edit Dokumen" : `Tambah ${activeTab === 'Buletin' ? 'Buletin' : 'Artikel/Makalah'}`}
             </h2>
             <p className="text-xs text-slate-500">Lengkapi data dokumen di bawah ini.</p>
           </div>
@@ -113,23 +112,23 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
         </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               
               {/* KOLOM KIRI: File Uploads */}
               <div className="space-y-6">
-                  {/* Tipe Publikasi */}
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Jenis Dokumen</label>
-                    <select 
-                        name="type" value={type} onChange={(e) => setType(e.target.value)}
-                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                    >
-                        <option value="Buletin">Buletin</option>
-                        <option value="Artikel">Artikel</option>
-                        <option value="Makalah">Makalah</option>
-                    </select>
-                  </div>
+                  
+                  {activeTab === "ArtikelMakalah" && (
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Jenis Dokumen</label>
+                        <select 
+                            name="type" value={type} onChange={(e) => setType(e.target.value)}
+                            className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium text-slate-700"
+                        >
+                            <option value="Artikel">Artikel</option>
+                            <option value="Makalah">Makalah Ilmiah</option>
+                        </select>
+                      </div>
+                  )}
 
                   {/* Upload PDF Wajib */}
                   <div>
@@ -158,13 +157,16 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
                     </div>
                   </div>
 
-                  {/* Upload Cover (Khusus Buletin/Artikel) */}
-                  {(type === "Buletin" || type === "Artikel") && (
+                  {/* --- PERUBAHAN DI SINI: Cover HANYA untuk Buletin --- */}
+                  {activeTab === "Buletin" && (
                       <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Cover Depan (Opsional)</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                            Cover Depan <span className="text-red-500">*</span>
+                        </label>
                         <div className="relative border-2 border-dashed border-slate-300 rounded-xl h-40 hover:bg-slate-50 transition flex flex-col items-center justify-center text-slate-400 overflow-hidden group">
                             <input 
                                 type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                required={!isEditMode} // Wajib jika baru nambah buletin
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if(file) {
@@ -183,7 +185,7 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
                             ) : (
                                 <>
                                     <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-                                    <span className="text-xs font-medium">Upload Cover</span>
+                                    <span className="text-xs font-medium">Upload Cover Gambar</span>
                                 </>
                             )}
                         </div>
@@ -194,29 +196,29 @@ export default function PublicationForm({ initialData, onClose, onSuccess }: Pub
               {/* KOLOM KANAN: Text Inputs */}
               <div className="space-y-4">
                   <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Judul Dokumen</label>
-                      <input type="text" name="title" defaultValue={initialData?.title} required className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Masukkan judul..." />
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Judul Dokumen <span className="text-red-500">*</span></label>
+                      <input type="text" name="title" defaultValue={initialData?.title} required className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium" placeholder={`Masukkan judul ${activeTab === 'Buletin' ? 'Buletin' : 'Artikel'}...`} />
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                       <div>
-                          <label className="block text-sm font-bold text-slate-700 mb-1.5">Tahun Terbit</label>
+                          <label className="block text-sm font-bold text-slate-700 mb-1.5">Tahun Terbit <span className="text-red-500">*</span></label>
                           <input type="number" name="year" defaultValue={initialData?.year || new Date().getFullYear()} required className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                       </div>
                       <div>
-                          <label className="block text-sm font-bold text-slate-700 mb-1.5">Penulis / Divisi</label>
+                          <label className="block text-sm font-bold text-slate-700 mb-1.5">Penulis / Divisi <span className="text-red-500">*</span></label>
                           <input type="text" name="author" defaultValue={initialData?.author || "BMKG Samarinda"} required className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                       </div>
                   </div>
 
-                  {type === "Buletin" && (
+                  {activeTab === "Buletin" && (
                       <div>
-                          <label className="block text-sm font-bold text-slate-700 mb-1.5">Edisi (Bulan)</label>
-                          <input type="text" name="edition" defaultValue={initialData?.edition} className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Januari 2024" />
+                          <label className="block text-sm font-bold text-slate-700 mb-1.5">Edisi (Bulan) <span className="text-red-500">*</span></label>
+                          <input type="text" name="edition" defaultValue={initialData?.edition} required className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Januari 2026" />
                       </div>
                   )}
 
-                  {(type === "Artikel" || type === "Makalah") && (
+                  {activeTab === "ArtikelMakalah" && (
                       <div className="space-y-4">
                           <div>
                               <label className="block text-sm font-bold text-slate-700 mb-1.5">Abstrak / Ringkasan</label>

@@ -69,7 +69,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
     <div className="w-full min-h-screen text-slate-800 overflow-x-hidden">
       
       {/* HEADER SECTION */}
-      <section className="bg-emerald-50 border border-emerald-100 rounded-[2rem] p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left">
           <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0">
             <Wind className="w-8 h-8 text-emerald-600" />
           </div>
@@ -104,12 +104,10 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
       </section>
 
       {/* CONTENT WRAPPER */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 mt-6 md:mt-8 space-y-6">
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="w-full mx-auto mt-6 md:mt-8 space-y-6 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             
             {/* GAUGE UTAMA */}
-            <div className="bg-white rounded-[2rem] p-2 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[400px]">
+            <div className="bg-white rounded-[2rem] p-2 border border-slate-100  flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[400px]">
 
                 <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6 flex-shrink-0">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 224 224">
@@ -147,7 +145,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
             </div>
 
             {/* GRAFIK */}
-            <div className="lg:col-span-2 bg-white rounded-[2rem] p-5 sm:p-6 md:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col min-h-[400px]">
+            <div className="lg:col-span-2 bg-white rounded-[2rem] p-5 sm:p-6 md:p-8 border border-slate-100  flex flex-col min-h-[400px]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
                 <div>
                   <h3 className="text-lg font-bold text-slate-800">Data 24 Jam Terakhir</h3>
@@ -162,7 +160,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                     </div>
                  ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data.history} margin={{ top: 10, right: 0, left: -10, bottom: 0 }} barCategoryGap="20%">
+                    <BarChart data={data.history} margin={{ top: 10, right: 0, left: -25, bottom: 0 }} barCategoryGap="20%">
                         <defs>
                         {data.history.map((entry: any, index: number) => {
                             const color = entry.pm25 !== null ? getPm25Color(entry.pm25) : 'transparent';
@@ -188,7 +186,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                             axisLine={false} 
                             tickLine={false} 
                             tick={{ fontSize: 10, fill: '#94a3b8' }} 
-                            label={{ value: 'µg/m³', angle: -90, position: 'insideLeft', offset: 0, fontSize: 10, fill: '#cbd5e1' }}
+                            label={{ value: 'µg/m³', angle: -90, position: 'insideLeft', offset: 30, fontSize: 10, fill: '#cbd5e1' }}
                         />
                         <Tooltip 
                             cursor={{ fill: '#f8fafc', radius: 8 }}
@@ -242,7 +240,6 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                 </div>
             </div>
 
-          </div>
       </div>
     </div>
   );

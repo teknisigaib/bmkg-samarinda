@@ -82,6 +82,8 @@ model Employee {
   name      String
   position  String   // Jabatan
   group     String   // 'Pimpinan', 'Struktural', 'Fungsional'
+  sub_group String?
+  is_ketua  Boolean @default(false)
   image     String?  // URL Foto profil
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

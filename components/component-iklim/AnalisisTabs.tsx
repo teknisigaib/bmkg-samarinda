@@ -35,19 +35,23 @@ export default function AnalisisTabs({
   const renderContent = () => {
     switch (activeTab) {
       case "h_dasarian":
-        return hujanDasarian.length > 0 ? <ClimateViewer data={hujanDasarian} /> 
+        return hujanDasarian.length > 0 
+        ? <ClimateViewer key="h_dasarian" data={hujanDasarian} /> // <-- DITAMBAHKAN KEY
         : <EmptyState title="Analisis Hujan Dasarian" />;
       
       case "h_bulanan":
-        return hujanBulanan.length > 0 ? <ClimateViewer data={hujanBulanan} /> 
+        return hujanBulanan.length > 0 
+        ? <ClimateViewer key="h_bulanan" data={hujanBulanan} /> // <-- DITAMBAHKAN KEY
         : <EmptyState title="Analisis Hujan Bulanan" />;
       
       case "sifat":
-        return sifatBulanan.length > 0 ? <ClimateViewer data={sifatBulanan} /> 
+        return sifatBulanan.length > 0 
+        ? <ClimateViewer key="sifat" data={sifatBulanan} /> // <-- DITAMBAHKAN KEY
         : <EmptyState title="Analisis Sifat Hujan" />;
       
       case "hari_hujan":
-        return hariHujan.length > 0 ? <ClimateViewer data={hariHujan} /> 
+        return hariHujan.length > 0 
+        ? <ClimateViewer key="hari_hujan" data={hariHujan} /> // <-- DITAMBAHKAN KEY
         : <EmptyState title="Analisis Hari Hujan" />;
         
       default: return null;

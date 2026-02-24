@@ -20,7 +20,7 @@ COPY . .
 RUN npx prisma generate
 
 # Matikan telemetri
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # --- PERBAIKAN UTAMA DISINI ---
 # Terima argumen dari GitHub Actions
@@ -38,9 +38,9 @@ RUN npm run build
 # 4. Runner (Production)
 FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV production
-ENV PORT 3000
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Buat user non-root (Keamanan)
 RUN addgroup --system --gid 1001 nodejs

@@ -51,7 +51,7 @@ export default function RunningText({ weatherText, marineWarnings }: RunningText
         Icon: AlertTriangle, 
         label: "PERINGATAN DINI:",
         maskGradient: "from-yellow-400",
-        speed: "45s"
+        speed: "60s"
       };
 
   const DisplayIcon = (!isMarineSafe && isWeatherSafe) ? Waves : styles.Icon;

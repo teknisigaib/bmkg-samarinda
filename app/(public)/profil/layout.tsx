@@ -34,7 +34,7 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
           
           <ProfilSidebar />
 
-          <main className="flex-1 w-full min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12">
+          <main className="flex-1 w-full min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-12">
             {children}
           </main>
 

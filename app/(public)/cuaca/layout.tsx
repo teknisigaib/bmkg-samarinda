@@ -30,9 +30,9 @@ export default function CuacaLayout({ children }: { children: React.ReactNode })
         <CuacaSidebar />
 
         {/* Area Konten */}
-        <main className="flex-1 w-full min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 pt-4 p-2 md:p-10 min-h-[600px]">
-          {children}
-        </main>
+        <main className="flex-1 w-full min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-12">
+            {children}
+          </main>
 
       </div>
     </div>
