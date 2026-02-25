@@ -19,7 +19,9 @@ export const metadata: Metadata = {
     default: 'BMKG APT Pranoto Samarinda - Info Cuaca & Iklim Kaltim',
   },
   description: "Website Resmi Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto. Menyediakan informasi cuaca, iklim, dan penerbangan untuk wilayah Samarinda dan Kalimantan Timur.",
-  
+  verification: {
+    google: "Ou2gyh8a7aDifDNw3zpQnyIYZDTlzfOQTLYJVB6fGq4",
+  },
   applicationName: 'BMKG APT Pranoto',
   authors: [{ name: 'BMKG Stasiun Meteorologi APT Pranoto', url: 'https://bmkg.go.id' }],
   keywords: ['Cuaca Samarinda', 'BMKG', 'APT Pranoto', 'Prakiraan Cuaca', 'Iklim', 'Penerbangan', 'Kalimantan Timur'],
