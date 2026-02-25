@@ -84,7 +84,7 @@ export default function FlyerSection({ flyers }: FlyerSectionProps) {
   return (
     <section className="w-full py-6 md:py-10 border-b border-gray-100">
       <div 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative group"
+        className="w-full mx-auto relative group"
         // EVENT HANDLER PAUSE 
         onMouseEnter={() => setIsPaused(true)} 
         onMouseLeave={() => setIsPaused(false)} 

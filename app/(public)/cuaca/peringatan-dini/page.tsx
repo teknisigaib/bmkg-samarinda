@@ -1,4 +1,4 @@
-import { Clock, FileText, ExternalLink, ImageIcon, ShieldCheck } from "lucide-react";
+import { Clock, FileText, ExternalLink, ImageIcon, ShieldCheck, AlertTriangle, MapPin } from "lucide-react"; // MapPin & AlertTriangle ditambahkan
 import { getLinkPeringatanDiniKaltim } from "@/lib/bmkg/warnings";
 import { getCAPAlertDetail } from "@/lib/bmkg/cap";
 import MapLoader from "@/components/component-cuaca/peringatan-dini/MapLoader";
@@ -28,6 +28,9 @@ export default async function PeringatanPage() {
   const xmlLink = await getLinkPeringatanDiniKaltim();
   const alertData = xmlLink ? await getCAPAlertDetail(xmlLink) : null;
 
+  // Cek tingkat bahaya (Bisa Severe atau Warning/Minor)
+  const isSevere = alertData?.severity === 'Severe';
+
   // Persiapan data untuk MapLoader
   const mapDisplayData = alertData ? {
     polygons: alertData.polygons,
@@ -46,38 +49,75 @@ export default async function PeringatanPage() {
   return (
     <div className="min-h-screen w-full mx-auto space-y-6 pb-20">
 
-      {/*  HEADER STATUS */}
-      <div className="mb-4">
-        {!alertData ? (
-          // KONDISI AMAN
-          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-4 text-center md:text-left shadow-sm">
-            <div className="bg-emerald-100 p-3 rounded-full">
-              <ShieldCheck className="w-8 h-8 text-emerald-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-emerald-800">Status: Kondusif</h3>
-              <p className="text-emerald-700 text-sm">
-                Tidak ada peringatan dini cuaca signifikan yang terpantau di wilayah Kalimantan Timur saat ini. Pantau terus informasi prakiraan cuaca terbaru dari BMKG APT Pranoto Samarinda.
-              </p>
+      {/* HEADER SECTION (UPGRADED) */}
+      {!alertData ? (
+        /* --- KONDISI AMAN / KONDUSIF (EMERALD) --- */
+        <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-sm">
+          <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0">
+            <ShieldCheck className="w-8 h-8 text-emerald-600" />
+          </div>
+  
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-slate-800">Status Cuaca: Kondusif</h2>
+            <p className="text-slate-600 text-sm mt-2 leading-relaxed ">
+              Tidak ada peringatan dini cuaca signifikan yang terpantau di wilayah <strong className="text-emerald-700">Kalimantan Timur</strong> saat ini. Kondisi cuaca diprakirakan normal.
+            </p>
+            
+            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
+              {/* Badge Status */}
+              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-bold shadow-sm">
+                 <span className="relative flex h-2.5 w-2.5">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                 </span>
+                 Aman Terkendali
+              </div>
+          
+              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
+                 <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                 Kalimantan Timur
+              </div>
             </div>
           </div>
-        ) : (
-          // KONDISI BAHAYA
-          <div>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${alertData.severity === 'Severe' ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-yellow-100 text-yellow-700 border border-yellow-200'}`}>
-                Tingkat: {alertData.severity}
-              </span>
-              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider border border-blue-100">
-                {alertData.event}
-              </span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-tight">
+        </section>
+      ) : (
+        /* --- KONDISI BAHAYA / PERINGATAN DINI (MERAH / AMBER) --- */
+        <section className={`${isSevere ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100'} border rounded-3xl p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-sm`}>
+          <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0">
+            <AlertTriangle className={`w-8 h-8 ${isSevere ? 'text-red-600' : 'text-amber-600'}`} />
+          </div>
+  
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-slate-800 leading-tight">
               {alertData.headline}
             </h2>
+            <p className="text-slate-600 text-sm mt-2 leading-relaxed ">
+              Peringatan dini terpantau. Tingkat bahaya berada pada status <strong className={isSevere ? 'text-red-600' : 'text-amber-600'}>{alertData.severity}</strong>. Harap waspada terhadap dampak cuaca ekstrem.
+            </p>
+            
+            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
+              {/* Badge Status */}
+              <div className={`inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border ${isSevere ? 'border-red-200 text-red-700' : 'border-amber-200 text-amber-700'} text-xs font-bold shadow-sm`}>
+                 <span className="relative flex h-2.5 w-2.5">
+                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isSevere ? 'bg-red-400' : 'bg-amber-400'} opacity-75`}></span>
+                   <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isSevere ? 'bg-red-500' : 'bg-amber-500'}`}></span>
+                 </span>
+                 Peringatan: {alertData.event}
+              </div>
+          
+              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
+                 <MapPin className={`w-3.5 h-3.5 ${isSevere ? 'text-red-500' : 'text-amber-500'}`} />
+                 Kalimantan Timur
+              </div>
+
+              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
+                 <Clock className={`w-3.5 h-3.5 ${isSevere ? 'text-red-500' : 'text-amber-500'}`} />
+                 Berlaku s/d: {formatDate(alertData.expires)}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </section>
+      )}
 
       {/* BAGIAN PETA  */}
       <div className="w-full block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">

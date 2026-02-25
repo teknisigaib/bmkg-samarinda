@@ -38,7 +38,7 @@ export default function NewsBulletinSection({ posts, bulletin }: NewsBulletinPro
   const [featuredPost, ...otherPosts] = posts;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-slate-50">
+    <section className="w-full mx-auto py-16 bg-slate-50">
       
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-b border-slate-200 pb-4">

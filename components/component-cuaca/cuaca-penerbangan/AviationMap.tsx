@@ -243,7 +243,7 @@ export default function AviationMap({ airports, onSelect, selectedIcao }: MapPro
 
             {/* MAP  */}
             <MapContainer center={[0, 117]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
+                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png" attribution='&copy; CARTO' />
 
                 {showBoundary && geoJsonData && <GeoJSON data={geoJsonData} style={{ color: '#ffffff', weight: 0.9, opacity: 1, fillColor: 'transparent' }} />}
                 {showSigmet && sigmetData && <GeoJSON key="sigmet-layer" data={sigmetData} style={getSigmetStyle} onEachFeature={onEachSigmet} />}

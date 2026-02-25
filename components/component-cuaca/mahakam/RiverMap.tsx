@@ -83,7 +83,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
   const riverCoreStyle = { color: '#2563eb', weight: 3, opacity: 1, lineCap: 'round' as const, lineJoin: 'round' as const };
 
   return (
-    <div className="w-full relative z-0 font-sans">
+    <div className="w-full relative z-0">
       
       <div className="h-[500px] w-full rounded-2xl overflow-hidden border border-slate-200 shadow-xl relative group bg-slate-100">
         

@@ -59,17 +59,12 @@ export default function AviationDashboard({ airports }: DashboardProps) {
                 </button>
             )}
         </div>
-        <div className="bg-white p-2 rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+        <div >
             <AviationMapWrapper 
                 airports={airports} 
                 onSelect={handleMapSelect} 
                 selectedIcao={selectedMapIcao} 
             />
-            <div className="mt-3 px-2 pb-2 text-sm text-slate-500 text-center italic">
-                {isRouteMode 
-                    ? `Menampilkan rute dari ${walsData?.station_name} ke ${selectedData?.station_name}` 
-                    : "Klik bandara lain di peta untuk melihat rute penerbangan."}
-            </div>
         </div>
       </section>
 

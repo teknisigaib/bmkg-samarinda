@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'; 
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { CLIMATE_TYPES } from "@/lib/climate-types"; 
