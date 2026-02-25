@@ -99,8 +99,8 @@ export default function Navbar() {
               width={40} 
               height={40} 
               priority 
-              className="w-9 h-8 md:w-12 md:h-10"
-              sizes="(max-width: 768px) 36px, 48px"
+              className="w-8 h-8 md:w-10 md:h-10"
+              
             />
             <div className="flex flex-col">
               <span className="text-gray-800 font-bold text-xs md:text-sm leading-tight">Badan Meteorologi Klimatologi & Geofisika</span>

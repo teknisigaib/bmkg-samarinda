@@ -22,7 +22,7 @@ export default function Home() {
     if (weather) {
       document.title = `Cuaca ${weather.location} | ${weather.condition} ${weather.temp}°`;
     } else {
-      document.title = "CuacaKita - Info Cuaca Terkini";
+      document.title = "Prakiraan Cuaca - Info Cuaca Terkini";
     }
   }, [weather]);
 

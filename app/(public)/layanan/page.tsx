@@ -16,7 +16,7 @@ export default function PricingLayananPage() {
       price: "Rp 0",
       period: "/ pengajuan",
       icon: GraduationCap,
-      url: "https://forms.google.com/your-form-student",
+      url: "https://docs.google.com/forms/d/e/1FAIpQLSe5xlkOtp5diRcCz1ce--khqrOjccAi3OflxkRcINeUDzU6hQ/viewform",
       isPopular: false
     },
     {
@@ -26,7 +26,7 @@ export default function PricingLayananPage() {
       price: "Rp 175rb",
       period: "/ lokasi / hari",
       icon: ShieldCheck,
-      url: "https://forms.google.com/your-form-insurance",
+      url: "https://docs.google.com/forms/d/e/1FAIpQLSfdcKKSEfCkggG40jFdM7CkLaAVgmYyH8Fh5cmqS-jvx0z49g/viewform",
       isPopular: false 
     },
     {
@@ -36,7 +36,7 @@ export default function PricingLayananPage() {
       price: "Rp 250rb",
       period: "/ rute / hari",
       icon: Ship,
-      url: "https://forms.google.com/your-form-voyage",
+      url: "https://docs.google.com/forms/d/e/1FAIpQLSeg2mPTD18NEmOdjO7YJFfM6l9Z2ciz5JFRs8vCRyddTc1P7A/viewform",
       isPopular: false
     },
     {
@@ -46,7 +46,7 @@ export default function PricingLayananPage() {
       price: "Rp 225rb",
       period: "/ lokasi / hari",
       icon: Anchor,
-      url: "https://forms.google.com/your-form-port",
+      url: "https://docs.google.com/forms/d/e/1FAIpQLSflHlgI6TIBt07kSZ0ciu6Bkjd7lm3DFfHvSCc-mGL3l0DBSA/viewform",
       isPopular: false
     },
     {
@@ -56,7 +56,7 @@ export default function PricingLayananPage() {
       price: "Rp 65rb",
       period: "/ buku",
       icon: BarChart3,
-      url: "https://forms.google.com/your-form-rain",
+      url: "https://docs.google.com/forms/d/e/1FAIpQLSfittGEQR1ifH2E5wnMq-95AUXQKUp-66w29A3nEFjPDBRcTQ/viewform",
       isPopular: false
     },
     {
@@ -66,7 +66,7 @@ export default function PricingLayananPage() {
       price: "Rp 3.75jt",
       period: "/ proyek",
       icon: MessageSquareText,
-      url: "https://forms.google.com/your-form-consult",
+      url: "https://docs.google.com/forms/d/e/1FAIpQLSemY2Mv1Z2e4-920lb6qabd0DHBcaX82n4yW37-xLJOff-frg/viewform",
       isPopular: false
     },
   ];

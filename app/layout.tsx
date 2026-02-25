@@ -13,24 +13,29 @@ const poppins = Poppins({
 // METADATA UTAMA 
 export const metadata: Metadata = {
   metadataBase: new URL('https://stamet-samarinda.bmkg.go.id'), 
-
+  
   title: {
-    template: '%s | BMKG APT Pranoto Samarinda',
-    default: 'BMKG APT Pranoto Samarinda - Info Cuaca & Iklim Kaltim',
+    template: '%s | Stasiun Meteorologi APT Pranoto Samarinda',
+    default: 'Stasiun Meteorologi APT Pranoto Samarinda - Info Cuaca & Iklim Kaltim',
   },
   description: "Website Resmi Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto. Menyediakan informasi cuaca, iklim, dan penerbangan untuk wilayah Samarinda dan Kalimantan Timur.",
   verification: {
     google: "Ou2gyh8a7aDifDNw3zpQnyIYZDTlzfOQTLYJVB6fGq4",
   },
-  applicationName: 'BMKG APT Pranoto',
-  authors: [{ name: 'BMKG Stasiun Meteorologi APT Pranoto', url: 'https://bmkg.go.id' }],
+  applicationName: 'Stasiun Meteorologi APT Pranoto',
+  authors: [{ name: 'Stasiun Meteorologi APT Pranoto', url: 'https://stamet-samarinda.bmkg.go.id' }],
   keywords: ['Cuaca Samarinda', 'BMKG', 'APT Pranoto', 'Prakiraan Cuaca', 'Iklim', 'Penerbangan', 'Kalimantan Timur'],
+  icons: {
+    icon: '/logo-bmkg.png',
+    shortcut: "/logo-bmkg.png",
+    apple: '/logo-bmkg.png',
+  },
   
   openGraph: {
-    title: 'BMKG APT Pranoto Samarinda',
+    title: 'Stasiun Meteorologi APT Pranoto Samarinda',
     description: 'Pantau kondisi cuaca, suhu, visibilitas penerbangan, dan peringatan dini di wilayah Samarinda secara real-time.',
     url: '/', 
-    siteName: 'BMKG APT Pranoto',
+    siteName: 'Stasiun Meteorologi APT Pranoto',
     locale: 'id_ID',
     type: 'website',
     images: [
@@ -38,24 +43,19 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1000,
         height: 1000,
-        alt: 'BMKG APT Pranoto Samarinda',
+        alt: 'Stasiun Meteorologi APT Pranoto Samarinda',
       },
     ],
   },
 
   twitter: {
     card: 'summary_large_image',
-    title: 'BMKG APT Pranoto Samarinda',
+    title: 'Stasiun Meteorologi APT Pranoto Samarinda',
     description: 'Informasi cuaca dan penerbangan resmi Stasiun Meteorologi APT Pranoto Samarinda.',
     images: ['/og-image.png'],
     creator: '@infoBMKG',
   },
 
-  icons: {
-    icon: '/logo-bmkg.png',
-    shortcut: "/logo-bmkg.png",
-    apple: '/logo-bmkg.png',
-  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
