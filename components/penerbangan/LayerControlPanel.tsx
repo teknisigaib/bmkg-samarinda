@@ -203,7 +203,7 @@ export default function LayerControlPanel({
                     icon={<Plane size={12} />}
                 />
 
-                {/* 6. BOUNDARIES */}
+                {/* 5. BOUNDARIES */}
                 <ToggleItem 
                     active={overlays.boundaries} 
                     onClick={() => toggleOverlay('boundaries')}
