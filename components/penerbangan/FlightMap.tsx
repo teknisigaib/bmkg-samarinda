@@ -105,7 +105,6 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
     radar: false,
     sigmet: false,
     airports: true,
-    fir: false,
     boundaries: true,
   });
 
