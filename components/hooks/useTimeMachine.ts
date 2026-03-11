@@ -1,127 +1,75 @@
+// components/hooks/useTimeMachine.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const DATA_INTERVAL_MINUTES = 10;
-const HISTORY_LENGTH = 12; 
-const ANIMATION_SPEED = 2000;
-
+// Struktur standar untuk setiap frame animasi
 export interface TimeFrame {
   timestamp: Date;
-  label: string;
-  dateLabel: string;
-  urlParam: string;
+  label: string;       // Contoh: "04:10 UTC"
+  dateLabel: string;   // Contoh: "11 Mar"
+  url: string;         // URL gambar tile map yang siap pakai
 }
 
-function formatTimeCode(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const hour = String(date.getUTCHours()).padStart(2, '0');
-  const min = String(date.getUTCMinutes()).padStart(2, '0');
-  return `${year}${month}${day}${hour}${min}`;
-}
+const ANIMATION_SPEED = 2000; // Kecepatan putar antar frame (dalam milidetik)
 
 export function useTimeMachine() {
   const [frames, setFrames] = useState<TimeFrame[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState(true); // Default true sampai ada data masuk
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isLiveRef = useRef<boolean>(true);
+  
+  // Ref ini bertugas melacak apakah user sedang berada di frame paling ujung (Terbaru/Live)
+  // Jika true, saat ada data baru masuk, slider akan otomatis bergeser ke data terbaru tersebut.
+  const isLiveRef = useRef<boolean>(true); 
 
-  // 1. GENERATE FRAMES (UTC LABEL)
-  const generateFrames = useCallback((anchorTimestamp: number) => {
-    const arr: TimeFrame[] = [];
-    const anchorDate = new Date(anchorTimestamp);
-    
-    for (let i = HISTORY_LENGTH - 1; i >= 0; i--) {
-      const d = new Date(anchorDate);
-      d.setMinutes(anchorDate.getMinutes() - (i * DATA_INTERVAL_MINUTES));
-      
-      arr.push({
-        timestamp: d,
-        // --- UBAH KE UTC DI SINI ---
-        label: d.toLocaleTimeString('en-GB', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            timeZone: 'UTC' 
-        }) + ' UTC', 
-        
-        dateLabel: d.toLocaleDateString('en-GB', { 
-            day: '2-digit', 
-            month: 'short', 
-            timeZone: 'UTC' 
-        }),
-        urlParam: formatTimeCode(d)
-      });
-    }
-    return arr;
-  }, []);
+  // 1. FUNGSI UNTUK MENERIMA DATA DARI SUMBER LUAR (cth: useHimawariData)
+  const loadPlaylist = useCallback((newFrames: TimeFrame[]) => {
+      setFrames(prevFrames => {
+          // Ambil URL terakhir dari data lama dan data baru untuk perbandingan
+          const prevLastUrl = prevFrames.length > 0 ? prevFrames[prevFrames.length - 1].url : '';
+          const newLastUrl = newFrames.length > 0 ? newFrames[newFrames.length - 1].url : '';
 
-  // 2. FETCH & SYNC
-  const refreshPlaylist = useCallback(async () => {
-      try {
-          // Tambahkan timestamp query agar browser tidak men-cache request JSON ini
-          const res = await fetch(`/api/satellite/status?t=${Date.now()}`);
-          const data = await res.json();
-
-          if (data.available && data.timestamp) {
-              const newFrames = generateFrames(data.timestamp);
-              
-              setFrames(prevFrames => {
-                  const prevLast = prevFrames.length > 0 ? prevFrames[prevFrames.length - 1].urlParam : '';
-                  const newLast = newFrames.length > 0 ? newFrames[newFrames.length - 1].urlParam : '';
-
-                  if (prevLast !== newLast && (isLiveRef.current || prevFrames.length === 0)) {
-                      setCurrentIndex(newFrames.length - 1);
-                  }
-                  return newFrames;
-              });
-              setIsOffline(false);
-          } else {
-              setIsOffline(true);
+          // Jika ada data baru (URL ujungnya berbeda) DAN user sedang memantau mode Live
+          if (prevLastUrl !== newLastUrl && (isLiveRef.current || prevFrames.length === 0)) {
+              // Pindahkan index ke frame paling baru
+              setCurrentIndex(newFrames.length - 1);
           }
-      } catch (e) {
-          console.error("Sync Error:", e);
-          setIsOffline(true);
-      }
-  }, [generateFrames]);
+          
+          return newFrames;
+      });
 
-  useEffect(() => {
-    refreshPlaylist();
-    // Cek setiap 1 menit (agar cepat menangkap update baru BMKG)
-    const intervalId = setInterval(refreshPlaylist, 60 * 1000); 
-    return () => clearInterval(intervalId);
-  }, [refreshPlaylist]);
+      // Update status offline/online
+      setIsOffline(newFrames.length === 0);
+  }, []); // Array kosong sangat penting agar fungsi ini tidak ter-recreate terus menerus
 
-  // ... (Sisa kode logic animasi SAMA PERSIS dengan sebelumnya) ...
-  
-  // (Copy logic animasi useEffect, togglePlay, dll dari jawaban sebelumnya di sini)
-  // ...
-  
-  // 4. ANIMATION ENGINE
+  // 2. ANIMATION ENGINE (Jantung Pemutar Otomatis)
   useEffect(() => {
-    if (isPlaying) {
-      isLiveRef.current = false; 
+    if (isPlaying && frames.length > 0) {
+      isLiveRef.current = false; // Saat play berjalan, berarti sedang tidak standby di Live
       
       timerRef.current = setInterval(() => {
         setCurrentIndex((prev) => {
           if (prev >= frames.length - 1) {
-            setIsPlaying(false);      
-            isLiveRef.current = true; 
+            setIsPlaying(false);      // Berhenti otomatis jika sudah sampai akhir
+            isLiveRef.current = true; // Set status kembali ke Live
             return prev;              
           }
-          return prev + 1;
+          return prev + 1; // Lanjut ke frame berikutnya
         });
       }, ANIMATION_SPEED);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
     }
+    
+    // Cleanup interval saat komponen mati atau isPlaying berubah
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isPlaying, frames.length]); 
 
+  // 3. KONTROL PLAYER
   const togglePlay = () => {
-    if (!isPlaying && currentIndex === frames.length - 1) {
+    if (!isPlaying && currentIndex === frames.length - 1 && frames.length > 0) {
+      // Jika posisi sedang di ujung akhir dan user tekan play, mulai ulang dari awal (0)
       setCurrentIndex(0);
     }
     setIsPlaying(!isPlaying);
@@ -136,11 +84,12 @@ export function useTimeMachine() {
   };
 
   const setIndex = (index: number) => {
-    setIsPlaying(false); 
+    setIsPlaying(false); // Hentikan play jika user menggeser slider manual
     setCurrentIndex(index);
     isLiveRef.current = (index === frames.length - 1);
   };
 
+  // 4. KEMBALIKAN SEMUA STATE & FUNGSI KE KOMPONEN PETA
   return {
     frames,
     currentIndex,
@@ -149,6 +98,7 @@ export function useTimeMachine() {
     isOffline,
     togglePlay,
     jumpToLive,
-    setIndex
+    setIndex,
+    loadPlaylist // <-- Ini yang akan dipanggil oleh useHimawariData atau komponen luar
   };
 }

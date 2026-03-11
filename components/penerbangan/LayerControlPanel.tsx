@@ -3,7 +3,8 @@
 import { ReactNode } from "react";
 import { 
   Map as MapIcon, CloudRain, Eye, 
-  Satellite, Radar, Zap, Plane, AlertTriangle, Info // Tambah Info Icon
+  Satellite, Radar, Zap, Plane, AlertTriangle, Info, // Tambah Info Icon
+  Loader2
 } from "lucide-react";
 
 export type BaseMapType = 'dark' | 'light' | 'satellite_base';
@@ -225,7 +226,9 @@ function ToggleItem({
 }: { 
     active: boolean, onClick: () => void, label: string, icon: ReactNode, time?: string, legend?: ReactNode 
 }) {
+    // Deteksi 3 status yang mungkin: OFFLINE, LOADING..., atau Teks Waktu Normal
     const isOffline = time?.includes("OFFLINE");
+    const isLoading = time?.includes("LOADING");
 
     return (
         <div className="flex flex-col">
@@ -252,12 +255,16 @@ function ToggleItem({
                 <div className="px-2 pb-1 animate-in slide-in-from-top-1 duration-200">
                     <div className="pl-6 border-l border-white/10 ml-[5px] pt-1">
                         
-                        {/* WAKTU UPDATE / OFFLINE INDICATOR */}
+                        {/* WAKTU UPDATE / OFFLINE / LOADING INDICATOR */}
                         {time && (
                             <div className="flex items-center gap-1.5 mb-2">
                                 {isOffline ? (
                                     <span className="flex items-center gap-1 text-[9px] font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
                                         <AlertTriangle size={8} /> OFFLINE
+                                    </span>
+                                ) : isLoading ? (
+                                    <span className="flex items-center gap-1 text-[9px] font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                        <Loader2 size={8} className="animate-spin" /> MENCARI DATA...
                                     </span>
                                 ) : (
                                     <p className="text-[9px] text-emerald-400 font-mono flex items-center gap-1.5">

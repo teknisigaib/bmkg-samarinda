@@ -12,6 +12,8 @@ import { useSigmetLayers } from "@/components/hooks/useSigmetLayers";
 import { useAirportWeather } from "@/components/hooks/useAirportWeather";
 import { useTimeMachine } from "@/components/hooks/useTimeMachine";
 import { useBoundaryLayers } from "@/components/hooks/useBoundaryLayers";
+// --- NEW IMPORT ---
+import { useHimawariData } from "@/components/hooks/useHimawariData";
 
 // --- CUSTOM COMPONENTS ---
 import AirportDetailPanel, { AirportData } from "./AirportDetailPanel";
@@ -80,29 +82,28 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   
-  // --- TIME MACHINE HOOK (BRAIN) ---
+  // --- 1. HOOK DATA SATELIT BARU ---
+  const himawariData = useHimawariData();
+
+  // --- 2. TIME MACHINE HOOK (PLAYER) ---
   const { 
     frames, currentIndex, currentFrame, isPlaying, isOffline, 
-    togglePlay, jumpToLive, setIndex 
+    togglePlay, jumpToLive, setIndex, loadPlaylist 
   } = useTimeMachine();
-  
-  // URL Generator
-  const getSatelliteUrl = () => {
-      if (!currentFrame) return "";
-      return `/api/tiles/satellite?z={z}&x={x}&y={y}&time=${currentFrame.urlParam}`;
-  };
 
-  const getRadarUrl = () => {
-      if (!currentFrame) return "";
-      return `/api/tiles/radar?z={z}&x={x}&y={y}&time=${currentFrame.urlParam}`;
-  };
+  // --- 3. MASUKKAN DATA KE DALAM PLAYER ---
+  useEffect(() => {
+    if (himawariData.frames && himawariData.frames.length > 0) {
+        loadPlaylist(himawariData.frames);
+    }
+  }, [himawariData.frames, loadPlaylist]);
 
-  // --- STATE LAYER CONTROL ---
+  // --- 4. LAYER CONTROL STATE ---
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [baseMap, setBaseMap] = useState<BaseMapType>('dark');
   const [overlays, setOverlays] = useState<Record<OverlayType, boolean>>({
     himawari: true, 
-    radar: false,
+    radar: false, // (Nanti bisa pakai logika sama jika Anda punya API Radar BMKG)
     sigmet: false,
     airports: true,
     boundaries: true,
@@ -139,30 +140,26 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
   const MapContent = (
     <div className={`bg-slate-900 overflow-hidden shadow-2xl transition-all duration-300 ${isFullscreen ? 'fixed inset-0 z-[9999] w-screen h-screen rounded-none' : `w-full h-[600px] rounded-2xl relative border border-slate-700 ${className}`}`}>
       
-      {/* 1. SIDEBAR DETAIL AIRPORT */}
       <AirportDetailPanel 
         airport={selectedAirport} 
         onClose={() => setSelectedAirport(null)} 
       />
 
-      {/* 2. SIDEBAR DETAIL SIGMET */}
       <SigmetDetailPanel 
         data={selectedSigmet} 
         onClose={() => setSelectedSigmet(null)} 
       />
 
-      {/* 3. LAYER CONTROL PANEL */}
       <LayerControlPanel 
         isOpen={isPanelOpen}
         baseMap={baseMap}
         setBaseMap={setBaseMap}
         overlays={overlays}
         toggleOverlay={toggleOverlay}
-        himawariTime={isOffline ? "OFFLINE" : currentFrame?.label}
-        radarTime={isOffline ? "OFFLINE" : currentFrame?.label}
+        himawariTime={isOffline ? (himawariData.isLoading ? "LOADING..." : "OFFLINE") : currentFrame?.label}
+        radarTime={"COOMING SOON"} // (Untuk sementara radar dimatikan/belum ada API)
       />
 
-      {/* 4. TIME CONTROL PANEL */}
       <TimeControlPanel 
           frames={frames}
           currentIndex={currentIndex}
@@ -172,7 +169,6 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
           onIndexChange={setIndex}
       />
 
-      {/* 5. TOMBOL MENU */}
       <button 
         onClick={() => setIsPanelOpen(!isPanelOpen)}
         className="absolute top-6 left-6 z-[2010] p-2 bg-black/80 text-white rounded-lg backdrop-blur-md border border-white/10 hover:bg-black transition-all shadow-xl"
@@ -180,7 +176,6 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
         {isPanelOpen ? <X size={16} /> : <Menu size={16} />}
       </button>
 
-      {/* 6. TOMBOL FULLSCREEN */}
       <button 
         onClick={() => setIsFullscreen(!isFullscreen)} 
         className="absolute top-6 right-6 z-[1000] p-2 bg-black/40 text-slate-300 hover:text-white rounded-lg border border-white/10 backdrop-blur-md transition-all"
@@ -188,7 +183,6 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
           {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
       </button>
 
-      {/* 7. MAP CONTAINER */}
       <MapContainer 
           key={isFullscreen ? 'full' : 'norm'}
           center={[-2.5, 118.0]} 
@@ -197,7 +191,6 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
           className="w-full h-full z-0 bg-[#1a1a1a]" 
           zoomControl={false}
       >
-          {/* A. BASE MAP */}
           <TileLayer
             key={baseMap}
             url={BASE_MAPS[baseMap]}
@@ -206,44 +199,34 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
             attribution="&copy; OpenStreetMap & CARTO"
           />
 
-          {/* B. HIMAWARI OVERLAY */}
+          {/* B. HIMAWARI OVERLAY (MENGGUNAKAN SUMBER API BARU) */}
           {overlays.himawari && currentFrame && (
              <TileLayer
-                key="himawari-layer" 
-                url={getSatelliteUrl()}
-                opacity={0.6} 
+                // Key ini sangat krusial! Menggunakan currentFrame.url agar Leaflet merender ulang saat frame berubah
+                key={`sat-${currentFrame.url}`} 
+                url={currentFrame.url}
+                opacity={0.65} 
                 zIndex={2}
+                tms={true}       // Membalik sumbu Y (Sangat sering dipakai di server BMKG)
+                noWrap={true}    // Mencegah gambar meluber/berulang ke kiri-kanan
+                maxNativeZoom={9}
              />
           )}
 
-          {/* C. RADAR OVERLAY */}
-          {overlays.radar && currentFrame && (
-             <TileLayer
-                key="radar-layer"
-                url={getRadarUrl()}
-                opacity={0.8}
-                zIndex={3}
-             />
-          )}
+          <GeoJSON 
+             key={sigmetData ? `sigmet-${sigmetData.features.length}` : 'sigmet-empty'} 
+             data={sigmetData || undefined}
+             style={getSigmetStyle}
+             onEachFeature={(feature, layer) => {
+                 layer.on({
+                     click: (e) => {
+                         if (e.originalEvent) e.originalEvent.stopPropagation();
+                         handleSigmetClick(feature.properties);
+                     }
+                 });
+             }}
+          />
 
-          {/* D. SIGMET GEOJSON */}
-          {overlays.sigmet && sigmetData && (
-             <GeoJSON 
-                key={`sigmet-${sigmetData.features.length}`} 
-                data={sigmetData}
-                style={getSigmetStyle}
-                onEachFeature={(feature, layer) => {
-                    layer.on({
-                        click: (e) => {
-                            if (e.originalEvent) e.originalEvent.stopPropagation();
-                            handleSigmetClick(feature.properties);
-                        }
-                    });
-                }}
-             />
-          )}
-
-          {/* E. BOUNDARY LAYER */}
           {overlays.boundaries && boundaryData && (
             <GeoJSON 
                 key="geo-boundaries"
@@ -253,7 +236,6 @@ export default function FlightMap({ className, initialAirports = [] }: MapProps)
             />
           )}
 
-          {/* F. BANDARA MARKERS */}
           {overlays.airports && displayAirports.map((airport) => {
              const isSelected = selectedAirport?.id === airport.id;
              
