@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     
     const data = await res.json();
 
-    // 1. REWRITE URL LATEST -> Arahkan ke Proxy Internal
+    // 1. REWRITE URL LATEST -> Arahkan ke Proxy Internals
     if (data.latest && data.latest.url) {
         data.latest.url = `/api/radar/image?path=${encodeURIComponent(data.latest.url)}`;
     }
