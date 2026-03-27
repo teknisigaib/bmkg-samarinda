@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AirportData } from '@/components/penerbangan/AirportDetailPanel';
+import { AirportData } from '@/components/component-cuaca/penerbangan/AirportDetailPanel';
 
 // Daftar ICAO Target
 const AIRPORT_LIST = [

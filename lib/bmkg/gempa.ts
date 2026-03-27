@@ -1,3 +1,5 @@
+import { cache } from "react"; // <-- Import fungsi cache dari React
+
 export interface GempaData {
   Tanggal: string;
   Jam: string;
@@ -27,15 +29,18 @@ export interface AutoGempaResponse {
   };
 }
 
-//  GEMPA TERKINI (M 5.0+)
-
-export async function getGempaTerkiniList(): Promise<GempaData[]> {
+// 1. GEMPA TERKINI (M 5.0+) - Dibungkus dengan React Cache
+export const getGempaTerkiniList = cache(async (): Promise<GempaData[]> => {
   try {
     const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json", {
       next: { revalidate: 60 },
     });
     
-    if (!res.ok) return [];
+    // Cegah error 429 (Too Many Requests) mematikan halaman
+    if (!res.ok) {
+        console.warn(`BMKG API Error (Terkini): ${res.status}`);
+        return [];
+    }
     
     const data: GempaListResponse = await res.json();
     const gempaRaw = data?.Infogempa?.gempa;
@@ -49,18 +54,19 @@ export async function getGempaTerkiniList(): Promise<GempaData[]> {
     console.error("Gagal fetch gempa terkini:", error);
     return [];
   }
-}
+});
 
-
-// GEMPA DIRASAKAN
-
-export async function getGempaDirasakanList(): Promise<GempaData[]> {
+// 2. GEMPA DIRASAKAN - Dibungkus dengan React Cache
+export const getGempaDirasakanList = cache(async (): Promise<GempaData[]> => {
   try {
     const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json", {
       next: { revalidate: 60 },
     });
     
-    if (!res.ok) return [];
+    if (!res.ok) {
+        console.warn(`BMKG API Error (Dirasakan): ${res.status}`);
+        return [];
+    }
 
     const data: GempaListResponse = await res.json();
     const gempaRaw = data?.Infogempa?.gempa;
@@ -78,24 +84,30 @@ export async function getGempaDirasakanList(): Promise<GempaData[]> {
     console.error("Gagal fetch gempa dirasakan:", error);
     return [];
   }
-}
+});
 
-// 3. AUTO GEMPA (Untuk Widget Home - 1 Data Terakhir)
-export async function getGempaTerbaru(): Promise<GempaData | null> {
+// 3. AUTO GEMPA (Untuk Widget Home - 1 Data Terakhir) - Dibungkus dengan React Cache
+export const getGempaTerbaru = cache(async (): Promise<GempaData | null> => {
   try {
     const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json", {
       next: { revalidate: 60 },
     });
     
-    if (!res.ok) return null;
+    if (!res.ok) {
+        console.warn(`BMKG API Error (AutoGempa): ${res.status}`);
+        return null;
+    }
     
     const data: AutoGempaResponse = await res.json();
-    const gempa = data.Infogempa.gempa;
+    const gempa = data.Infogempa?.gempa;
     
-    gempa.ShakemapUrl = `https://data.bmkg.go.id/DataMKG/TEWS/${gempa.Shakemap}`;
+    if(gempa && gempa.Shakemap) {
+        gempa.ShakemapUrl = `https://data.bmkg.go.id/DataMKG/TEWS/${gempa.Shakemap}`;
+    }
     
-    return gempa;
+    return gempa || null;
   } catch (error) {
+    console.error("Gagal fetch auto gempa:", error);
     return null;
   }
-}
+});

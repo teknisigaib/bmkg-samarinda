@@ -3,8 +3,9 @@
 import React from 'react';
 import { 
   GraduationCap, ShieldCheck, Ship, Anchor, BarChart3, 
-  MessageSquareText, Check, FileText, Info
+  MessageSquareText, Check, FileText, Info, Database, Receipt
 } from 'lucide-react';
+import Breadcrumb from "@/components/ui/Breadcrumb";
 
 export default function PricingLayananPage() {
   
@@ -72,77 +73,90 @@ export default function PricingLayananPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FBFCFD] text-slate-900 py-20 overflow-hidden">
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+    <div className="min-h-screen bg-slate-50/50 pb-20">
+      <div className="w-full mx-auto pt-6 px-4 lg:px-8 space-y-12">
         
-        {/* HEADER SECTION */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
-          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
-            Tarif & Layanan
-          </h1>
-          <p className="text-lg md:text-xl text-slate-500">
-            Transparansi biaya PNBP untuk setiap kebutuhan data Anda. <br className="hidden md:block" />
-            Pilih layanan yang sesuai, mulai dari akademik hingga industri.
-          </p>
-        </div>
+        {/* --- BREADCRUMB --- */}
+        <Breadcrumb 
+            items={[
+              { label: "Beranda", href: "/" },
+              { label: "Layanan" }, 
+              { label: "Tarif & Layanan Data" } 
+            ]} 
+        />
 
-        {/* GRID LAYANAN */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* --- HEADER SECTION --- */}
+        <section className="relative flex flex-col items-center justify-center text-center mb-16 mx-auto pt-2">
+           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
+           </div>
+           
+           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+              Tarif & Layanan Data
+           </h1>
+           
+           <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
+              Transparansi biaya PNBP untuk setiap kebutuhan data Anda. Pilih layanan yang sesuai, mulai dari keperluan akademik hingga operasional industri.
+           </p>
+
+           
+        </section>
+
+        {/* --- GRID LAYANAN --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {services.map((item) => (
             <div key={item.id} className="relative group h-full">
 
               {/* CARD CONTAINER */}
-              <div className={`relative flex flex-col h-full bg-white rounded-[32px] p-8 transition-all duration-300 border-2
+              <div className={`relative flex flex-col h-full bg-white rounded-2xl p-8 transition-all duration-300 border
                 ${item.isPopular 
-                  ? 'border-transparent shadow-xl shadow-teal-900/5' 
+                  ? 'border-blue-200 shadow-lg shadow-blue-900/5' 
                   : 'border-slate-200 shadow-sm'
                 }
-                
-                {/* === HOVER EFFECTS: BORDER BIRU & SHADOW === */}
                 group-hover:border-blue-500 group-hover:shadow-xl group-hover:shadow-blue-500/10 group-hover:-translate-y-1
               `}>
                 
                 {/* Header: Icon & Title */}
                 <div className="flex flex-col items-center text-center mb-6">
-
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  <div className="w-14 h-14 bg-slate-50 border border-slate-100 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors">
+                      <item.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-slate-500 leading-relaxed max-w-[240px]">
+                  <p className="text-sm text-slate-500 leading-relaxed font-medium max-w-[240px]">
                     {item.description}
                   </p>
                 </div>
 
                 {/* PRICE SECTION */}
-                <div className="text-center mb-8 py-8 border-y border-slate-100 group-hover:border-slate-200 transition-colors">
+                <div className="text-center mb-8 py-6 border-y border-slate-100 group-hover:border-slate-200 transition-colors">
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-4xl font-extrabold text-slate-900 tracking-tight">
                       {item.price}
                     </span>
                   </div>
-                  <span className="text-sm text-slate-400 font-medium mt-1 block">
+                  <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-2 block">
                     {item.period}
                   </span>
                   
                   {item.isPopular && (
-                    <span className="inline-block mt-3 px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider rounded-full group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
+                    <span className="inline-block mt-4 px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-widest rounded-md">
                       Paling Banyak Dicari
                     </span>
                   )}
                 </div>
 
                 {/* Button CTA */}
-                <div className="mb-8">
+                <div className="mt-auto">
                   <a 
                     href={item.url}
                     target="_blank" 
                     rel="noreferrer"
-                    className={`block w-full py-3.5 rounded-full text-center font-semibold text-sm transition-all duration-300 border
+                    className={`block w-full py-3.5 rounded-xl text-center font-bold text-xs uppercase tracking-widest transition-all duration-300 border
                       ${item.isPopular 
-                        ? 'bg-slate-900 text-white border-transparent' 
-                        : 'bg-white border-slate-200 text-slate-700'
+                        ? 'bg-slate-900 text-white border-slate-900' 
+                        : 'bg-slate-50 border-slate-200 text-slate-700'
                       }
                       group-hover:bg-blue-600 group-hover:border-blue-600 group-hover:text-white group-hover:shadow-md
                     `}
@@ -151,102 +165,98 @@ export default function PricingLayananPage() {
                   </a>
                 </div>
 
-                {/* Features List */}
-              
-
               </div>
             </div>
           ))}
         </div>
 
-
-        {/*  ALUR PENGAJUAN  */}
-        <div className="mb-20 mt-20">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-slate-900">Alur Permintaan Data</h2>
-            <p className="text-slate-500">Proses mudah dan transparan dari pengajuan hingga data diterima.</p>
+        {/* --- ALUR PENGAJUAN --- */}
+        <div className="pt-16 mb-10">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Alur Permintaan Data</h2>
+            <p className="text-slate-500 font-medium text-sm md:text-base">Proses mudah dan transparan dari tahap pengajuan hingga data diterima.</p>
           </div>
 
           <div className="relative">
             {/* Garis Penghubung (Desktop) */}
-            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0"></div>
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-px bg-slate-200 -translate-y-1/2 z-0 border-dashed border-t"></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 relative z-10">
               {/* Step 1 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-sm">
-                <div className="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-white shadow-sm">
+              <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 text-center shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-black text-xl mb-5 border border-blue-100 shadow-sm">
                   1
                 </div>
                 <h3 className="font-bold text-slate-900 mb-2">Isi Formulir</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
                   Pilih layanan di atas, klik "Ajukan", dan lengkapi data diri serta detail permintaan di Google Form.
                 </p>
               </div>
 
               {/* Step 2 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-sm">
-                <div className="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-white shadow-sm">
+              <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 text-center shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-black text-xl mb-5 border border-blue-100 shadow-sm">
                   2
                 </div>
                 <h3 className="font-bold text-slate-900 mb-2">Verifikasi & Billing</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
                   Petugas memverifikasi. Jika disetujui, Anda akan menerima Kode Billing PNBP via Email/WA.
                 </p>
               </div>
 
               {/* Step 3 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-sm">
-                <div className="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-white shadow-sm">
+              <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 text-center shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-black text-xl mb-5 border border-blue-100 shadow-sm">
                   3
                 </div>
                 <h3 className="font-bold text-slate-900 mb-2">Pembayaran</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
                   Lakukan pembayaran ke Kas Negara via ATM/M-Banking menggunakan Kode Billing (Simponi).
                 </p>
               </div>
 
               {/* Step 4 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-sm">
-                <div className="w-12 h-12 mx-auto bg-green-50 text-green-600 rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-white shadow-sm">
+              <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 text-center shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 mx-auto bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-black text-xl mb-5 border border-emerald-100 shadow-sm">
                   <Check className="w-6 h-6" />
                 </div>
                 <h3 className="font-bold text-slate-900 mb-2">Terima Data</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Setelah pembayaran terkonfirmasi lunas, softcopy data akan dikirimkan ke email Anda.
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  Setelah pembayaran terkonfirmasi lunas, *softcopy* data akan dikirimkan ke email Anda.
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* FOOTER  */}
-        <div className="border-t border-slate-200 pt-16">
+        {/* --- FOOTER (Dasar Hukum) --- */}
+        <div className="pt-8">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
-                 <FileText className="w-32 h-32 text-slate-900" />
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm text-center relative overflow-hidden">
+              {/* Ikon Latar */}
+              <div className="absolute -right-4 -bottom-4 opacity-[0.03] pointer-events-none">
+                 <FileText className="w-48 h-48 text-slate-900" />
               </div>
 
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full text-xs font-bold text-slate-600 uppercase tracking-wide mb-4">
-                  <Info className="w-3 h-3" />
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-5">
+                  <Info className="w-3.5 h-3.5 text-blue-500" />
                   Dasar Hukum & Regulasi
                 </div>
 
-                <div className="space-y-4 text-slate-500 text-sm leading-relaxed">
+                <div className="space-y-4 text-slate-500 text-sm md:text-base font-medium leading-relaxed text-justify md:text-center">
                   <p>
-                    Tarif layanan yang tercantum di atas telah sesuai dengan <strong className="text-slate-700">PP No. 47 Tahun 2018</strong> tentang 
+                    Tarif layanan yang tercantum di atas telah sesuai dengan <strong className="text-slate-800 font-bold">Peraturan Pemerintah (PP) No. 47 Tahun 2018</strong> tentang 
                     Jenis dan Tarif Penerimaan Negara Bukan Pajak (PNBP) yang berlaku di BMKG.
                   </p>
                   <p>
-                    Adapun ketentuan mengenai <strong className="text-slate-700">Tarif Rp.0,00 (Nol Rupiah)</strong> untuk kegiatan tertentu (seperti penelitian/pendidikan) 
-                    diterapkan sesuai dengan <strong className="text-slate-700">Perka BMKG No. 12 Tahun 2019</strong> tentang 
+                    Adapun ketentuan mengenai <strong className="text-blue-700 font-bold">Tarif Rp 0,00 (Nol Rupiah)</strong> untuk kegiatan tertentu (seperti penelitian pendidikan/mahasiswa) 
+                    diterapkan secara ketat sesuai dengan <strong className="text-slate-800 font-bold">Perka BMKG No. 12 Tahun 2019</strong> tentang 
                     Persyaratan dan Tata Cara Pengenaan Tarif Nol Rupiah Atas Jenis PNBP.
                   </p>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 

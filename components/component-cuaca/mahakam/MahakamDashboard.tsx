@@ -7,8 +7,9 @@ import { RawTideData } from '@/lib/tide-service';
 import RouteForecastView from './RouteForecastView';
 import StationDetailView from './StationDetailView';
 import TidalChart, { TideData } from '@/components/component-cuaca/mahakam/TidalChart';
+import SectionDivider from "@/components/ui/SectionDivider"; // <-- Tambahkan ini
 // Import Ikon Baru
-import { Anchor, Info, Clock,Waves } from "lucide-react";
+import { Map, Clock ,Waves } from "lucide-react";
 
 const RiverMap = dynamic(
   () => import('./RiverMap'),
@@ -84,85 +85,89 @@ export default function MahakamDashboard({ data, tideData }: Props) {
   return (
     <div className="space-y-8 pb-20">
          
-         {/* --- HEADER UTAMA (FITUR BARU) --- */}
-         <section className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            
-            {/* Main Icon */}
-            <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0 ring-4 ring-blue-50/50">
-                <Anchor className="w-8 h-8 text-blue-600" />
-            </div>
-    
-            <div className="flex-1 w-full">
-                <h2 className="text-2xl font-bold text-slate-800">
-                    Cuaca Jalur Sungai Mahakam
-                </h2>
-                <p className="text-slate-600 text-sm mt-2 leading-relaxed mx-auto md:mx-0">
-                   Informasi terpadu cuaca, jarak pandang, dan pasang surut untuk keselamatan pelayaran di sepanjang alur Sungai Mahakam.
-                </p>
-                
-                {/* Action Row: Badge Informasi */}
-                <div className="mt-5 flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  
-                  {/* Badge Tanggal */}
-                  <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
-                      <Clock className="w-3.5 h-3.5 text-blue-500" />
-                      <span>{todayLabel}</span>
-                  </div>
+         {/* --- 2. HEADER SECTION: REFINED SYMMETRICAL LIGHT --- */}
+        <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
+           
+           {/* Judul Utama */}
+           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+              Prakiraan Cuaca Sungai Mahakam
+           </h1>
+           
+           {/* Deskripsi */}
+           <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
+              Sistem pemantauan alur sungai terpadu. Menyediakan informasi cuaca, visibilitas, dan data pasang surut *real-time* untuk keselamatan pelayaran.
+           </p>
 
-                  {/* Badge Jumlah Titik Pantau */}
-                  <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
-                      <Info className="w-3.5 h-3.5 text-blue-500" />
-                      <span><strong>{data.length}</strong> Titik Pantau Cuaca</span>
-                  </div>
-
-                  {/* Badge Status Pasut Saat Ini (Live) */}
-                  {currentTideInfo && (
-                      <div className="inline-flex items-center gap-2 bg-blue-600 px-3 py-1.5 rounded-md border border-blue-600 text-xs font-bold text-white shadow-sm shadow-blue-200">
-                          <Waves className="w-3.5 h-3.5" />
-                          <span>Pasang Surut: {currentTideInfo.heightLAT.toFixed(2)} m (LAT)</span>
-                      </div>
-                  )}
-
+           {/* Symmetrical Status Bar (Unified Capsule) */}
+           <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-full shadow-sm p-1">
+              
+              {/* Info Titik Pantau */}
+              <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
+                 <Map className="w-4 h-4 text-blue-500" />
+                 <span className="text-xs font-semibold text-slate-700">{data.length} Titik Pantau</span>
+              </div>
+              
+              {/* Info Pasut Live (Jika ada) */}
+              {currentTideInfo && (
+                <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
+                   <Waves className="w-4 h-4 text-emerald-500" />
+                   <span className="text-xs font-semibold text-slate-700">Pasut: {currentTideInfo.heightLAT.toFixed(2)}m</span>
                 </div>
-            </div>
-         </section>
-         {/* ---------------------------------- */}
+              )}
+              
+              {/* Waktu Sync */}
+              <div className="flex items-center gap-2 px-4 py-1.5">
+                 <Clock className="w-4 h-4 text-slate-400" />
+                 <span className="text-xs font-medium text-slate-500">{todayLabel}</span>
+              </div>
+              
+           </div>
+        </section>
 
 
-         {/* 1. PETA VISUALISASI */}
-         <section>
-            <RiverMap initialData={data} />
-         </section>
+         {/* --- 1. PETA VISUALISASI --- */}
+        <section className="relative w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-200/50 bg-slate-900">
+           <RiverMap initialData={data} />
+        </section>
 
-         {/* 2. PASANG SURUT */}
-         <section className="scroll-mt-20">
+        {/* --- 2. PASANG SURUT DENGAN DIVIDER --- */}
+        <section className="scroll-mt-20 mt-24">
+            <SectionDivider title="Grafik Pasang Surut" className="mb-8" />
+            
             {processedTideData.length > 0 ? (
-                <TidalChart data={processedTideData} />
+               
+                   <TidalChart data={processedTideData} />
+                
             ) : (
                 <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-400">
                     Gagal memuat data pasang surut BMKG.
                 </div>
             )}
-         </section>
+        </section>
 
-         {/* 3. TABEL RUTE */}
-         <section className="relative z-20">
+        {/* --- 3. TABEL RUTE DENGAN DIVIDER --- */}
+        <section className="relative z-20 mt-24">
+             <SectionDivider title="Prakiraan Jalur Sungai" className="mb-8" />
+             
              <RouteForecastView 
                 data={data} 
                 onSelect={handleStationSelect}
                 activeId={selectedStation?.id}
              />
-         </section>
+        </section>
 
-         {/* 4. DETAIL VIEW */}
-         {selectedStation && (
-             <section ref={detailRef} className="scroll-mt-6">
+        {/* --- 4. DETAIL VIEW --- */}
+        {selectedStation && (
+             <section ref={detailRef} className="scroll-mt-6 mt-12">
+                {/* Kita beri divider dinamis untuk detail stasiun yang dipilih */}
+                <SectionDivider title={`Prakiraan Cuaca - ${selectedStation.name}`} className="mb-8" />
+                
                 <StationDetailView 
                     data={selectedStation} 
                     onClose={() => setSelectedStation(null)} 
                 />
              </section>
-         )}
+        )}
 
     </div>
   );

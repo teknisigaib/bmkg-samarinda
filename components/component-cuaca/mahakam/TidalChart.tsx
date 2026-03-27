@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Waves, ArrowUp, ArrowDown, Info, MapPin, Clock } from "lucide-react";
+import { ArrowUp, ArrowDown, Info, Clock, Navigation } from "lucide-react";
 
 export type TideData = {
   originalTime: string;
@@ -34,7 +34,6 @@ export default function TidalChart({ data, locationName = "Terminal Peti Kemas P
     setNowIndex(targetIndex);
 
     if (containerRef.current && targetIndex > 0) {
-        // Multiplier 4 agar padat
         const chartWidth = Math.max(800, data.length * 4);
         const targetX = (targetIndex / (data.length - 1)) * chartWidth;
         const clientWidth = containerRef.current.clientWidth;
@@ -44,8 +43,8 @@ export default function TidalChart({ data, locationName = "Terminal Peti Kemas P
 
   if (!data || data.length === 0) {
     return (
-        <div className="w-full h-32 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-center text-slate-400 text-sm">
-            Data tidak tersedia.
+        <div className="w-full h-32 bg-slate-50 rounded-[2rem] border border-slate-200 flex items-center justify-center text-slate-400 text-sm font-bold uppercase tracking-widest">
+            Data Tidak Tersedia
         </div>
     );
   }
@@ -89,11 +88,9 @@ export default function TidalChart({ data, locationName = "Terminal Peti Kemas P
   const chartWidth = Math.max(800, data.length * 4); 
   const getX = (index: number) => (index / (data.length - 1)) * chartWidth;
   
-  // Responsive Height Logic (Simulasi di CSS nanti)
-  const chartHeight = 220; // Base height calculation
+  const chartHeight = 220; 
   const getY = (height: number) => {
     const range = maxVal - minVal || 1; 
-    // Margin atas bawah lebih ketat agar tidak buang space
     return (chartHeight - 30) - ((height - minVal) / range) * (chartHeight - 60);
   };
 
@@ -111,92 +108,100 @@ export default function TidalChart({ data, locationName = "Terminal Peti Kemas P
       const cp2y = y;
       d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
     }
-    // Extend ke bawah untuk gradient
     d += ` V ${chartHeight + 50} H 0 Z`; 
     return d;
   }, [data, maxVal, minVal, chartWidth, datum]);
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+    <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden transition-all flex flex-col relative">
       
-      {/* HEADER: RESPONSIF (MOBILE PADAT, DESKTOP RAPI) */}
-      <div className="p-4 md:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+      {/* --- HEADER: SIMETRIS & BERSIH --- */}
+      <div className="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between bg-white z-10 gap-4">
         
-        {/* BAGIAN KIRI: ICON & JUDUL */}
-        <div className="flex items-start gap-3 md:items-center">
-            <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-slate-800 text-base md:text-lg leading-tight truncate">
-                    Pasang Surut Sungai Mahakam
-                </h3>
-                
-                <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-1">
-                    <div className="flex items-center gap-1 text-[11px] md:text-xs text-slate-500 font-medium truncate">
-                        <MapPin className="w-3 h-3 text-red-500 shrink-0" />
-                        <span className="truncate">{locationName}</span>
-                    </div>
-                    {/* Badge WITA */}
-                    <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200 shrink-0">
-                        <Clock className="w-3 h-3 text-slate-400" />
-                        <span>WITA (UTC+8)</span>
-                    </div>
-                </div>
+        {/* Spacer Kiri (Desktop) */}
+        <div className="w-full md:w-64 flex justify-center md:justify-start">
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button 
+                    onClick={() => setDatum('LAT')} 
+                    className={`px-4 py-1.5 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all ${datum === 'LAT' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    LAT
+                </button>
+                <button 
+                    onClick={() => setDatum('MSL')} 
+                    className={`px-4 py-1.5 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all ${datum === 'MSL' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    MSL
+                </button>
             </div>
         </div>
 
-        <div className="flex flex-row items-center justify-between md:justify-end gap-3 w-full md:w-auto mt-2 md:mt-0">
-            
-            {/* SWITCHER */}
-            <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 shrink-0">
-                <button onClick={() => setDatum('LAT')} className={`px-3 py-1 md:px-4 md:py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all ${datum === 'LAT' ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>LAT</button>
-                <button onClick={() => setDatum('MSL')} className={`px-3 py-1 md:px-4 md:py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all ${datum === 'MSL' ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>MSL</button>
+        {/* Tengah: Judul */}
+        <div className="flex flex-col items-center text-center">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-1">
+                Prakiraan Pasang Surut
+            </h3>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">
+                {locationName}
+            </h2>
+            <div className="flex items-center gap-1 text-[10px] text-blue-600 font-bold mt-2 uppercase tracking-widest px-3 py-1 bg-blue-50 rounded-full border border-blue-100/50">
+                <Clock className="w-3 h-3" />
+                <span>Waktu Lokal (WITA)</span>
             </div>
-            
-            {/* STATS */}
-            <div className="flex gap-3 md:gap-4 text-[10px] md:text-xs font-medium bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl border border-slate-200 shadow-sm">
+        </div>
+
+        {/* Kanan: Statistik Ekstrim */}
+        <div className="w-full md:w-64 flex justify-center md:justify-end">
+            <div className="flex gap-4 text-xs font-medium bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
                 <div className="flex flex-col items-end">
-                    <span className="text-slate-400 flex items-center gap-1 uppercase tracking-wider text-[9px] md:text-[10px]">Maks <ArrowUp className="w-2.5 h-2.5 text-red-500" /></span>
-                    <span className="text-slate-800 font-bold text-sm md:text-base">{highestPoint ? getDataHeight(highestPoint).toFixed(2) : '-'}m</span>
+                    <span className="text-slate-400 flex items-center gap-1 uppercase tracking-widest text-[9px] font-bold">Maks <ArrowUp className="w-3 h-3 text-red-500" /></span>
+                    <span className="text-slate-800 font-black text-sm">{highestPoint ? getDataHeight(highestPoint).toFixed(2) : '-'}m</span>
                 </div>
                 <div className="w-px h-auto bg-slate-200"></div>
                 <div className="flex flex-col items-end">
-                    <span className="text-slate-400 flex items-center gap-1 uppercase tracking-wider text-[9px] md:text-[10px]">Min <ArrowDown className="w-2.5 h-2.5 text-emerald-500" /></span>
-                    <span className="text-slate-800 font-bold text-sm md:text-base">{lowestPoint ? getDataHeight(lowestPoint).toFixed(2) : '-'}m</span>
+                    <span className="text-slate-400 flex items-center gap-1 uppercase tracking-widest text-[9px] font-bold">Min <ArrowDown className="w-3 h-3 text-emerald-500" /></span>
+                    <span className="text-slate-800 font-black text-sm">{lowestPoint ? getDataHeight(lowestPoint).toFixed(2) : '-'}m</span>
                 </div>
             </div>
-
         </div>
+
       </div>
 
-      <div ref={containerRef} className="relative w-full overflow-x-auto custom-scrollbar bg-gradient-to-b from-white to-slate-50 scroll-smooth h-[220px]">
-         <div style={{ width: chartWidth, height: '200px' }} className="relative">
-            <svg width={chartWidth} height="200" className="overflow-visible">
+      {/* --- AREA GRAFIK --- */}
+      <div ref={containerRef} className="relative w-full overflow-x-auto custom-scrollbar bg-slate-50/50 scroll-smooth h-[280px]">
+         <div style={{ width: chartWidth, height: '240px' }} className="relative mt-4">
+            <svg width={chartWidth} height="240" className="overflow-visible">
                 <defs>
                     <linearGradient id="waterGradient" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="#2563eb" stopOpacity="0.3" />
-                        <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.1" />
+                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
                         <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
                     </linearGradient>
                 </defs>
 
+                {/* Garis Referensi MSL (Jika Mode MSL) */}
                 {datum === 'MSL' && <line x1="0" y1={getY(0)} x2={chartWidth} y2={getY(0)} stroke="#ef4444" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />}
 
+                {/* Garis Horizontal Latar */}
                 {[0, 1, 2, 3].map((line, i) => {
-                    const yPos = 30 + (i * 40); 
-                    return <line key={i} x1="0" y1={yPos} x2={chartWidth} y2={yPos} stroke="#e2e8f0" strokeWidth="1" />;
+                    const yPos = 30 + (i * 45); 
+                    return <line key={i} x1="0" y1={yPos} x2={chartWidth} y2={yPos} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 4" />;
                 })}
 
+                {/* Path Gelombang */}
                 <path d={pathData} fill="url(#waterGradient)" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" className="transition-all duration-500" />
 
+                {/* Marker Waktu Sekarang */}
                 {nowIndex !== -1 && (
-                    <g className="animate-in fade-in duration-1000 z-50">
-                        <line x1={getX(nowIndex)} y1="30" x2={getX(nowIndex)} y2="200" stroke="#2563eb" strokeWidth="2" strokeDasharray="4 2" />
-                        <rect x={getX(nowIndex) - 35} y="0" width="70" height="30" rx="6" fill="#2563eb" className="shadow-sm" />
-                        <text x={getX(nowIndex)} y="10" textAnchor="middle" className="text-[8px] font-bold fill-blue-100 uppercase tracking-wider">SEKARANG</text>
-                        <text x={getX(nowIndex)} y="23" textAnchor="middle" className="text-[11px] font-bold fill-white">{getDataHeight(data[nowIndex]).toFixed(2)} m</text>
+                    <g className="animate-in fade-in duration-1000 z-1000">
+                        <line x1={getX(nowIndex)} y1="30" x2={getX(nowIndex)} y2="220" stroke="#2563eb" strokeWidth="1.5" strokeDasharray="4 2" />
+                        <rect x={getX(nowIndex) - 35} y="0" width="70" height="28" rx="14" fill="#2563eb" className="shadow-sm" />
+                        <text x={getX(nowIndex)} y="12" textAnchor="middle" className="text-[8px] font-bold fill-blue-100 uppercase tracking-wider">SEKARANG</text>
+                        <text x={getX(nowIndex)} y="23" textAnchor="middle" className="text-[10px] font-bold fill-white">{getDataHeight(data[nowIndex]).toFixed(2)}m</text>
                         <circle cx={getX(nowIndex)} cy={getY(getDataHeight(data[nowIndex]))} r={5} fill="#2563eb" stroke="white" strokeWidth="2" />
                     </g>
                 )}
 
+                {/* Plot Data Points & Label */}
                 {data.map((d, i) => {
                     const val = getDataHeight(d);
                     const cx = getX(i);
@@ -208,59 +213,72 @@ export default function TidalChart({ data, locationName = "Terminal Peti Kemas P
                     const { isLocalHigh, isLocalLow } = markerStatus[i];
 
                     return (
-                        <g key={i} className="group">
-                            <rect x={cx - 3} y={0} width="6" height="200" fill="transparent" className="cursor-crosshair" />
-                            <line x1={cx} y1={cy} x2={cx} y2="200" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 2" className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <circle cx={cx} cy={cy} r={isLocalHigh || isLocalLow ? 3 : 2} className={`transition-all group-hover:r-4 ${isLocalHigh || isLocalLow ? 'fill-white stroke-blue-600 stroke-2' : 'fill-blue-400 opacity-0 group-hover:opacity-100'}`} />
+                        <g key={i} className="group cursor-crosshair">
+                            {/* Area Interaksi */}
+                            <rect x={cx - 5} y={0} width="10" height="220" fill="transparent" />
+                            
+                            {/* Garis Hover */}
+                            <line x1={cx} y1={cy} x2={cx} y2="220" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="2 2" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                            
+                            {/* Titik Marker */}
+                            <circle cx={cx} cy={cy} r={isLocalHigh || isLocalLow ? 4 : 2} className={`transition-all ${isLocalHigh || isLocalLow ? 'fill-white stroke-blue-600 stroke-2' : 'fill-blue-400 opacity-0 group-hover:opacity-100'}`} />
+                            
+                            {/* Label Tinggi (Maks) */}
                             {isLocalHigh && (
-                                <g>
-                                    <text x={cx} y={cy - 12} textAnchor="middle" className="text-[10px] font-bold fill-red-600 select-none drop-shadow-sm">{val.toFixed(2)}</text>
-                                    
-                                </g>
+                                <text x={cx} y={cy - 12} textAnchor="middle" className="text-[10px] font-bold fill-red-500 select-none drop-shadow-sm">{val.toFixed(2)}</text>
                             )}
+                            
+                            {/* Label Rendah (Min) */}
                             {isLocalLow && (
-                                <g>
-                                    <text x={cx} y={cy + 18} textAnchor="middle" className="text-[10px] font-bold fill-emerald-600 select-none drop-shadow-sm">{val.toFixed(2)}</text>
-                                    
-                                </g>
+                                <text x={cx} y={cy + 18} textAnchor="middle" className="text-[10px] font-bold fill-emerald-600 select-none drop-shadow-sm">{val.toFixed(2)}</text>
                             )}
-                            {showLabel && !isLocalLow && <text x={cx} y="190" textAnchor="middle" className="fill-slate-400 text-[10px] font-medium">{d.label}</text>}
+                            
+                            {/* Label Jam Bawah */}
+                            {showLabel && !isLocalLow && <text x={cx} y="210" textAnchor="middle" className="fill-slate-400 text-[9px] font-bold tracking-wider">{d.label}</text>}
+                            
+                            {/* Label Ganti Hari */}
                             {showDate && (
                                 <g>
-                                    <line x1={cx} y1="0" x2={cx} y2="200" stroke="#e2e8f0" strokeWidth="1.5" />
-                                    <rect x={cx + 4} y="5" width="50" height="18" rx="4" fill="#f1f5f9" />
-                                    <text x={cx + 29} y="17" textAnchor="middle" className="fill-slate-600 text-[10px] font-bold uppercase tracking-wider">{d.dateLabel}</text>
+                                    <line x1={cx} y1="0" x2={cx} y2="220" stroke="#cbd5e1" strokeWidth="1" />
+                                    <rect x={cx + 4} y="5" width="54" height="18" rx="9" fill="#f1f5f9" />
+                                    <text x={cx + 31} y="17" textAnchor="middle" className="fill-slate-600 text-[9px] font-bold uppercase tracking-wider">{d.dateLabel}</text>
                                 </g>
                             )}
+                            
+                            {/* Tooltip Hover */}
                             <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                                <rect x={cx > chartWidth - 100 ? cx - 70 : cx - 30} y={cy - 45} width="65" height="38" rx="6" fill="#1e293b" />
-                                <text x={cx > chartWidth - 100 ? cx - 38 : cx + 2} y={cy - 28} textAnchor="middle" fill="white" className="text-[11px] font-bold">{val.toFixed(2)} m</text>
-                                <text x={cx > chartWidth - 100 ? cx - 38 : cx + 2} y={cy - 16} textAnchor="middle" fill="#94a3b8" className="text-[9px]">{datum}</text>
+                                <rect x={cx > chartWidth - 80 ? cx - 60 : cx - 30} y={cy - 40} width="60" height="34" rx="8" fill="#1e293b" />
+                                <text x={cx > chartWidth - 80 ? cx - 30 : cx} y={cy - 24} textAnchor="middle" fill="white" className="text-[10px] font-bold">{val.toFixed(2)}m</text>
+                                <text x={cx > chartWidth - 80 ? cx - 30 : cx} y={cy - 13} textAnchor="middle" fill="#94a3b8" className="text-[8px] uppercase tracking-widest">{d.label}</text>
                             </g>
                         </g>
                     );
                 })}
             </svg>
-        </div>
+         </div>
       </div>
       
-      {/* FOOTER */}
-      <div className="bg-slate-50 p-3 md:p-4 border-t border-slate-200">
-        <div className="flex items-start gap-2 md:gap-3">
-            <Info className="w-4 h-4 md:w-5 md:h-5 text-blue-500 shrink-0 mt-0.5" />
-            <div className="text-[10px] md:text-xs text-slate-600 space-y-0.5">
-                <p>
-                    <span className="font-bold text-slate-700">LAT:</span> Kedalaman dari surut terendah (navigasi).
-                </p>
-                <p>
-                    <span className="font-bold text-slate-700">MSL:</span> Relatif terhadap rata-rata muka laut.
-                </p>
-                <p className="text-slate-400 italic pt-1">
-                    *Waktu ditampilkan dalam zona waktu WITA.
-                </p>
+      {/* --- FOOTER: KETERANGAN --- */}
+      <div className="bg-white px-6 py-4 border-t border-slate-100">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+                <Navigation className="w-4 h-4 text-blue-500" />
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Datum Referensi</span>
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-2 md:gap-6 text-[10px] text-slate-500 font-medium">
+                <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                    <span className="font-bold text-slate-700">LAT:</span> 
+                    <span>Lowest Astronomical Tide (Kedalaman navigasi aman).</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                    <span className="font-bold text-slate-700">MSL:</span> 
+                    <span>Mean Sea Level (Relatif rata-rata muka laut).</span>
+                </div>
             </div>
         </div>
       </div>
+
     </div>
   );
 }

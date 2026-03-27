@@ -8,7 +8,7 @@ const WarningMap = dynamic(
   {
     ssr: false, 
     loading: () => (
-      <div className="h-[400px] md:h-[600px] w-full bg-gray-100 animate-pulse rounded-2xl flex items-center justify-center text-gray-400">
+      <div className="h-[400px] md:h-[550px] lg:h-[600px] w-full bg-slate-100 animate-pulse flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">
         Memuat Peta...
       </div>
     )

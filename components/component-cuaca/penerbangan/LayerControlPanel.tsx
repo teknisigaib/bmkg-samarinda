@@ -3,8 +3,9 @@
 import { ReactNode } from "react";
 import { 
   Map as MapIcon, CloudRain, Eye, 
-  Satellite, Radar, Zap, Plane, AlertTriangle, Info, // Tambah Info Icon
-  Loader2
+  Satellite, Radar, Zap, Plane, AlertTriangle, Info,
+  Loader2, RefreshCw, 
+  Activity // Tambah icon pulse
 } from "lucide-react";
 
 export type BaseMapType = 'dark' | 'light' | 'satellite_base';
@@ -25,19 +26,24 @@ const SIGMET_LEGEND_ITEMS = [
   { label: 'CLD', color: 'bg-blue-500' },
 ];
 
-// --- WARNA BLOK HIMAWARI (Meniru gambar: Merah terang -> Oranye -> Kuning -> Hijau Muda -> Biru Muda -> Biru Tua) ---
 const HIMAWARI_COLORS = [
     '#FF4D4D', '#FF6B6B', '#FFCC99', '#FFDAB9', '#FFB347', '#FF8C00', 
     '#EEDD82', '#BDB76B', '#9ACD32', '#7CFC00', '#32CD32', '#66CDAA', 
     '#20B2AA', '#00CED1', '#1E90FF', '#4169E1', '#0000CD', '#000080'
 ];
 
-// --- WARNA BLOK RADAR (dBZ: Biru Muda -> Biru -> Hijau -> Kuning -> Merah -> Ungu) ---
 const RADAR_COLORS = [
     '#00FFFF', '#00BFFF', '#0080FF', '#0040FF', '#00FF00', '#32CD32',
     '#228B22', '#006400', '#FFFF00', '#FFD700', '#FFA500', '#FF8C00',
     '#FF4500', '#FF0000', '#B22222', '#8B0000', '#FF00FF', '#8A2BE2'
 ];
+
+// 1. Tipe Data Baru untuk Status Multi-Radar
+export type RadarSiteStatus = {
+    id: string;
+    name: string;
+    status: string; // Bisa berisi "OFFLINE", "LOADING...", atau string waktu "14:00 UTC"
+};
 
 interface Props {
   baseMap: BaseMapType;
@@ -46,7 +52,11 @@ interface Props {
   toggleOverlay: (type: OverlayType) => void;
   isOpen: boolean;
   himawariTime?: string;
-  radarTime?: string;
+  radarStatuses?: RadarSiteStatus[]; 
+  onRefreshHimawari?: () => void;
+  isHimawariLoading?: boolean;
+  onRefreshRadar?: () => void;
+  isRadarLoading?: boolean;
 }
 
 function BaseMapGridItem({ active, onClick, label, icon }: any) {
@@ -70,25 +80,30 @@ function BaseMapGridItem({ active, onClick, label, icon }: any) {
 
 export default function LayerControlPanel({ 
   baseMap, setBaseMap, overlays, toggleOverlay, isOpen,
-  himawariTime, radarTime
+  himawariTime, radarStatuses,
+  
+  // --- EKSTRAK TAMBAHAN BARU DI SINI ---
+  onRefreshHimawari,
+  isHimawariLoading,
+  onRefreshRadar,
+  isRadarLoading
 }: Props) {
   
   return (
     <div className={`
       absolute top-16 left-6 z-[2000] 
       transition-all duration-300 ease-in-out
-      ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0 pointer-events-none'}
+      ${isOpen ? 'translate-x-0 opacity-90' : '-translate-x-4 opacity-0 pointer-events-none'}
       max-h-[calc(100%-5rem)] 
       flex flex-col
     `}>
       
       <div 
-        className="w-64 flex-1 bg-[#1a1c23]/95 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl py-3 overflow-y-auto overflow-x-hidden"
+        className="w-70 flex-1 bg-[#1a1c23]/95 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl py-3 overflow-y-auto overflow-x-hidden"
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent' }}
       >
         
         {/* GROUP 1: BASE MAPS */}
-
         <div className="px-3">
             <h4 className="text-[9px] uppercase font-bold text-slate-500 mb-2 tracking-widest pl-1">
                 Peta Dasar
@@ -131,16 +146,16 @@ export default function LayerControlPanel({
                     label="Satelit Himawari"
                     icon={<Eye size={12} />}
                     time={overlays.himawari ? himawariTime : undefined}
+                    onRefresh={onRefreshHimawari}     // <-- GANTI JADI INI
+                    isRefreshing={isHimawariLoading}  // <-- GANTI JADI INI
                     legend={overlays.himawari && (
                         <div className="mt-1 bg-[#23252d] rounded-lg p-2 border border-white/5">
                             <div className="flex items-center gap-2">
-                                {/* Color Blocks */}
                                 <div className="flex-1 flex h-2 rounded overflow-hidden">
                                     {HIMAWARI_COLORS.map((c, i) => (
                                         <div key={i} className="h-full flex-1" style={{ backgroundColor: c }}></div>
                                     ))}
                                 </div>
-                                {/* Info Icon */}
                                 <Info size={12} className="text-slate-400" />
                             </div>
                             <div className="flex justify-between text-[9px] text-slate-300 mt-1.5 font-sans tracking-wide">
@@ -151,23 +166,51 @@ export default function LayerControlPanel({
                     )}
                 />
 
-                {/* 2. RADAR */}
+                {/* 2. RADAR CUACA */}
                 <ToggleItem 
                     active={overlays.radar} 
                     onClick={() => toggleOverlay('radar')}
                     label="Radar Cuaca"
                     icon={<Radar size={12} />}
-                    time={overlays.radar ? radarTime : undefined}
+                    onRefresh={onRefreshRadar}        // <-- GANTI JADI INI
+                    isRefreshing={isRadarLoading}     // <-- GANTI JADI INI
+                    customTimeComponent={
+                        (overlays.radar && radarStatuses) ? (
+                            <div className="flex flex-col gap-0.5 mb-2 mt-1 bg-black/20 p-1.5 rounded-lg border border-white/5">
+                                {radarStatuses.map(rt => {
+                                    const isOffline = rt.status.includes("OFFLINE");
+                                    const isLoading = rt.status.includes("LOADING");
+
+                                    return (
+                                        <div key={rt.id} className="flex justify-between items-center text-[9px] px-1 py-0.5">
+                                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
+                                                <Activity size={8} className="text-slate-500" /> 
+                                                {rt.name}
+                                            </span>
+                                            
+                                            {isOffline ? (
+                                                <span className="text-rose-400 font-bold bg-rose-500/10 px-1 py-0.5 rounded border border-rose-500/20">OFFLINE</span>
+                                            ) : isLoading ? (
+                                                <span className="text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">
+                                                    <Loader2 size={8} className="animate-spin" /> MENCARI...
+                                                </span>
+                                            ) : (
+                                                <span className="text-emerald-400 font-mono font-bold tracking-wide">{rt.status}</span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : undefined
+                    }
                     legend={overlays.radar && (
                         <div className="mt-1 bg-[#23252d] rounded-lg p-2 border border-white/5">
                             <div className="flex items-center gap-2">
-                                {/* Color Blocks */}
                                 <div className="flex-1 flex h-2 rounded overflow-hidden">
                                     {RADAR_COLORS.map((c, i) => (
                                         <div key={i} className="h-full flex-1" style={{ backgroundColor: c }}></div>
                                     ))}
                                 </div>
-                                {/* Info Icon */}
                                 <Info size={12} className="text-slate-400" />
                             </div>
                             <div className="flex justify-between text-[9px] text-slate-300 mt-1.5 font-sans tracking-wide">
@@ -222,13 +265,12 @@ export default function LayerControlPanel({
 // --- SUB COMPONENTS ---
 
 function ToggleItem({ 
-    active, onClick, label, icon, time, legend 
+    active, onClick, label, icon, time, customTimeComponent, legend, onRefresh, isRefreshing 
 }: { 
-    active: boolean, onClick: () => void, label: string, icon: ReactNode, time?: string, legend?: ReactNode 
+    active: boolean, onClick: () => void, label: string, icon: ReactNode, time?: string, customTimeComponent?: ReactNode, legend?: ReactNode, onRefresh?: () => void, isRefreshing?: boolean 
 }) {
-    // Deteksi 3 status yang mungkin: OFFLINE, LOADING..., atau Teks Waktu Normal
-    const isOffline = time?.includes("OFFLINE");
-    const isLoading = time?.includes("LOADING");
+    const isOffline = typeof time === 'string' && time.includes("OFFLINE");
+    const isLoading = typeof time === 'string' && time.includes("LOADING");
 
     return (
         <div className="flex flex-col">
@@ -237,6 +279,7 @@ function ToggleItem({
                 onClick={onClick}
                 className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg cursor-pointer hover:bg-white/5 transition-all group"
             >
+                {/* KIRI: Icon dan Label */}
                 <div className="flex items-center gap-2.5">
                     <span className={`${active ? 'text-white' : 'text-slate-500'}`}>{icon}</span>
                     <span className={`text-[11px] font-medium ${active ? 'text-white' : 'text-slate-300 group-hover:text-slate-200'}`}>
@@ -244,19 +287,45 @@ function ToggleItem({
                     </span>
                 </div>
                 
-                {/* Switch iOS Style */}
-                <div className={`relative w-7 h-4 rounded-full transition-colors duration-300 ${active ? 'bg-blue-500' : 'bg-white/10 border border-white/5'}`}>
-                    <div className={`absolute top-[1.5px] left-[2px] w-[13px] h-[13px] rounded-full bg-white shadow-sm transition-transform duration-300 ${active ? 'translate-x-[11px]' : 'translate-x-0'}`}></div>
+                {/* KANAN: Tombol Refresh & Switch Toggle */}
+                <div className="flex items-center gap-2.5">
+                    
+                    {/* TOMBOL REFRESH DIPINDAH KE SINI (Hanya muncul jika layer aktif) */}
+                    {active && onRefresh && (
+                        <button 
+                            onClick={(e) => { 
+                                e.stopPropagation(); // Mencegah klik men-trigger toggle layer
+                                onRefresh(); 
+                            }}
+                            className="p-1 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
+                            title="Refresh Data"
+                        >
+                            <RefreshCw size={12} className={`${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
+                        </button>
+                    )}
+
+                    {/* Switch iOS Style */}
+                    <div className={`relative w-7 h-4 rounded-full transition-colors duration-300 ${active ? 'bg-blue-500' : 'bg-white/10 border border-white/5'}`}>
+                        <div className={`absolute top-[1.5px] left-[2px] w-[13px] h-[13px] rounded-full bg-white shadow-sm transition-transform duration-300 ${active ? 'translate-x-[11px]' : 'translate-x-0'}`}></div>
+                    </div>
+                    
                 </div>
             </div>
 
             {/* Info Area (Legend & Time) */}
-            {(active && (time || legend)) && (
+            {(active && (time || customTimeComponent || legend)) && (
                 <div className="px-2 pb-1 animate-in slide-in-from-top-1 duration-200">
-                    <div className="pl-6 border-l border-white/10 ml-[5px] pt-1">
+                    <div className="pl-3 border-l border-white/10 ml-[7px] pt-1">
                         
-                        {/* WAKTU UPDATE / OFFLINE / LOADING INDICATOR */}
-                        {time && (
+                        {/* CUSTOM COMPONENT (Untuk Multi Radar) */}
+                        {customTimeComponent && (
+                            <div className="mb-2">
+                                {customTimeComponent}
+                            </div>
+                        )}
+
+                        {/* STRING BIASA (Untuk Himawari) */}
+                        {(time && !customTimeComponent) && (
                             <div className="flex items-center gap-1.5 mb-2">
                                 {isOffline ? (
                                     <span className="flex items-center gap-1 text-[9px] font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">

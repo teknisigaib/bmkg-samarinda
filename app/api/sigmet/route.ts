@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const TARGET_URL = "https://aviationweather.gov/api/data/isigmet?format=geojson&level=3000";
+  const TARGET_URL = "https://aviationweather.gov/api/data/isigmet?format=geojson";
 
   try {
     const response = await fetch(TARGET_URL, {

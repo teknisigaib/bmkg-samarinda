@@ -29,7 +29,7 @@ const services = [
     desc: "Layanan aspirasi dan pengaduan masyarakat via SP4N LAPOR!",
     icon: <PhoneForwarded className="w-6 h-6 text-white" />,
     color: "bg-rose-600",
-    href: "https://www.lapor.go.id/",
+    href: "https://www.lapor.go.id/instansi/badan-meteorologi-klimatologi-dan-geofisika",
     external: true,
   },
 ];

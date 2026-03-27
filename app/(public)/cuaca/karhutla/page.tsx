@@ -1,15 +1,17 @@
+// app/cuaca/karhutla/page.tsx
 export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
-import { Map as MapIcon } from "lucide-react";
 import { getRawWeeklyHotspots, getHotspotTrend } from "@/lib/data-karhutla"; 
 import HotspotMapWrapper from "@/components/component-cuaca/karhutla/HotspotMapWrapper";
 import KarhutlaStaticMaps from "@/components/component-cuaca/karhutla/KarhutlaStaticMaps"; 
 import KarhutlaStats from "@/components/component-cuaca/karhutla/KarhutlaStats"; 
+import Breadcrumb from "@/components/ui/Breadcrumb";
+import SectionDivider from "@/components/ui/SectionDivider"; 
 
 export const revalidate = 600; 
 
 export const metadata: Metadata = {
-  title: "Peringatan Karhutla | BMKG Samarinda",
+  title: "Peringatan Karhutla | BMKG APT PranotoSamarinda",
   description: "Monitoring titik panas (hotspot) di wilayah Kalimantan Timur.",
 };
 
@@ -25,36 +27,43 @@ export default async function KarhutlaPage() {
     : new Date().toLocaleDateString("id-ID");
 
   return (
-    <div className="space-y-10 w-full mb-20">
-      
-      <section>
-        <HotspotMapWrapper 
-            data={weeklyHotspots} 
-            lastUpdateString={lastUpdateString} 
-        />
-      </section>
+    <div className="min-h-screen">
+       <div className="w-full mx-auto pt-6 pb-10 sm:px-4 lg:px-6">
+          
+          {/* --- BREADCRUMB --- */}
+          <Breadcrumb 
+             className="mb-10" 
+             items={[
+               { label: "Beranda", href: "/" },
+               { label: "Cuaca" }, 
+               { label: "Peringatan Karhutla" } 
+             ]} 
+          />
 
-      {/* STATISTIK & HIMBAUAN */}
-      <section>
-        <KarhutlaStats trend={trendData} />
-      </section>
+          <div className="space-y-12 w-full mb-20">
+            
+            {/* 1. MAP UTAMA */}
+            <section>
+              <HotspotMapWrapper 
+                  data={weeklyHotspots} 
+                  lastUpdateString={lastUpdateString} 
+              />
+            </section>
 
-      {/* PETA ANALISIS */}
-      <section className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-gray-200 pb-3">
-            <div className="flex items-center gap-3">
-                <div className="bg-gray-100 p-2 rounded-lg">
-                   <MapIcon className="w-6 h-6 text-gray-700" />
-                </div>
-                <div>
-                    <h3 className="text-xl font-bold text-gray-800">Analisis & Prakiraan</h3>
-                    <p className="text-sm text-gray-500">Sistem Peringatan Kebakaran Hutan dan Lahan</p>
-                </div>
-            </div>
-        </div>
-        <KarhutlaStaticMaps />
-      </section>
+            {/* 2. STATISTIK & HIMBAUAN */}
+            <section className="mt-24 scroll-mt-20">
+              <SectionDivider title="Statistik & Tren Karhutla" className="mb-8" />
+              <KarhutlaStats trend={trendData} />
+            </section>
 
+            {/* 3. PETA ANALISIS SPASIAL */}
+            <section className="mt-24 scroll-mt-20">
+              <SectionDivider title="Analisis & Prakiraan Spasial" className="mb-8" />
+              <KarhutlaStaticMaps />
+            </section>
+
+          </div>
+       </div>
     </div>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import { MahakamLocation } from '@/lib/mahakam-data';
+import { MahakamLocation, translateWindDir } from '@/lib/mahakam-data';
 import { 
-    Navigation2, Ship, ArrowRight, CloudSun, 
-    Thermometer, Eye, Droplets, MousePointerClick, 
+    Navigation2, CloudSun, Cloud,
+    Thermometer, Eye, Droplets, 
     AlertTriangle, CheckCircle2, XCircle, 
 } from 'lucide-react';
 
@@ -14,16 +14,8 @@ interface Props {
     activeId?: string;
 }
 
-const getCardinalDirection = (deg: number) => {
-    const arr = ["U", "U-TL", "TL", "T-TL", "T", "T-TG", "TG", "S-TG", "S", "S-BD", "BD", "B-BD", "B", "B-BL", "BL", "U-BL"];
-    const val = Math.floor((deg / 22.5) + 0.5);
-    return arr[val % 16];
-};
-
-
 const getNavStatus = (loc: MahakamLocation) => {
     // 1. Kriteria Bahaya (Merah)
-    // Gunakan visibility numerik (loc.visibility dalam km) untuk logika
     if (
         (loc.visibility !== undefined && loc.visibility < 4) || 
         (typeof loc.windSpeed === 'number' && loc.windSpeed > 25) || 
@@ -34,13 +26,13 @@ const getNavStatus = (loc: MahakamLocation) => {
             type: 'danger', 
             label: 'Bahaya', 
             icon: XCircle, 
-            badgeStyle: 'bg-red-100 text-red-700 border-red-200',
-            colBase: 'bg-red-50/40', 
-            colHover: 'hover:bg-red-100/80',
-            colActive: 'bg-red-100/80 ring-2 ring-inset ring-red-400',
-            headerBg: 'bg-red-100/80',
-            headerText: 'text-red-950',
-            activeBadge: 'text-red-600 bg-white border-red-100'
+            badgeStyle: 'bg-red-50 text-red-700 border-red-200',
+            colBase: 'bg-white', 
+            colHover: 'hover:bg-red-50/50',
+            colActive: 'bg-red-50 ring-2 ring-inset ring-red-400 z-20 shadow-[0_0_20px_rgba(248,113,113,0.15)]',
+            headerBg: 'bg-red-50',
+            headerText: 'text-red-900',
+            activeBadge: 'text-red-600 bg-white border-red-200'
         };
     }
     
@@ -54,13 +46,13 @@ const getNavStatus = (loc: MahakamLocation) => {
             type: 'warning', 
             label: 'Waspada', 
             icon: AlertTriangle, 
-            badgeStyle: 'bg-amber-100 text-amber-800 border-amber-200',
-            colBase: 'bg-amber-50/40', 
-            colHover: 'hover:bg-amber-100/80',
-            colActive: 'bg-amber-100/80 ring-2 ring-inset ring-amber-400',
-            headerBg: 'bg-amber-100/80',
-            headerText: 'text-amber-950',
-            activeBadge: 'text-amber-700 bg-white border-amber-100'
+            badgeStyle: 'bg-amber-50 text-amber-700 border-amber-200',
+            colBase: 'bg-white', 
+            colHover: 'hover:bg-amber-50/50',
+            colActive: 'bg-amber-50 ring-2 ring-inset ring-amber-400 z-20 shadow-[0_0_20px_rgba(251,191,36,0.15)]',
+            headerBg: 'bg-amber-50',
+            headerText: 'text-amber-900',
+            activeBadge: 'text-amber-700 bg-white border-amber-200'
         };
     }
 
@@ -69,209 +61,167 @@ const getNavStatus = (loc: MahakamLocation) => {
         type: 'safe', 
         label: 'Aman', 
         icon: CheckCircle2, 
-        badgeStyle: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+        badgeStyle: 'bg-emerald-50 text-emerald-700 border-emerald-200',
         colBase: 'bg-white',
-        colHover: 'hover:bg-slate-50/50',
-        colActive: 'bg-blue-50/50 ring-2 ring-inset ring-blue-400',
-        headerBg: 'bg-slate-50/50',
+        colHover: 'hover:bg-slate-50',
+        colActive: 'bg-blue-50/40 ring-2 ring-inset ring-blue-400 z-20 shadow-[0_0_20px_rgba(59,130,246,0.1)]',
+        headerBg: 'bg-white',
         headerText: 'text-slate-900',
-        activeBadge: 'text-blue-600 bg-white border-blue-100'
+        activeBadge: 'text-blue-600 bg-white border-blue-200'
     };
 };
 
+// Tinggi baris DIKUNCI KETAT (h + min-h) agar tidak ada yang melar/menciut
 const ROW_H = {
-    HEADER: "h-20", 
-    STATUS: "h-12", 
-    WEATHER: "h-20",
-    WIND: "h-16",
-    TEMP: "h-16",
-    VIS: "h-16",
-    HUMID: "h-16"
+    HEADER: "h-[70px] min-h-[70px]", // Tinggi header dikurangi menjadi 70px
+    STATUS: "h-[65px] min-h-[65px]", 
+    WEATHER: "h-[110px] min-h-[110px]", 
+    WIND: "h-[85px] min-h-[85px]",      
+    TEMP: "h-[65px] min-h-[65px]",
+    CLOUD: "h-[65px] min-h-[65px]", 
+    VIS: "h-[65px] min-h-[65px]",
+    HUMID: "h-[65px] min-h-[65px]"
 };
 
-const ICON_STYLE = "w-8 h-8 rounded-lg bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center shrink-0";
+// Style Label Kiri (Dengan Ikon)
+const LABEL_CONTAINER = "flex items-center gap-3 px-5 w-full";
+const LABEL_TEXT = "text-[10px] font-bold uppercase tracking-widest text-slate-500";
+const LABEL_ICON = "text-slate-400 shrink-0";
+
+// Style Sel Data 
+const DATA_CELL = "flex flex-col items-center justify-center p-2 w-full border-b border-slate-100/50 shrink-0 overflow-hidden";
+const ZEBRA_BG = "bg-slate-50/40"; 
 
 export default function RouteForecastView({ data, onSelect, activeId }: Props) {
   
   return (
     <div className="w-full min-w-0 animate-in fade-in slide-in-from-bottom-8 duration-700 text-slate-800 pb-10">
-      
-      {/* HEADER TABEL */}
-      <div className="flex items-center justify-between mb-5 px-1">
-          <div className="flex items-center gap-3">
-              <div className="bg-white border border-slate-200 text-slate-600 p-2.5 rounded-xl shadow-sm shrink-0">
-                  <Ship size={22} />
-              </div>
-              <div className="min-w-0">
-                  <h2 className="text-xl font-black text-slate-900 leading-tight truncate">Monitoring Cuaca Rute Pelayaran</h2>
-                  <p className="text-xs text-slate-500 font-medium truncate">Klik kolom lokasi untuk melihat detail lengkap di peta.</p>
-              </div>
-          </div>
-      </div>
 
       {/* WADAH TABEL */}
-      <div className="bg-white rounded-2xl shadow-xl shadow-slate-100 border border-slate-200 relative w-full grid grid-cols-1 overflow-hidden">
-        <div className="w-full overflow-x-auto custom-scrollbar bg-white">
-            <div className="flex min-w-max">
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 relative w-full grid grid-cols-1 overflow-hidden">
+        <div className="w-full overflow-x-auto custom-scrollbar bg-slate-50/30">
+            <div className="flex min-w-max bg-white">
             
-                {/* --- KOLOM LABEL STICKY --- */}
-                <div className="sticky left-0 z-30 w-32 md:w-36 item-center text-center shrink-0 border-r border-slate-100 bg-white/95 backdrop-blur-sm shadow-[6px_0_15px_-5px_rgba(0,0,0,0.04)] text-slate-500">
+                {/* --- 1. KOLOM LABEL STICKY KIRI --- */}
+                <div className="sticky left-0 z-30 w-44 md:w-56 shrink-0 border-r border-slate-200 bg-white shadow-[8px_0_20px_-5px_rgba(0,0,0,0.05)]">
                     
-                    {/* Header Parameter */}
-                    <div className={`${ROW_H.HEADER} flex flex-col justify-center px-4 border-b border-slate-100`}>
-                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Parameter</span>
+                    <div className={`${ROW_H.HEADER} flex flex-col items-center justify-center border-b border-slate-200 bg-slate-50/50 p-2`}>
+                        <Navigation2 className="w-4 h-4 text-blue-500 mb-1" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 text-center">Pilih Area</span>
                     </div>
 
-                    {/* STATUS */}
-                    <div className={`${ROW_H.STATUS} flex items-center px-4 border-b border-slate-50 bg-slate-50/30`}>
-                         <div className="flex items-center gap-3">
-                            <div className={ICON_STYLE}>
-                                <AlertTriangle size={16}/>
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Status</span>
-                        </div>
+                    <div className={`${ROW_H.STATUS} flex items-center border-b border-slate-100 ${ZEBRA_BG}`}>
+                        <div className={LABEL_CONTAINER}><AlertTriangle size={16} className={LABEL_ICON}/><span className={LABEL_TEXT}>Status Navigasi</span></div>
                     </div>
 
-                    {/* CUACA */}
-                    <div className={`${ROW_H.WEATHER} flex items-center px-4 border-b border-slate-50`}>
-                        <div className="flex items-center gap-3">
-                            <div className={ICON_STYLE}>
-                                <CloudSun size={18}/>
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Cuaca</span>
-                        </div>
+                    <div className={`${ROW_H.WEATHER} flex items-center border-b border-slate-100`}>
+                        <div className={LABEL_CONTAINER}><CloudSun size={18} className={LABEL_ICON}/><span className={LABEL_TEXT}>Kondisi Cuaca</span></div>
                     </div>
                     
-                    {/* ANGIN */}
-                    <div className={`${ROW_H.WIND} flex items-center px-4 border-b border-slate-50 bg-slate-50/30`}>
-                        <div className="flex items-center gap-3">
-                            <div className={ICON_STYLE}>
-                                <Navigation2 size={18}/>
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Angin</span>
-                        </div>
+                    <div className={`${ROW_H.WIND} flex items-center border-b border-slate-100 ${ZEBRA_BG}`}>
+                        <div className={LABEL_CONTAINER}><Navigation2 size={16} className={LABEL_ICON}/><span className={LABEL_TEXT}>Angin & Arah</span></div>
                     </div>
 
-                    {/* SUHU */}
-                    <div className={`${ROW_H.TEMP} flex items-center px-4 border-b border-slate-50`}>
-                        <div className="flex items-center gap-3">
-                             <div className={ICON_STYLE}>
-                                <Thermometer size={18}/>
-                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Suhu</span>
-                        </div>
+                    <div className={`${ROW_H.TEMP} flex items-center border-b border-slate-100`}>
+                        <div className={LABEL_CONTAINER}><Thermometer size={16} className={LABEL_ICON}/><span className={LABEL_TEXT}>Suhu Udara</span></div>
                     </div>
 
-                    {/* JARAK PANDANG */}
-                    <div className={`${ROW_H.VIS} flex items-center px-4 border-b border-slate-50 bg-slate-50/30`}>
-                        <div className="flex items-center gap-3">
-                             <div className={ICON_STYLE}>
-                                <Eye size={18}/>
-                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Visibilitas</span>
-                        </div>
+                    <div className={`${ROW_H.CLOUD} flex items-center border-b border-slate-100 ${ZEBRA_BG}`}>
+                        <div className={LABEL_CONTAINER}><Cloud size={16} className={LABEL_ICON}/><span className={LABEL_TEXT}>Tutupan Awan</span></div>
                     </div>
 
-                    {/* RH */}
-                    <div className={`${ROW_H.HUMID} flex items-center px-4`}>
-                        <div className="flex items-center gap-3">
-                             <div className={ICON_STYLE}>
-                                <Droplets size={18}/>
-                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600">Kelembaban</span>
-                        </div>
+                    <div className={`${ROW_H.VIS} flex items-center border-b border-slate-100`}>
+                        <div className={LABEL_CONTAINER}><Eye size={16} className={LABEL_ICON}/><span className={LABEL_TEXT}>Jarak Pandang</span></div>
+                    </div>
+
+                    <div className={`${ROW_H.HUMID} flex items-center border-b border-slate-100 ${ZEBRA_BG}`}>
+                        <div className={LABEL_CONTAINER}><Droplets size={16} className={LABEL_ICON}/><span className={LABEL_TEXT}>Kelembaban (RH)</span></div>
                     </div>
                 </div>
 
-                {/* --- KOLOM DATA LOKASI --- */}
+                {/* --- 2. KOLOM DATA LOKASI --- */}
                 {data.map((loc, idx) => {
                     const isActive = activeId === loc.id;
                     const status = getNavStatus(loc);
 
                     const columnClass = isActive 
-                        ? `${status.colActive} z-10` 
+                        ? `${status.colActive}` 
                         : `${status.colBase} ${status.colHover}`;
-
-                    const headerClass = isActive 
-                        ? `${status.headerBg} border-b-2 border-${status.type === 'safe' ? 'blue' : status.type}-400`
-                        : `${status.headerBg}`;
 
                     return (
                         <div 
                             key={idx} 
                             onClick={() => onSelect(loc)}
                             className={`
-                                w-32 border-r border-slate-100 flex flex-col shrink-0 text-center relative cursor-pointer transition-all duration-300 group
+                                w-32 md:w-36 border-r border-slate-100 flex flex-col shrink-0 text-center relative cursor-pointer transition-all duration-300 group
                                 ${columnClass}
                             `}
                         >
-                            {/* Overlay Hover */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors pointer-events-none z-0" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-slate-900/[0.02] transition-colors pointer-events-none z-0" />
 
-                            {/* HEADER LOKASI */}
-                            <div className={`${ROW_H.HEADER} flex flex-col items-center justify-center p-3 border-b border-slate-200 transition-colors z-10 ${headerClass}`}>
-                                <h3 className={`text-xs font-bold leading-tight mb-1.5 line-clamp-2 h-8 flex items-center justify-center ${status.headerText}`}>
+                            {/* HEADER LOKASI (Diperkecil & badge dihilangkan) */}
+                            <div className={`${ROW_H.HEADER} flex flex-col items-center justify-center p-2 border-b border-slate-200 z-10 transition-colors ${status.headerBg}`}>
+                                <h3 className={`text-xs font-black uppercase tracking-widest leading-tight line-clamp-2 text-center ${status.headerText}`}>
                                     {loc.name.replace('Stasiun Meteorologi', '').replace('Stasiun', '').trim()}
                                 </h3>
-                                {isActive ? (
-                                    <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full shadow-sm animate-in fade-in zoom-in border ${status.activeBadge}`}>
-                                        Terpilih
-                                    </span>
-                                ) : (
-                                    <div className="inline-flex items-center gap-1 text-[9px] font-medium text-slate-500 bg-white/70 px-2 py-0.5 rounded border border-slate-100 opacity-70 group-hover:opacity-100 transition-opacity">
-                                        <MousePointerClick size={10} /> Detail
-                                    </div>
-                                )}
                             </div>
 
-                            {/* STATUS NAVIGASI */}
-                            <div className={`${ROW_H.STATUS} flex items-center justify-center p-2 border-b border-slate-100/50 z-10`}>
-                                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${status.badgeStyle} shadow-sm`}>
-                                    <status.icon size={12} strokeWidth={3} />
-                                    <span className="text-[10px] font-extrabold uppercase tracking-wide">{status.label}</span>
+                            {/* STATUS */}
+                            <div className={`${ROW_H.STATUS} ${DATA_CELL} ${ZEBRA_BG} z-10`}>
+                                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border ${status.badgeStyle}`}>
+                                    <status.icon size={12} strokeWidth={2.5} />
+                                    <span className="text-[10px] font-bold uppercase tracking-wide">{status.label}</span>
                                 </div>
                             </div>
 
                             {/* CUACA */}
-                            <div className={`${ROW_H.WEATHER} flex flex-col items-center justify-center p-2 border-b border-slate-100/50 z-10`}>
-                                <div className="w-12 h-12 mb-1 drop-shadow-sm transition-transform group-hover:scale-105 duration-300">
-                                    {loc.iconUrl ? <img src={loc.iconUrl} alt="" className="w-full h-full object-contain filter saturate-100 contrast-125" /> : <div className="w-full h-full bg-slate-100 rounded-full animate-pulse"/>}
+                            <div className={`${ROW_H.WEATHER} ${DATA_CELL} z-10`}>
+                                <div className="w-12 h-12 mb-1.5 transition-transform group-hover:scale-110 duration-300">
+                                    {loc.iconUrl ? <img src={loc.iconUrl} alt="" className="w-full h-full object-contain filter saturate-100" /> : <div className="w-full h-full bg-slate-100 rounded-full animate-pulse"/>}
                                 </div>
-                                <span className="text-[10px] font-bold text-slate-700 capitalize line-clamp-2 px-1 leading-tight">{loc.weather}</span>
+                                <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest line-clamp-2 px-1 leading-tight">{loc.weather}</span>
                             </div>
 
                             {/* ANGIN */}
-                            <div className={`${ROW_H.WIND} flex flex-col items-center justify-center p-2 border-b border-slate-100/50 z-10`}>
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <Navigation2 size={14} className="text-slate-500" style={{ transform: `rotate(${loc.windDeg || 0}deg)` }} fill="currentColor"/>
-                                    <span className="text-sm font-black text-slate-900">{loc.windSpeed}</span>
-                                    <span className="text-[10px] font-bold text-slate-500">km/j</span>
+                            <div className={`${ROW_H.WIND} ${DATA_CELL} ${ZEBRA_BG} z-10`}>
+                                <div className="flex items-baseline gap-0.5 mb-1.5">
+                                    <span className="text-base font-black text-slate-900">{loc.windSpeed}</span>
+                                    <span className="text-[9px] font-bold text-slate-500">km/j</span>
                                 </div>
-                                <span className="text-[9px] font-medium text-slate-500 bg-white/60 px-2 py-0.5 rounded border border-slate-100 truncate max-w-[90%]">
-                                    {getCardinalDirection(loc.windDeg || 0)}
-                                </span>
+                                <div className="flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-slate-200 text-[9px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
+                                    <Navigation2 size={10} style={{ transform: `rotate(${loc.windDeg || 0}deg)` }} fill="currentColor" className="text-slate-400"/>
+                                    <span className="truncate max-w-[80px]">{translateWindDir(loc.windDir)}</span>
+                                </div>
                             </div>
 
                             {/* SUHU */}
-                            <div className={`${ROW_H.TEMP} flex flex-col items-center justify-center p-2 border-b border-slate-100/50 z-10`}>
-                                <div className="flex items-end gap-0.5">
-                                    <span className="text-base font-black text-slate-800">{loc.temp}</span>
-                                    <span className="text-[10px] font-bold text-slate-400 mb-0.5">°C</span>
+                            <div className={`${ROW_H.TEMP} ${DATA_CELL} z-10`}>
+                                <div className="flex items-start">
+                                    <span className="text-base font-black text-slate-900">{loc.temp}</span>
+                                    <span className="text-[10px] font-bold text-slate-500 mt-0.5">°C</span>
                                 </div>
                             </div>
 
-                            {/* VISIBILITY (UPDATED) */}
-                            <div className={`${ROW_H.VIS} flex flex-col items-center justify-center p-2 border-b border-slate-100/50 z-10`}>
-                                <span className="text-sm font-bold text-slate-800 px-2 py-0.5 bg-white/60 rounded border border-slate-100 whitespace-nowrap">
+                            {/* AWAN */}
+                            <div className={`${ROW_H.CLOUD} ${DATA_CELL} ${ZEBRA_BG} z-10`}>
+                                <div className="flex items-baseline gap-0.5">
+                                    <span className="text-base font-black text-slate-900">{loc.tcc || 0}</span>
+                                    <span className="text-[10px] font-bold text-slate-500">%</span>
+                                </div>
+                            </div>
+
+                            {/* VISIBILITY */}
+                            <div className={`${ROW_H.VIS} ${DATA_CELL} z-10`}>
+                                <span className="text-sm font-black text-slate-800 whitespace-nowrap">
                                     {loc.visibilityDisplay || "-"}
                                 </span>
                             </div>
 
                             {/* HUMIDITY */}
-                            <div className={`${ROW_H.HUMID} flex flex-col items-center justify-center p-2 z-10`}>
-                                <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 border border-slate-200">
-                                    <Droplets size={12} className="text-slate-400" />
-                                    <span className="text-xs font-bold text-slate-700">{loc.humidity} <span className="text-[10px] font-medium text-slate-400">%</span></span>
+                            <div className={`${ROW_H.HUMID} ${DATA_CELL} ${ZEBRA_BG} z-10`}>
+                                <div className="flex items-baseline gap-0.5">
+                                    <span className="text-base font-black text-slate-900">{loc.humidity}</span>
+                                    <span className="text-[10px] font-bold text-slate-500">%</span>
                                 </div>
                             </div>
 

@@ -121,7 +121,9 @@ export const KALTIM_PORTS = [
   "Pelabuhan Tanjung Batu, Balikpapan",
   "Pelabuhan Pulau Maratua",
   "Pelabuhan Nusantara - Pare Pare",
-  "Pelabuhan Majene"
+  "Pelabuhan Majene",
+  "Pelabuhan Donggala",
+  "Pelabuhan Taipa",
 ];
 
 export async function getWilmetosGeoJson() {

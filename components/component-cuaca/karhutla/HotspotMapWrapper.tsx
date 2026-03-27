@@ -2,25 +2,26 @@
 
 import dynamic from "next/dynamic";
 import { HotspotData } from "@/lib/data-karhutla";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { 
   Flame, 
-  Info, 
   RefreshCw,
-  MapPin
+  MapPin,
+  CalendarDays
 } from "lucide-react";
 import HotspotControl from "@/components/component-cuaca/karhutla/HotspotControl";
 
+// 1. DYNAMIC IMPORT PETA (Tanpa SSR)
 const HotspotMap = dynamic(() => import("./HotspotMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-[500px] w-full bg-red-50 animate-pulse rounded-2xl flex items-center justify-center text-red-300 font-bold">
+    <div className="h-[500px] w-full bg-slate-50 animate-pulse rounded-[2rem] flex items-center justify-center text-slate-400 font-bold tracking-widest uppercase text-sm border border-slate-200">
       Memuat Peta...
     </div>
   ),
 });
 
-// HELPER FORMAT 
+// --- HELPER FORMAT TANGGAL ---
 const formatDateID = (date: Date) => {
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -38,29 +39,35 @@ const formatDateHeader = (date: Date) => {
 
 export default function HotspotMapWrapper({ data, lastUpdateString }: { data: HotspotData[], lastUpdateString: string }) {
   
-  // 1. Generate 7 Hari Terakhir (Array of Date Objects)
+  // --- MENCEGAH HYDRATION MISMATCH ---
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // --- LOGIKA DATA TANGGAL ---
   const last7Days = useMemo(() => {
     const dates = [];
+    const today = new Date();
+    // Mundurkan 'today' 1 hari karena data BMKG adalah data pantauan kemarin
+    today.setDate(today.getDate() - 1); 
+
     for (let i = 0; i < 7; i++) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(d.getDate() - i);
       dates.push(d);
     }
-    return dates.reverse(); // Urutan: Lama -> Baru (Hari Ini)
+    return dates.reverse(); // Urutan: Lama -> Terbaru
   }, []);
 
-  // 2. State untuk Index Tanggal Terpilih (Default: Hari Terakhir/Terbaru)
   const [selectedIndex, setSelectedIndex] = useState(last7Days.length - 1);
-  
-  // Ambil Date Object berdasarkan index
   const selectedDate = last7Days[selectedIndex];
 
-  // 3. Konversi ke Format ISO String untuk HotspotControl (timestamps)
   const timestamps = useMemo(() => {
       return last7Days.map(d => d.toISOString());
   }, [last7Days]);
   
-  // 4. Filter Data Berdasarkan Tanggal Terpilih
   const filteredData = useMemo(() => {
     const targetID = formatDateID(selectedDate);
     return data
@@ -68,50 +75,61 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
         .sort((a, b) => b.conf - a.conf);
   }, [data, selectedDate]);
 
+  // --- SSR FALLBACK (Loading UI saat di Server) ---
+  if (!isMounted) {
+    return (
+      <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-[2rem] border border-slate-200 animate-pulse">
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Menyiapkan Data...</p>
+      </div>
+    );
+  }
+
+  // --- RENDER UTAMA ---
   return (
     <div className="space-y-8 w-full max-w-full overflow-hidden pb-10"> 
 
-      {/* HEADER */}
-      <section className="bg-red-50 border border-red-100 rounded-2xl p-6 flex flex-col md:flex-row gap-4 items-center text-center md:items-start md:text-left shadow-sm">
-        
-        {/* Ikon Api */}
-        <div className="bg-white p-3 rounded-full shadow-sm w-fit ring-4 ring-red-50">
-            <Flame className="w-8 h-8 text-red-600" />
-        </div>
-        
-        <div className="flex-1">
-            <h2 className="text-xl font-black text-gray-800">Monitoring Titik Panas (Hotspot)</h2>
-            <p className="text-gray-600 text-sm mt-1 leading-relaxed">
-                Peta sebaran titik panas di wilayah <strong>Kalimantan Timur</strong> berdasarkan pantauan satelit (SNPP/NOAA20). 
-            </p>
-            
-            {/* Container Badge (Pills) */}
-            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
-                
-                {/* Badge Jumlah Titik */}
-                <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-red-200 text-xs font-bold text-red-600 shadow-sm">
-                    <Info className="w-3.5 h-3.5" />
-                    <span>{formatDateHeader(selectedDate)}: {filteredData.length} Titik</span>
-                </div>
-                
-                {/* Badge Update Server */}
-                <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-500 shadow-sm">
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Update Server: {lastUpdateString}</span>
-                </div>
+      {/* --- 1. HEADER SECTION --- */}
+      <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
+         
+         {/* Efek Cahaya Halus (Glow) di Latar Belakang */}
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl"></div>
+         </div>
+         
+         {/* Judul Utama */}
+         <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+            Monitoring Hotspot
+         </h1>
+         
+         {/* Deskripsi */}
+         <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
+            Peta sebaran titik panas di wilayah Kalimantan Timur berdasarkan pantauan satelit (SNPP/NOAA20) sebagai peringatan dini kebakaran hutan dan lahan.
+         </p>
 
+         {/* Symmetrical Status Bar */}
+         <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-full shadow-sm p-1">
+            <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
+               <Flame className="w-4 h-4 text-orange-500" />
+               <span className="text-xs font-bold text-slate-700">{filteredData.length} Titik Api</span>
             </div>
-        </div>
+            <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
+               <CalendarDays className="w-4 h-4 text-blue-500" />
+               <span className="text-xs font-bold text-slate-700">{formatDateHeader(selectedDate)}</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-1.5">
+               <RefreshCw className="w-4 h-4 text-slate-400" />
+               <span className="text-xs font-medium text-slate-500">Update Server: {lastUpdateString}</span>
+            </div>
+         </div>
       </section>
       
-      {/* 2. PETA INTERAKTIF + KONTROL WAKTU */}
-      <div className="relative group">
+      {/* --- 2. PETA INTERAKTIF + KONTROL WAKTU --- */}
+      <div className="relative group rounded-[2rem] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-200/50 bg-slate-900">
         
-        {/* Peta */}
+        {/* Komponen Peta */}
         <HotspotMap data={filteredData} />
 
-        {/* --- PENGGANTI DATE PICKER LAMA: HOTSPOT CONTROL --- */}
-        {/* Ini akan melayang di atas peta (bagian bawah) */}
+        {/* Kontrol Waktu Melayang */}
         <div className="absolute bottom-0 left-0 w-full z-[800]"> 
              <HotspotControl 
                 timestamps={timestamps}
@@ -119,77 +137,76 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
                 onSelect={setSelectedIndex}
              />
         </div>
-        {/* --------------------------------------------------- */}
 
         {/* Overlay Info Kosong */}
         {filteredData.length === 0 && (
              <div className="absolute inset-0 z-[300] flex items-center justify-center pointer-events-none pb-20">
-                <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-sm border border-gray-100 text-center">
-                    <p className="text-gray-500 font-medium text-sm">Tidak ada titik panas terdeteksi</p>
-                    <p className="text-xs text-gray-400">pada tanggal {formatDateHeader(selectedDate)}</p>
+                <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg border border-slate-200 text-center">
+                    <p className="text-slate-800 font-bold text-sm">Tidak ada titik panas terdeteksi</p>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">pada tanggal {formatDateHeader(selectedDate)}</p>
                 </div>
              </div>
         )}
       </div>
 
-      {/* 3. TABEL DAFTAR TITIK PANAS (Tetap Sama) */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm w-full">
-        <div className="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row justify-between md:items-center gap-2">
-            <h3 className="font-bold text-gray-800 flex items-center gap-2">
+      {/* --- 3. TABEL DAFTAR TITIK PANAS --- */}
+      <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm w-full mt-6">
+        <div className="p-5 border-b border-slate-100 bg-white flex flex-col md:flex-row justify-between md:items-center gap-4">
+            <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest text-xs">
                 <MapPin className="w-4 h-4 text-red-500" />
-                Daftar Detail Lokasi
+                Rincian Lokasi Koordinat
             </h3>
-            <span className="text-xs text-gray-500 font-medium bg-white px-2 py-1 rounded border border-gray-200">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
                 Menampilkan {filteredData.length} Data
             </span>
         </div>
 
-        <div className="overflow-x-auto w-full max-w-[calc(100vw-2.5rem)] md:max-w-full mx-auto max-h-[500px] overflow-y-auto custom-scrollbar">
+        <div className="overflow-x-auto w-full max-w-[calc(100vw-2.5rem)] md:max-w-full mx-auto max-h-[400px] overflow-y-auto custom-scrollbar">
             <table className="w-full text-sm text-left relative">
-                <thead className="bg-gray-50 text-gray-500 font-bold uppercase text-[10px] tracking-wider sticky top-0 z-10 shadow-sm">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-widest sticky top-0 z-10 shadow-sm">
                     <tr>
-                        <th className="px-4 py-3 w-10 text-center bg-gray-50 whitespace-nowrap">No</th>
-                        <th className="px-4 py-3 bg-gray-50 min-w-[150px]">Lokasi</th>
-                        <th className="px-4 py-3 bg-gray-50 whitespace-nowrap">Confidence</th>
-                        <th className="px-4 py-3 bg-gray-50 hidden md:table-cell whitespace-nowrap">Satelit</th>
-                        <th className="px-4 py-3 bg-gray-50 hidden md:table-cell whitespace-nowrap">Waktu (WIB)</th>
-                        <th className="px-4 py-3 text-right bg-gray-50 whitespace-nowrap">Koordinat</th>
+                        <th className="px-5 py-4 w-10 text-center bg-slate-50 whitespace-nowrap">No</th>
+                        <th className="px-5 py-4 bg-slate-50 min-w-[150px]">Wilayah Administrasi</th>
+                        <th className="px-5 py-4 bg-slate-50 whitespace-nowrap">Tingkat Kepercayaan</th>
+                        <th className="px-5 py-4 bg-slate-50 hidden md:table-cell whitespace-nowrap">Satelit</th>
+                        <th className="px-5 py-4 bg-slate-50 hidden md:table-cell whitespace-nowrap">Waktu (WIB)</th>
+                        <th className="px-5 py-4 text-right bg-slate-50 whitespace-nowrap">Titik Koordinat</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-100 bg-white">
                     {filteredData.length > 0 ? (
                         filteredData.map((item, index) => {
-                            let confColor = "bg-gray-100 text-gray-600";
-                            if(item.conf >= 9) confColor = "bg-red-100 text-red-700";
-                            else if(item.conf >= 7) confColor = "bg-orange-100 text-orange-700";
-                            else confColor = "bg-yellow-100 text-yellow-700";
+                            let confColor = "bg-slate-100 text-slate-600 border-slate-200";
+                            if(item.conf >= 9) confColor = "bg-red-50 text-red-600 border-red-200";
+                            else if(item.conf >= 7) confColor = "bg-orange-50 text-orange-600 border-orange-200";
+                            else confColor = "bg-amber-50 text-amber-600 border-amber-200";
 
                             return (
-                                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-4 py-3 text-center text-gray-500 text-xs align-top">
+                                <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
+                                    <td className="px-5 py-4 text-center text-slate-400 font-bold text-xs align-top">
                                         {index + 1}
                                     </td>
-                                    <td className="px-4 py-3 align-top">
-                                        <div className="font-bold text-gray-800 text-xs md:text-sm">
+                                    <td className="px-5 py-4 align-top">
+                                        <div className="font-black text-slate-800 text-sm">
                                             {item.subDistrict}
                                         </div>
-                                        <div className="text-[10px] md:text-xs text-gray-500 uppercase mt-0.5">
+                                        <div className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mt-1">
                                             {item.district}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 align-top">
-                                        <span className={`px-2 py-1 rounded text-[10px] font-bold ${confColor} whitespace-nowrap`}>
-                                            {item.conf >= 9 ? "Tinggi" : (item.conf >= 7 ? "Sedang" : "Rendah")} ({item.conf})
+                                    <td className="px-5 py-4 align-top">
+                                        <span className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold border ${confColor} whitespace-nowrap`}>
+                                            {item.conf >= 9 ? "Tinggi" : (item.conf >= 7 ? "Sedang" : "Rendah")} ({item.conf}%)
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-gray-600 font-medium text-xs hidden md:table-cell align-top">
+                                    <td className="px-5 py-4 text-slate-600 font-bold text-xs hidden md:table-cell align-top">
                                         {item.satellite}
                                     </td>
-                                    <td className="px-4 py-3 text-gray-500 text-xs hidden md:table-cell align-top">
+                                    <td className="px-5 py-4 text-slate-500 font-medium text-xs hidden md:table-cell align-top">
                                         {item.date.split(" ")[1]} 
                                     </td>
-                                    <td className="px-4 py-3 text-right align-top">
-                                        <div className="font-mono text-[10px] text-gray-500 whitespace-nowrap">
+                                    <td className="px-5 py-4 text-right align-top">
+                                        <div className="font-mono text-[11px] font-bold text-slate-500 whitespace-nowrap bg-slate-50 px-2 py-1 rounded inline-block border border-slate-100 group-hover:bg-white transition-colors">
                                             {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
                                         </div>
                                     </td>
@@ -198,8 +215,8 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
                         })
                     ) : (
                         <tr>
-                            <td colSpan={6} className="px-4 py-12 text-center text-gray-400 text-sm">
-                                Tidak ada data titik panas pada tanggal ini.
+                            <td colSpan={6} className="px-5 py-16 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">
+                                Data Tidak Ditemukan
                             </td>
                         </tr>
                     )}

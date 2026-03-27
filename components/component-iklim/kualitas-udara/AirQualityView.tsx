@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { 
-  MapPin, Wind, Clock, TrendingUp, TrendingDown, Minus 
+  TrendingUp, TrendingDown, Minus 
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
@@ -29,17 +29,16 @@ const getPm25Color = (val: number) => {
 };
 
 const getStatusInfo = (val: number) => {
-  if (val <= THRESHOLDS.BAIK) return { text: "Baik", desc: "Udara bersih, nikmati aktivitas luar ruangan." };
-  if (val <= THRESHOLDS.SEDANG) return { text: "Sedang", desc: "Kualitas udara dapat diterima, namun polusi sedang." };
-  if (val <= THRESHOLDS.TIDAK_SEHAT) return { text: "Tidak Sehat", desc: "Gunakan masker jika beraktivitas di luar." };
-  if (val <= THRESHOLDS.SANGAT_TIDAK_SEHAT) return { text: "Sangat Tidak Sehat", desc: "Hindari aktivitas fisik berat di luar ruangan." };
-  return { text: "Berbahaya", desc: "Kualitas udara sangat buruk, tetap di dalam ruangan." };
+  if (val <= THRESHOLDS.BAIK) return { text: "Baik", desc: "Udara bersih, nikmati aktivitas luar ruangan tanpa ragu." };
+  if (val <= THRESHOLDS.SEDANG) return { text: "Sedang", desc: "Kualitas udara dapat diterima, namun polusi mulai terasa." };
+  if (val <= THRESHOLDS.TIDAK_SEHAT) return { text: "Tidak Sehat", desc: "Gunakan masker dan kurangi durasi aktivitas luar ruangan." };
+  if (val <= THRESHOLDS.SANGAT_TIDAK_SEHAT) return { text: "Sangat Tidak Sehat", desc: "Hindari seluruh aktivitas fisik berat di luar ruangan." };
+  return { text: "Berbahaya", desc: "Kualitas udara sangat buruk. Tetap di dalam ruangan tertutup." };
 };
 
 // COMPONENT UTAMA
 export default function AirQualityView({ initialData }: { initialData: any }) {
   
-  // Langsung pakai data dari props
   const data = initialData;
   const isError = !data.success && data.history.length === 0;
 
@@ -66,97 +65,76 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
   const TrendIcon = trend ? trend.icon : null;
 
   return (
-    <div className="w-full min-h-screen text-slate-800 overflow-x-hidden">
+    <div className="w-full text-slate-800">
       
-      {/* HEADER SECTION */}
-      <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left">
-          <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0">
-            <Wind className="w-8 h-8 text-emerald-600" />
+      {/* TAMPILAN JIKA SENSOR MATI/ERROR */}
+      {isError && (
+          <div className="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center text-amber-800 font-semibold shadow-sm">
+             Sensor PM2.5 saat ini sedang offline atau dalam pemeliharaan. Data tidak dapat ditampilkan.
           </div>
-  
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-slate-800">Kualitas Udara Kota Samarinda</h2>
-            <p className="text-slate-600 text-sm mt-2 leading-relaxed ">
-              Monitoring konsentrasi Particulate Matter (<strong className="text-emerald-600">PM2.5</strong>) secara real-time di Stasiun Meteorologi APT Pranoto.
-            </p>
-            
-            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
-              {/* Badge Status */}
-              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-bold shadow-sm">
-                 <span className="relative flex h-2.5 w-2.5">
-                   {!isError && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                   <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${!isError ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                 </span>
-                 {!isError ? 'Status: Online' : 'Status: Offline / No Data'}
-              </div>
-          
-              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-500" />
-                  BMKG APT Pranoto
-              </div>
-
-              <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
-                  <Clock className="w-3.5 h-3.5 text-emerald-500" />
-                  Update: {data.lastUpdate}
-              </div>
-            </div>
-          </div>
-      </section>
+      )}
 
       {/* CONTENT WRAPPER */}
-      <div className="w-full mx-auto mt-6 md:mt-8 space-y-6 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 transition-opacity duration-500 ${isError ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
             
-            {/* GAUGE UTAMA */}
-            <div className="bg-white rounded-[2rem] p-2 border border-slate-100  flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[400px]">
+            {/* GAUGE UTAMA (KIRI) */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-sm lg:min-h-[420px]">
+                
+                {/* Waktu Terakhir Dihapus dari sini karena sudah dipindah ke Header (page.tsx) */}
 
-                <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6 flex-shrink-0">
+                <div className="relative w-56 h-56 sm:w-64 sm:h-64 mt-2 mb-6 flex-shrink-0">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 224 224">
-                    <circle cx="112" cy="112" r="96" stroke="#f1f5f9" strokeWidth="12" fill="transparent" strokeLinecap="round" />
+                    {/* Lingkaran Dasar */}
+                    <circle cx="112" cy="112" r="96" stroke="#f1f5f9" strokeWidth="14" fill="transparent" strokeLinecap="round" />
+                    {/* Lingkaran Nilai Aktif */}
                     <circle 
-                      cx="112" cy="112" r="96" stroke={currentColor} strokeWidth="12" fill="transparent" 
+                      cx="112" cy="112" r="96" stroke={currentColor} strokeWidth="14" fill="transparent" 
                       strokeDasharray={2 * Math.PI * 96}
                       strokeDashoffset={2 * Math.PI * 96 * (1 - Math.min(currentVal, 250) / 250)} 
                       strokeLinecap="round"
-                      className="transition-all duration-1000 ease-out drop-shadow-lg"
+                      className="transition-all duration-1000 ease-out drop-shadow-md"
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl sm:text-6xl font-extrabold text-slate-800 tracking-tighter drop-shadow-sm">
+                    <span className="text-6xl sm:text-7xl font-black text-slate-800 tracking-tighter drop-shadow-sm">
                       {currentVal}
                     </span>
-                    <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-widest mt-2 bg-slate-50 px-2 py-1 rounded">
-                      PM<sub>2.5</sub> µg/m³
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-500 tracking-widest mt-2 uppercase border border-slate-100 bg-slate-50 px-3 py-1 rounded-lg">
+                      µg/m³
                     </span>
                   </div>
                 </div>
 
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-3 tracking-tight" style={{ color: currentColor }}>
                     {statusInfo.text}
                 </h2>
+
                 {trend && TrendIcon && (
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-4 ${trend.bg} ${trend.color}`}>
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest font-bold border mb-4 shadow-sm ${trend.bg} ${trend.color}`}>
                         <TrendIcon className="w-3.5 h-3.5" />
                         <span>Tren: {trend.text}</span>
                     </div>
                 )}
-                <p className="text-slate-500 text-sm leading-relaxed max-w-[200px] sm:max-w-xs mx-auto">
+                
+                <p className="text-slate-500 text-sm leading-relaxed max-w-[280px] mx-auto font-medium">
                     {statusInfo.desc}
                 </p>
             </div>
 
-            {/* GRAFIK */}
-            <div className="lg:col-span-2 bg-white rounded-[2rem] p-5 sm:p-6 md:p-8 border border-slate-100  flex flex-col min-h-[400px]">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
+            {/* GRAFIK RIWAYAT (KANAN) */}
+            <div className="lg:col-span-2 bg-white rounded-3xl p-6 md:p-8 border border-slate-200 flex flex-col min-h-[420px] shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-2 border-b border-slate-100 pb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">Data 24 Jam Terakhir</h3>
-                  <p className="text-sm text-slate-400">Riwayat konsentrasi PM2.5 per jam</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Data 24 Jam Terakhir</h3>
+                  <p className="text-sm font-medium text-slate-500 mt-1">Riwayat fluktuasi konsentrasi PM2.5 per jam</p>
                 </div>
               </div>
 
-              <div className="w-full h-[300px] min-w-0 relative">
+              <div className="w-full flex-grow min-h-[250px] relative">
                  {(!data.history || data.history.length === 0) ? (
-                    <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm italic">
-                        Belum ada data riwayat tersedia
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                        <TrendingUp className="w-10 h-10 mb-3 opacity-20" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Belum ada riwayat tersedia</span>
                     </div>
                  ) : (
                     <ResponsiveContainer width="100%" height="100%">
@@ -177,7 +155,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                             dataKey="time" 
                             axisLine={false} 
                             tickLine={false} 
-                            tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                            tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} 
                             dy={10} 
                             interval="preserveStartEnd"
                             minTickGap={10}
@@ -185,8 +163,8 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                         <YAxis 
                             axisLine={false} 
                             tickLine={false} 
-                            tick={{ fontSize: 10, fill: '#94a3b8' }} 
-                            label={{ value: 'µg/m³', angle: -90, position: 'insideLeft', offset: 30, fontSize: 10, fill: '#cbd5e1' }}
+                            tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} 
+                            label={{ value: 'Konsentrasi (µg/m³)', angle: -90, position: 'insideLeft', offset: 25, fontSize: 10, fill: '#cbd5e1', fontWeight: 700 }}
                         />
                         <Tooltip 
                             cursor={{ fill: '#f8fafc', radius: 8 }}
@@ -196,19 +174,19 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                                 if (val === null) return null;
                                 const color = getPm25Color(val);
                                 return (
-                                    <div className="bg-white/95 backdrop-blur px-3 py-2 border border-slate-100 shadow-xl rounded-md text-xs z-50">
-                                    <p className="font-bold text-slate-700 mb-0.5">Jam {label}</p>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full" style={{background: color}}></div>
-                                        <span className=" font-bold text-sm">{val}</span>
-                                    </div>
+                                    <div className="bg-white/95 backdrop-blur-sm px-4 py-3 border border-slate-200 shadow-xl rounded-xl z-50 min-w-[120px]">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-100 pb-1">Pukul {label}</p>
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-3 h-3 rounded-full shadow-sm" style={{background: color}}></div>
+                                            <span className="font-black text-lg text-slate-800">{val} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest ml-0.5">µg/m³</span></span>
+                                        </div>
                                     </div>
                                 );
                                 }
                                 return null;
                             }}
                         />
-                        <Bar dataKey="pm25" radius={[4, 4, 4, 4]}>
+                        <Bar dataKey="pm25" radius={[6, 6, 6, 6]}>
                         {data.history.map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={`url(#grad-${index})`} />
                         ))}
@@ -219,22 +197,22 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
               </div>
             </div>
 
-            {/* LEGEND */}
-            <div className="lg:col-span-3 bg-white rounded-[2rem] p-5 sm:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 text-center">Panduan Indeks Kualitas Udara</h4>
+            {/* LEGEND (BAWAH) */}
+            <div className="lg:col-span-3 bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm">
+                <h4 className="text-[12px] font-bold text-slate-400 mb-6 text-center">Panduan Klasifikasi Indeks Kualitas Udara</h4>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     {[
-                        { label: "Baik", range: "0 - 15.5 µg/m³", color: COLORS.BAIK, bg: "bg-emerald-50 text-emerald-700" },
-                        { label: "Sedang", range: "15.6 - 55.4 µg/m³", color: COLORS.SEDANG, bg: "bg-blue-50 text-blue-700" },
-                        { label: "Tdk Sehat", range: "55.5 - 150.4 µg/m³", color: COLORS.TIDAK_SEHAT, bg: "bg-amber-50 text-amber-700" },
-                        { label: "Sangat Tdk Sehat", range: "150.5 - 250.4 µg/m³", color: COLORS.SANGAT_TS, bg: "bg-red-50 text-red-700" },
-                        { label: "Berbahaya", range: "> 250.5 µg/m³", color: COLORS.BERBAHAYA, bg: "bg-slate-100 text-slate-700" },
+                        { label: "Baik", range: "0 - 15.5", color: COLORS.BAIK, bg: "bg-emerald-50 border-emerald-100" },
+                        { label: "Sedang", range: "15.6 - 55.4", color: COLORS.SEDANG, bg: "bg-blue-50 border-blue-100" },
+                        { label: "Tidak Sehat", range: "55.5 - 150.4", color: COLORS.TIDAK_SEHAT, bg: "bg-amber-50 border-amber-100" },
+                        { label: "Sangat Tdk Sehat", range: "150.5 - 250.4", color: COLORS.SANGAT_TS, bg: "bg-red-50 border-red-100" },
+                        { label: "Berbahaya", range: "> 250.5", color: COLORS.BERBAHAYA, bg: "bg-slate-100 border-slate-200" },
                     ].map((item, idx) => (
-                        <div key={idx} className={`rounded-xl p-3 text-center border border-transparent hover:border-slate-200 transition-colors ${item.bg}`}>
-                            <div className="w-4 h-4 rounded-md mx-auto mb-2" style={{ backgroundColor: item.color }}></div>
-                            <div className="font-bold text-sm mb-0.5 whitespace-nowrap">{item.label}</div>
-                            <div className="text-[10px] opacity-80">{item.range}</div>
+                        <div key={idx} className={`rounded-md p-4 text-center border transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${item.bg}`}>
+                            <div className="w-6 h-6 rounded-md mx-auto mb-3 shadow-sm border border-white" style={{ backgroundColor: item.color }}></div>
+                            <div className="font-bold text-sm text-slate-600 mb-1">{item.label}</div>
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.range}</div>
                         </div>
                     ))}
                 </div>

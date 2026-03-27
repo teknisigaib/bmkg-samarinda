@@ -32,13 +32,11 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter Logic
   const filteredData = initialData.filter((item) => {
     return item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
            item.edition.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const currentData = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -55,26 +53,26 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
   };
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-10 pb-10">
 
         {/* SEARCH BAR */}
-        <div className="max-w-md mx-auto relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+        <div className="max-w-xl mx-auto relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
             </div>
             <input 
                 type="text" 
                 placeholder="Cari edisi atau judul buletin..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm hover:shadow-md"
+                className="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm font-medium text-slate-800 placeholder-slate-400"
             />
         </div>
 
         {/* GRID DATA  */}
-        <div id="buletin-grid">
+        <div id="buletin-grid" className="scroll-mt-32">
            {currentData.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                 {currentData.map((item, index) => (
                     <motion.div
                         layoutId={`card-${item.id}`}
@@ -83,12 +81,11 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: index * 0.05 }}
-                        className="group flex flex-col items-center text-center cursor-pointer h-full"
+                        className="group flex flex-col items-center text-center cursor-pointer h-full bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-200 hover:-translate-y-1 transition-all duration-300"
                         onClick={() => setSelectedBuletin(item)}
                     >
                   
-                        <div className="relative w-[210px] h-[280px] mx-auto rounded-md overflow-hidden shadow-lg shadow-slate-300 mb-5 transform group-hover:-translate-y-2 transition-all duration-300 bg-slate-200 border border-slate-100">
-                            
+                        <div className="relative w-full aspect-[3/4] max-w-[210px] mx-auto rounded-lg overflow-hidden shadow-md mb-5 bg-slate-100 border border-slate-200">
                             <Image
                                 src={item.cover}
                                 alt={item.title}
@@ -98,22 +95,22 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
                             />
                             
                             {/* Overlay Hover */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                            <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors" />
                             
                             {/* Badge Tahun */}
-                            <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow-sm z-10">
+                            <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm text-slate-800 border border-slate-200 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-md shadow-sm z-10">
                                 {item.year}
                             </div>
                         </div>
 
                         {/* Text Info */}
-                        <div className="w-full max-w-[210px] mx-auto flex flex-col flex-grow">
-                            <h3 className="text-sm font-bold text-slate-800 leading-snug mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        <div className="w-full flex flex-col flex-grow items-center justify-between">
+                            <h3 className="text-sm font-bold text-slate-800 leading-snug mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
                                 {item.title}
                             </h3>
-                            <p className="text-xs text-slate-500 uppercase tracking-wide font-medium mt-auto">
+                            <div className="text-[10px] bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 uppercase tracking-widest font-bold w-fit">
                                 {item.edition}
-                            </p>
+                            </div>
                         </div>
 
                     </motion.div>
@@ -121,12 +118,15 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
             </div>
            ) : (
              /* Empty State */
-             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                <FileText className="w-12 h-12 mb-3 opacity-20" />
-                <p className="text-sm font-medium">Tidak ada buletin ditemukan.</p>
+             <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div className="bg-slate-50 p-4 rounded-full mb-4 border border-slate-100">
+                   <FileText className="w-10 h-10 text-slate-300" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Tidak ada buletin ditemukan</h3>
+                <p className="text-sm font-medium text-slate-500 mb-6">Coba gunakan kata kunci pencarian yang lain.</p>
                 <button 
                     onClick={() => setSearchQuery("")}
-                    className="mt-2 text-xs text-blue-600 hover:underline"
+                    className="px-6 py-2 bg-white border border-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
                 >
                     Hapus Pencarian
                 </button>
@@ -136,23 +136,27 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
 
         {/* PAGINATION  */}
         {filteredData.length > ITEMS_PER_PAGE && (
-            <div className="flex justify-center gap-2 pt-8">
+            <div className="flex justify-center items-center gap-3 pt-8">
                 <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 rounded-full border border-gray-100 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:shadow-none transition bg-white"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-blue-200 hover:text-blue-600 disabled:opacity-30 disabled:hover:bg-white transition-all bg-white shadow-sm"
                 >
-                    <ChevronLeft className="w-4 h-4 text-slate-600" />
+                    <ChevronLeft className="w-5 h-5" />
                 </button>
-                <div className="flex items-center px-4 text-xs font-bold text-slate-600 bg-white rounded-full border border-gray-100">
-                    {currentPage} / {totalPages}
+
+                <div className="flex gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        Halaman <span className="text-blue-600 ml-1">{currentPage}</span> <span className="mx-1">/</span> {totalPages}
+                    </span>
                 </div>
+
                 <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 rounded-full border border-gray-100 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:shadow-none transition bg-white"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-blue-200 hover:text-blue-600 disabled:opacity-30 disabled:hover:bg-white transition-all bg-white shadow-sm"
                 >
-                    <ChevronRight className="w-4 h-4 text-slate-600" />
+                    <ChevronRight className="w-5 h-5" />
                 </button>
             </div>
         )}
@@ -164,34 +168,35 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6"
             >
-              <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-sm" onClick={() => setSelectedBuletin(null)} />
+              <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-md" onClick={() => setSelectedBuletin(null)} />
               
               <motion.div
                 layoutId={`card-${selectedBuletin.id}`}
-                className="bg-white w-full h-full md:max-w-5xl md:h-[90vh] md:rounded-2xl shadow-2xl relative flex flex-col overflow-hidden z-10"
+                className="bg-white w-full h-full md:max-w-5xl md:h-[90vh] md:rounded-3xl shadow-2xl relative flex flex-col overflow-hidden z-10"
               >
                 {/* Header Modal */}
-                <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 bg-white">
-                  <div className="flex items-center gap-3">
-                      <div className="hidden sm:block w-8 h-10 relative rounded overflow-hidden bg-slate-200">
+                <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white">
+                  <div className="flex items-center gap-4">
+                      <div className="hidden sm:block w-10 h-14 relative rounded border border-slate-200 overflow-hidden bg-slate-100">
                           <Image src={selectedBuletin.cover} alt="Cover" fill className="object-cover" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-bold text-slate-800 line-clamp-1 text-sm md:text-base">{selectedBuletin.title}</h3>
-                        <p className="text-[10px] md:text-xs font-medium text-slate-500 uppercase">{selectedBuletin.edition}</p>
+                        <h3 className="font-bold text-slate-800 line-clamp-1 text-sm md:text-base mb-0.5">{selectedBuletin.title}</h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedBuletin.edition}</p>
                       </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <a 
                         href={selectedBuletin.pdfUrl} 
                         download 
-                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-full hover:bg-slate-800 transition"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-blue-700 transition shadow-sm"
                     >
-                      <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
+                      <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Unduh PDF</span>
                     </a>
-                    <button onClick={() => setSelectedBuletin(null)} className="p-1.5 hover:bg-gray-100 rounded-full transition">
-                      <X className="w-5 h-5 text-slate-500" />
+                    <div className="w-px h-6 bg-slate-200 hidden md:block mx-1"></div>
+                    <button onClick={() => setSelectedBuletin(null)} className="p-2 hover:bg-slate-100 rounded-full transition text-slate-500">
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 </div>

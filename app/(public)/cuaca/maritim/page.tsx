@@ -1,6 +1,7 @@
 import MaritimeDashboard from "@/components/component-cuaca/cuaca-maritim/MaritimeDashboard";
 import { KALTIM_AREAS, createSlug, combineForecasts, getWilmetosGeoJson } from "@/lib/bmkg/maritim"; // Import getWilmetosGeoJson
 import type { Metadata } from "next";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 
 export const dynamic = 'force-dynamic';
 
@@ -37,9 +38,22 @@ export default async function MaritimePage() {
   });
 
   return (
-    <main className="min-h-screen w-full  bg-white">
-       {/* Kirim geoJsonData ke Dashboard */}
-       <MaritimeDashboard initialData={initialCache} geoJsonData={geoJsonData} />
-    </main>
+    <div className="min-h-screen">
+       <div className="w-full mx-auto pt-6 pb-10 sm:px-4 lg:px-6">
+           
+           {/* 2. Tambahkan BREADCRUMB di sini */}
+           <Breadcrumb 
+             className="mb-10" 
+             items={[
+               { label: "Beranda", href: "/" },
+               { label: "Cuaca" }, 
+               { label: "Cuaca Maritim" } 
+             ]} 
+           />
+
+           {/* Kirim geoJsonData ke Dashboard */}
+           <MaritimeDashboard initialData={initialCache} geoJsonData={geoJsonData} />
+       </div>
+    </div>
   );
 }

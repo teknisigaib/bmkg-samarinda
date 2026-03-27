@@ -1,101 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { Scan } from "lucide-react";
+import { Satellite, ZoomIn } from "lucide-react";
+import ImageLightbox from "@/components/ui/ImageLightbox"; // Import Lightbox kita
 
 export default function EHSatelitSection() {
-  const [isZoomed, setIsZoomed] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  
+  // State untuk menyimpan timestamp agar tidak terjadi Hydration Mismatch
+  const [timestamp, setTimestamp] = useState<string>("");
 
-  const imageUrl = `https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_EH_Kaltim.png?id=${Date.now()}`;
+  // Generate timestamp hanya di sisi klien setelah komponen di-mount
+  useEffect(() => {
+    setTimestamp(Date.now().toString());
+  }, []);
+
+  // URL gambar dari BMKG (Ditambah timestamp untuk bypass cache)
+  // Jika timestamp kosong (saat SSR), jangan tambahkan parameter id
+  const imageUrl = timestamp 
+    ? `https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_EH_Kaltim.png?id=${timestamp}`
+    : `https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_EH_Kaltim.png`;
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-3 flex flex-col h-full">
-      <h2 className="text-base text-center font-semibold text-gray-800 mb-3">
-        Himawari-9 IR Enhanced
-      </h2>
+    <>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-full">
+        
+        {/* HEADER KARTU (DIPINDAHKAN KE TENGAH) */}
+        <div className="flex items-center justify-center border-b border-slate-100 pb-2 mb-2">
+            <h2 className="font-semibold text-slate-800">
+              Himawari-9 Enhanced IR
+            </h2>
+        </div>
 
-      <div className="relative aspect-[1/1] bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-        <AnimatePresence mode="wait">
-          {!imageError ? (
-            <motion.div
-              key="hima"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <Image
-                src={imageUrl}
-                alt="Citra Satelit Himawari Kalimantan Timur"
-                fill
-                className="object-contain"
-                unoptimized
-                onError={() => setImageError(true)}
-              />
-            </motion.div>
-          ) : (
-            <p className="text-gray-500 text-sm">Gambar tidak tersedia.</p>
-          )}
-        </AnimatePresence>
-
-        {/* Tombol Zoom */}
-        <button
-          onClick={() => setIsZoomed(true)}
-          className="absolute bottom-2 right-2 bg-gray-800/40 hover:bg-gray-800/60 text-white p-1.5 rounded-full"
-          title="Perbesar"
+        {/* AREA GAMBAR (Thumbnail) */}
+        <div 
+            className="relative w-full aspect-square bg-slate-50 rounded-xl overflow-hidden border border-slate-200 group cursor-pointer"
+            onClick={() => !imageError && setIsLightboxOpen(true)}
         >
-          <Scan size={16} />
-        </button>
+          {!imageError ? (
+            <>
+                <Image
+                    src={imageUrl}
+                    alt="Citra Satelit Himawari Kalimantan Timur"
+                    fill
+                    className="object-contain transition-transform duration-700 group-hover:scale-105"
+                    unoptimized
+                    onError={() => setImageError(true)}
+                />
+                
+                {/* Overlay Hover "Perbesar" */}
+                <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors duration-300 flex items-center justify-center">
+                    <div className="bg-white/95 backdrop-blur-sm text-slate-800 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm translate-y-2 group-hover:translate-y-0">
+                        <ZoomIn className="w-3.5 h-3.5 text-blue-600" /> Klik Untuk Perbesar
+                    </div>
+                </div>
+            </>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                <Satellite className="w-8 h-8 mb-2 opacity-50" />
+                <p className="text-xs font-bold uppercase tracking-widest">Koneksi Satelit Terputus</p>
+            </div>
+          )}
+        </div>
+
+        {/* AREA DESKRIPSI */}
+        <div className="bg-blue-50 text-gray-700 rounded-xl p-4 mt-4 border border-blue-100">
+            <p className="text-sm sm:text-base text-justify">
+              Produk <strong>Himawari-9 EH</strong> menunjukkan suhu puncak awan yang didapat dari 
+              pengamatan radiasi yang diklasifikasi dengan pewarnaan tertentu, dimana warna hitam atau biru 
+              menunjukkan tidak terdapat pembentukan awan yang banyak (cerah), sedangkan 
+              semakin dingin suhu puncak awan, dimana warna mendekati jingga hingga merah, 
+              menunjukan pertumbuhan awan yang signifikan dan berpotensi terbentuknya awan Cumulonimbus.
+            </p>
+        </div>
+
       </div>
 
-      {/* Deskripsi */}
-      <div className="bg-blue-50 text-gray-700 rounded-xl p-4 mt-4 border border-blue-100">
-        <p className="text-sm sm:text-base leading-relaxed">
-          Produk <strong>Himawari-9 EH</strong> menunjukkan suhu puncak awan yang didapat dari 
-          pengamatan radiasi yang 
-          diklasifikasi dengan pewarnaan tertentu, dimana warna hitam atau biru 
-          menunjukkan tidak terdapat pembentukan awan yang banyak (cerah), sedangkan 
-          semakin dingin suhu puncak awan, dimana warna mendekati jingga hingga merah, 
-          menunjukan pertumbuhan awan yang signifikan dan berpotensi terbentuknya awan Cumulonimbus.
-        </p>
-      </div>
-
-      {/* Modal Zoom */}
-      <AnimatePresence>
-        {isZoomed && (
-          <motion.div
-            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="relative bg-black rounded-lg overflow-hidden max-w-4xl w-full aspect-[1/1]"
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-            >
-              <Image
-                src={imageUrl}
-                alt="Zoomed Himawari-9"
-                fill
-                className="object-contain"
-                unoptimized
-              />
-              <button
-                onClick={() => setIsZoomed(false)}
-                className="absolute top-3 right-3 bg-red-500 hover:bg-gray-800/70 text-white px-3 py-1.5 rounded-md text-sm"
-              >
-                X
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      {/* --- LIGHTBOX MODAL --- */}
+      {!imageError && (
+          <ImageLightbox 
+            isOpen={isLightboxOpen}
+            imageUrl={imageUrl}
+            title="Citra Satelit Himawari-9 (EH)"
+            description="Pemantauan suhu puncak awan. Semakin merah, awan semakin tebal (berpotensi hujan)."
+            altText="Satelit Himawari Kaltim"
+            onClose={() => setIsLightboxOpen(false)}
+          />
+      )}
+    </>
   );
 }

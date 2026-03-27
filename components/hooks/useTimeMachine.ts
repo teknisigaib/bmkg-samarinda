@@ -1,76 +1,84 @@
 // components/hooks/useTimeMachine.ts
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-// Struktur standar untuk setiap frame animasi
-export interface TimeFrame {
-  timestamp: Date;
-  label: string;       // Contoh: "04:10 UTC"
-  dateLabel: string;   // Contoh: "11 Mar"
-  url: string;         // URL gambar tile map yang siap pakai
+// Struktur standar untuk TimeFrame Universal (TANPA url gambar!)
+export interface UniversalTimeFrame {
+  timeUTC: string;     // Format ISO murni untuk pencocokan data (Cth: "2026-03-24T10:20:00.000Z")
+  timestamp: Date;     // Objek Date Javascript
+  label: string;       // Untuk UI: "10:20 UTC"
+  dateLabel: string;   // Untuk UI: "24 Mar"
 }
 
-const ANIMATION_SPEED = 2000; // Kecepatan putar antar frame (dalam milidetik)
+const ANIMATION_SPEED = 2000; // Kecepatan putar antar frame (2 detik)
+const HISTORY_STEPS = 12;     // Berapa langkah ke belakang? (12 langkah = 2 jam)
+const STEP_MINUTES = 10;      // Interval antar langkah (10 menit)
 
-export function useTimeMachine() {
-  const [frames, setFrames] = useState<TimeFrame[]>([]);
+export function useTimeMachine(serverTimeUTC: string | null) {
+  const [frames, setFrames] = useState<UniversalTimeFrame[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isOffline, setIsOffline] = useState(true); // Default true sampai ada data masuk
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Ref ini bertugas melacak apakah user sedang berada di frame paling ujung (Terbaru/Live)
-  // Jika true, saat ada data baru masuk, slider akan otomatis bergeser ke data terbaru tersebut.
   const isLiveRef = useRef<boolean>(true); 
 
-  // 1. FUNGSI UNTUK MENERIMA DATA DARI SUMBER LUAR (cth: useHimawariData)
-  const loadPlaylist = useCallback((newFrames: TimeFrame[]) => {
-      setFrames(prevFrames => {
-          // Ambil URL terakhir dari data lama dan data baru untuk perbandingan
-          const prevLastUrl = prevFrames.length > 0 ? prevFrames[prevFrames.length - 1].url : '';
-          const newLastUrl = newFrames.length > 0 ? newFrames[newFrames.length - 1].url : '';
+  // 1. GENERATOR JAM UNIVERSAL (Berjalan otomatis jika serverTime masuk)
+  useEffect(() => {
+    if (!serverTimeUTC) return;
 
-          // Jika ada data baru (URL ujungnya berbeda) DAN user sedang memantau mode Live
-          if (prevLastUrl !== newLastUrl && (isLiveRef.current || prevFrames.length === 0)) {
-              // Pindahkan index ke frame paling baru
-              setCurrentIndex(newFrames.length - 1);
-          }
-          
-          return newFrames;
+    const serverDate = new Date(serverTimeUTC);
+    
+    // BULATKAN KE BAWAH (Ke 10 Menit Terdekat)
+    const minutes = Math.floor(serverDate.getUTCMinutes() / STEP_MINUTES) * STEP_MINUTES;
+    serverDate.setUTCMinutes(minutes, 0, 0);
+
+    const newFrames: UniversalTimeFrame[] = [];
+    
+    // Cetak Rel Waktu dari masa lalu (kiri) ke masa sekarang (kanan)
+    for (let i = HISTORY_STEPS; i >= 0; i--) {
+      const frameTime = new Date(serverDate.getTime() - i * STEP_MINUTES * 60000);
+      
+      newFrames.push({
+        timeUTC: frameTime.toISOString(),
+        timestamp: frameTime,
+        label: frameTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC',
+        dateLabel: frameTime.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', timeZone: 'UTC' })
       });
+    }
 
-      // Update status offline/online
-      setIsOffline(newFrames.length === 0);
-  }, []); // Array kosong sangat penting agar fungsi ini tidak ter-recreate terus menerus
+    setFrames(newFrames);
+    
+    // Jika user sedang manteng di posisi LIVE, geser otomatis ke frame ujung kanan yang baru
+    if (isLiveRef.current) {
+      setCurrentIndex(newFrames.length - 1);
+    }
+  }, [serverTimeUTC]);
 
-  // 2. ANIMATION ENGINE (Jantung Pemutar Otomatis)
+  // 2. ANIMATION ENGINE (Jantung Pemutar)
   useEffect(() => {
     if (isPlaying && frames.length > 0) {
-      isLiveRef.current = false; // Saat play berjalan, berarti sedang tidak standby di Live
+      isLiveRef.current = false; 
       
       timerRef.current = setInterval(() => {
         setCurrentIndex((prev) => {
           if (prev >= frames.length - 1) {
-            setIsPlaying(false);      // Berhenti otomatis jika sudah sampai akhir
-            isLiveRef.current = true; // Set status kembali ke Live
+            setIsPlaying(false);      // Stop otomatis di akhir
+            isLiveRef.current = true; // Set status Live
             return prev;              
           }
-          return prev + 1; // Lanjut ke frame berikutnya
+          return prev + 1;
         });
       }, ANIMATION_SPEED);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     
-    // Cleanup interval saat komponen mati atau isPlaying berubah
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isPlaying, frames.length]); 
 
   // 3. KONTROL PLAYER
   const togglePlay = () => {
     if (!isPlaying && currentIndex === frames.length - 1 && frames.length > 0) {
-      // Jika posisi sedang di ujung akhir dan user tekan play, mulai ulang dari awal (0)
-      setCurrentIndex(0);
+      setCurrentIndex(0); // Ulangi dari 0 jika ditekan saat di ujung
     }
     setIsPlaying(!isPlaying);
   };
@@ -84,21 +92,18 @@ export function useTimeMachine() {
   };
 
   const setIndex = (index: number) => {
-    setIsPlaying(false); // Hentikan play jika user menggeser slider manual
+    setIsPlaying(false);
     setCurrentIndex(index);
     isLiveRef.current = (index === frames.length - 1);
   };
 
-  // 4. KEMBALIKAN SEMUA STATE & FUNGSI KE KOMPONEN PETA
   return {
     frames,
     currentIndex,
     currentFrame: frames[currentIndex] || null, 
     isPlaying,
-    isOffline,
     togglePlay,
     jumpToLive,
-    setIndex,
-    loadPlaylist // <-- Ini yang akan dipanggil oleh useHimawariData atau komponen luar
+    setIndex
   };
 }

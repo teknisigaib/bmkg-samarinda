@@ -5,11 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  CloudSun, AlertTriangle, Plane, Ship, Users, ClipboardList,
-  FileText, Target, Activity, Map, DropletOff,
-  Satellite, Flame, Newspaper, BookA, BookText, Menu, X, OctagonAlert, CloudRain, BarChart3, Leaf, Waves, Radio
-} from "lucide-react"; 
+import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 
 type NavItem = {
   key: string;
@@ -18,7 +14,6 @@ type NavItem = {
     name: string;
     desc: string;
     href: string;
-    icon: React.ReactNode;
   }[];
 };
 
@@ -27,52 +22,51 @@ const NAV_ITEMS: NavItem[] = [
     key: "profil",
     label: "Profil",
     items: [
-      { name: "Visi & Misi", desc: "Tujuan dan arah pembangunan", href: "/profil/visi-misi", icon: <Target className="w-5 h-5 text-blue-500" /> },
-      { name: "Tugas & Fungsi", desc: "Peran dan tanggung jawab utama", href: "/profil/tugas-fungsi", icon: <ClipboardList className="w-5 h-5 text-blue-500" /> },
-      { name: "Daftar Pegawai", desc: "Struktur organisasi dan pegawai", href: "/profil/daftar-pegawai", icon: <Users className="w-5 h-5 text-blue-500" /> },
-      { name: "Transparansi Kinerja", desc: "Pelaporan dan keterbukaan publik", href: "/profil/transparansi-kinerja", icon: <FileText className="w-5 h-5 text-blue-500" /> },
+      { name: "Visi & Misi", desc: "Tujuan dan arah pembangunan", href: "/profil/visi-misi" },
+      { name: "Tugas & Fungsi", desc: "Peran dan tanggung jawab utama", href: "/profil/tugas-fungsi" },
+      { name: "Daftar Pegawai", desc: "Struktur organisasi dan pegawai", href: "/profil/daftar-pegawai" },
+      { name: "Transparansi Kinerja", desc: "Pelaporan dan keterbukaan publik", href: "/profil/transparansi-kinerja" },
     ]
   },
   {
     key: "cuaca",
     label: "Cuaca",
     items: [
-      { name: "Prakiraan Cuaca", desc: "Lihat prakiraan cuaca harian", href: "/cuaca/prakiraan", icon: <CloudSun className="w-5 h-5 text-blue-500" /> },
-      { name: "Peringatan Dini", desc: "Informasi cuaca ekstrem", href: "/cuaca/peringatan-dini", icon: <AlertTriangle className="w-5 h-5 text-blue-500" /> },
-      { name: "Cuaca Penerbangan", desc: "Info cuaca untuk penerbangan", href: "/cuaca/penerbangan", icon: <Plane className="w-5 h-5 text-blue-500" /> },
-      { name: "Cuaca Maritim", desc: "Info cuaca untuk pelayaran", href: "/cuaca/maritim", icon: <Ship className="w-5 h-5 text-blue-500" /> },
-      { name: "Cuaca Mahakam", desc: "Prakiraan cuaca sungai Mahakam", href: "/cuaca/mahakam", icon: <Waves className="w-5 h-5 text-blue-500" /> },
-      { name: "Satelit Cuaca", desc: "Visualisasi citra satelit cuaca", href: "/cuaca/satelit", icon: <Satellite className="w-5 h-5 text-blue-500" /> },
-      { name: "Peringatan Karhutla", desc: "Kebakaran hutan dan lahan", href: "/cuaca/karhutla", icon: <Flame className="w-5 h-5 text-blue-500" /> },
-      { name: "Cuaca RealTime", desc: "Data Realtime Automatic Weather Station", href: "/cuaca/aws", icon: <Radio className="w-5 h-5 text-blue-500" /> },
+      { name: "Prakiraan Cuaca", desc: "Lihat prakiraan cuaca harian", href: "/cuaca/prakiraan" },
+      { name: "Peringatan Dini", desc: "Informasi cuaca ekstrem", href: "/cuaca/peringatan-dini" },
+      { name: "Cuaca Penerbangan", desc: "Info cuaca untuk penerbangan", href: "/cuaca/penerbangan" },
+      { name: "Cuaca Maritim", desc: "Info cuaca untuk pelayaran", href: "/cuaca/maritim" },
+      { name: "Cuaca Mahakam", desc: "Prakiraan cuaca sungai Mahakam", href: "/cuaca/mahakam" },
+      { name: "Satelit Cuaca", desc: "Visualisasi citra satelit cuaca", href: "/cuaca/satelit" },
+      { name: "Peringatan Karhutla", desc: "Kebakaran hutan dan lahan", href: "/cuaca/karhutla" },
+      { name: "Cuaca RealTime", desc: "Data Realtime Automatic Weather Station", href: "/cuaca/aws" },
     ]
   },
   {
     key: "gempa",
     label: "Gempa",
     items: [
-      { name: "Gempa Bumi Terbaru", desc: "Data gempa terkini", href: "/gempa/gempa-terbaru", icon: <Activity className="w-5 h-5 text-blue-500" /> },
-      { name: "Gempa Bumi Dirasakan", desc: "Laporan gempa yang terasa", href: "/gempa/gempa-dirasakan", icon: <Map className="w-5 h-5 text-blue-500" /> },
+      { name: "Gempa Bumi Terbaru", desc: "Data gempa terkini", href: "/gempa/gempa-terbaru" },
     ]
   },
   {
     key: "iklim",
     label: "Iklim",
     items: [
-      { name: "Info Hari Tanpa Hujan", desc: "Pantauan hari tanpa hujan", href: "/iklim/hari-tanpa-hujan", icon: <DropletOff className="w-5 h-5 text-blue-500" /> },
-      { name: "Prakiraan Hujan", desc: "Prakiraan Hujan", href: "/iklim/prakiraan-hujan", icon: <CloudRain className="w-5 h-5 text-blue-500" /> },
-      { name: "Analisis Hujan", desc: "Analisis Hujan", href: "/iklim/analisis-hujan", icon: <BarChart3 className="w-5 h-5 text-blue-500" /> },
-      { name: "PDIE", desc: "Peringatan Dini Iklim Ekstrem", href: "/iklim/peringatan-dini", icon: <OctagonAlert className="w-5 h-5 text-blue-500" /> },
-      { name: "Kualitas Udara", desc: "Pantauan Konsentrasi PM25", href: "/iklim/kualitas-udara", icon: <Leaf className="w-5 h-5 text-blue-500" /> },
+      { name: "Info Hari Tanpa Hujan", desc: "Pantauan hari tanpa hujan", href: "/iklim/hari-tanpa-hujan" },
+      { name: "Prakiraan Hujan", desc: "Prakiraan Hujan", href: "/iklim/prakiraan-hujan" },
+      { name: "Analisis Hujan", desc: "Analisis Hujan", href: "/iklim/analisis-hujan" },
+      { name: "PDIE", desc: "Peringatan Dini Iklim Ekstrem", href: "/iklim/peringatan-dini" },
+      { name: "Kualitas Udara", desc: "Pantauan Konsentrasi PM25", href: "/iklim/kualitas-udara" },
     ]
   },
   {
     key: "publikasi",
     label: "Publikasi",
     items: [
-      { name: "Berita & Kegiatan", desc: "Berita terkini BMKG", href: "/publikasi/berita-kegiatan", icon: <Newspaper className="w-5 h-5 text-blue-500" /> },
-      { name: "Buletin", desc: "Publikasi buletin berkala", href: "/publikasi/buletin", icon: <BookA className="w-5 h-5 text-blue-500" /> },
-      { name: "Artikel dan Makalah", desc: "Artikel ilmiah", href: "/publikasi/artikel", icon: <BookText className="w-5 h-5 text-blue-500" /> },
+      { name: "Berita & Kegiatan", desc: "Berita terkini BMKG", href: "/publikasi/berita-kegiatan" },
+      { name: "Buletin", desc: "Publikasi buletin berkala", href: "/publikasi/buletin" },
+      { name: "Artikel dan Makalah", desc: "Artikel ilmiah", href: "/publikasi/artikel" },
     ]
   }
 ];
@@ -83,151 +77,227 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
 
-  // Styling khusus untuk indikator garis bawah desktop
-  const activeDesktopClass = "text-blue-600 font-bold relative after:absolute after:-bottom-1.5 after:left-1/2 after:-translate-x-1/2 after:w-1/2 after:h-[3px] after:bg-blue-600 after:rounded-full";
+  const isPathActive = (key: string) => pathname.startsWith(`/${key}`);
 
   return (
     <>
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm fixed top-0 w-full z-[9999]">
-        <div className="max-w-8xl mx-auto md:mx-10 px-4 flex items-center h-16 relative">
+      <nav className="bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm fixed top-0 w-full z-[9999] transition-all">
+        {/* Tambahkan 'relative' di sini agar absolute centering berfungsi baik */}
+        <div className="relative w-full px-4 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between h-[60px]">
           
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 z-50">
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 z-50 group">
             <Image 
               src="/logo-bmkg.png" 
               alt="Logo BMKG" 
-              width={40} 
-              height={40} 
+              width={44} 
+              height={44} 
               priority 
-              className="w-8 h-8 md:w-10 md:h-10"
-              
+              className="w-8 h-8 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="flex flex-col">
-              <span className="text-gray-800 font-bold text-xs md:text-sm leading-tight">Badan Meteorologi Klimatologi & Geofisika</span>
-              <span className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">Stasiun Meteorologi APT Pranoto Samarinda</span>
+            <div className="flex flex-col justify-center">
+              <span className="text-gray-900 font-bold text-[12px] sm:text-xs md:text-sm tracking-tight leading-tight">
+                BMKG
+              </span>
+              <span className="text-[9px] sm:text-[12px] md:text-sm text-gray-500 font-medium leading-tight">
+                Stasiun Meteorologi APT Pranoto
+              </span>
             </div>
           </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex space-x-1 items-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-             <Link 
-                href="/" 
-                className={`px-4 py-2 text-md font-medium rounded-full transition-colors ${pathname === "/" ? activeDesktopClass : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"}`}
-             >
-                Home
-             </Link>
+          {/* DESKTOP MENU - Menggunakan Absolute Centering agar benar-benar di tengah */}
+          <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 justify-center items-center space-x-1">
+            <Link 
+              href="/" 
+              className={`px-3 xl:px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                pathname === "/" ? "bg-slate-100 text-blue-700" : "text-gray-600 hover:bg-slate-50 hover:text-gray-900"
+              }`}
+            >
+              Beranda
+            </Link>
              
-             {NAV_ITEMS.map((menu) => {
-                const isActive = pathname.startsWith(`/${menu.key}`); 
+            {NAV_ITEMS.map((menu) => {
+              const isActive = isPathActive(menu.key);
+              const isHovered = activeDesktop === menu.key;
+              const isMultiColumn = menu.items.length > 5;
 
-                return (
-                  <div key={menu.key} className="relative" onMouseEnter={() => setActiveDesktop(menu.key)} onMouseLeave={() => setActiveDesktop(null)}>
-                     <button 
-                       className={`px-4 py-2 text-md font-medium flex items-center gap-1 rounded-full transition-colors ${
-                          activeDesktop === menu.key 
-                            ? "text-blue-600 bg-blue-50" 
-                            : isActive 
-                              ? activeDesktopClass 
-                              : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-                       }`}
-                       aria-expanded={activeDesktop === menu.key}
-                     >
-                        {menu.label} 
-                     </button>
+              return (
+                <div 
+                  key={menu.key} 
+                  className="relative" 
+                  onMouseEnter={() => setActiveDesktop(menu.key)} 
+                  onMouseLeave={() => setActiveDesktop(null)}
+                >
+                  <button 
+                    className={`px-3 xl:px-4 py-2 text-sm font-semibold flex items-center gap-1.5 rounded-lg transition-all ${
+                       isHovered ? "bg-slate-50 text-gray-900" 
+                     : isActive ? "bg-slate-100 text-blue-700" 
+                     : "text-gray-600 hover:bg-slate-50 hover:text-gray-900"
+                    }`}
+                  >
+                    {menu.label}
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isHovered ? "rotate-180" : "opacity-50"}`} />
+                  </button>
 
-                     <AnimatePresence>
-                       {activeDesktop === menu.key && (
-                          <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2 }} className="absolute left-1/2 -translate-x-1/2 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black/5">
-                             <div className="py-2">
-                               {menu.items.map((item) => {
-                                 const isSubActive = pathname === item.href;
-                                 return (
-                                   <Link key={item.href} href={item.href} onClick={() => setActiveDesktop(null)} className={`flex items-start gap-3 px-4 py-3 transition group ${isSubActive ? 'bg-blue-50' : 'hover:bg-blue-50'}`}>
-                                     <div className={`p-2 rounded-lg shrink-0 transition ${isSubActive ? 'bg-white text-blue-600 shadow-sm border border-blue-100' : 'bg-blue-50 text-blue-600 group-hover:bg-white group-hover:shadow-sm'}`}>{item.icon}</div>
-                                     <div>
-                                       <p className={`text-sm tracking-wide ${isSubActive ? 'font-bold text-blue-700' : 'font-semibold text-gray-800 group-hover:text-blue-700'}`}>{item.name}</p>
-                                       <p className="text-xs text-gray-500 leading-snug">{item.desc}</p>
-                                     </div>
-                                   </Link>
-                                 );
-                               })}
-                             </div>
-                          </motion.div>
-                       )}
-                     </AnimatePresence>
-                  </div>
-                );
-             })}
+                  <AnimatePresence>
+                    {isHovered && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 15, scale: 0.98 }} 
+                        animate={{ opacity: 1, y: 0, scale: 1 }} 
+                        exit={{ opacity: 0, y: 10, scale: 0.98 }} 
+                        transition={{ duration: 0.15, ease: "easeOut" }} 
+                        className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden"
+                        style={{ width: isMultiColumn ? '600px' : '280px' }}
+                      >
+                        {/* Gap diperbesar sedikit jadi gap-2 agar border tidak dempet */}
+                        <div className={`p-3 grid gap-2 ${isMultiColumn ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                          {menu.items.map((item) => {
+                            const isSubActive = pathname === item.href;
+                            return (
+                              <Link 
+                                key={item.href} 
+                                href={item.href} 
+                                onClick={() => setActiveDesktop(null)} 
+                                // REVISI BORDER: Menambahkan border tipis di setiap item
+                                className={`block p-3 rounded-xl border transition-all group/item ${
+                                  isSubActive 
+                                    ? 'bg-blue-50/50 border-blue-100' 
+                                    : 'border-gray-100/70 hover:bg-slate-50 hover:border-gray-200 hover:shadow-sm'
+                                }`}
+                              >
+                                <p className={`text-sm font-semibold mb-0.5 transition-colors ${
+                                  isSubActive ? 'text-blue-700' : 'text-gray-800 group-hover/item:text-blue-600'
+                                }`}>
+                                  {item.name}
+                                </p>
+                                <p className="text-[12px] text-gray-500 leading-snug">
+                                  {item.desc}
+                                </p>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+
+            {/* TAMBAHAN MENU LAYANAN DATA DI DESKTOP */}
+            <Link 
+              href="/layanan" 
+              className={`px-3 xl:px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                pathname.startsWith("/layanan") ? "bg-slate-100 text-blue-700" : "text-gray-600 hover:bg-slate-50 hover:text-gray-900"
+              }`}
+            >
+              Layanan Data
+            </Link>
+
           </div>
 
-          {/* Right Section */}
-          <div className="flex items-center gap-3 ml-auto">
+          {/* RIGHT ACTION BUTTON */}
+          <div className="flex items-center gap-3 z-50">
             <Link 
                href="/contact" 
-               className={`hidden md:inline-flex items-center justify-center text-sm font-semibold px-5 py-2 rounded-xl transition-all border-1 border-slate-600 ${pathname.startsWith('/contact') ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 hover:bg-blue-700 hover:text-white hover:border-blue-700'}`}
+               className="hidden md:flex items-center justify-center text-sm font-semibold px-5 py-2.5 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors shadow-sm"
             >
-               Kontak Kami
+               Hubungi Kami
             </Link>
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition" aria-label="Toggle Menu" aria-expanded={mobileOpen}>
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            
+            <button 
+              onClick={() => setMobileOpen(true)} 
+              className="lg:hidden p-2 text-gray-600 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <Menu className="w-6 h-6" />
             </button>
           </div>
+
         </div>
       </nav>
 
-      {/* MOBILE DRAWER */}
+      {/* MOBILE FULL-SCREEN MENU (Sisa kode mobile tetap sama) */}
       <AnimatePresence>
         {mobileOpen && (
-          <>
-            <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={() => setMobileOpen(false)}
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[10000] lg:hidden"
-            />
-            <motion.div
-              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 w-[85%] max-w-sm h-full bg-white shadow-2xl backdrop-blur-md z-[10001] p-6 overflow-y-auto lg:hidden border-l border-gray-100"
-            >
-              <div className="flex justify-between items-center mb-8">
-                <span className="font-bold text-xl text-gray-800">Menu</span>
-                <button onClick={() => setMobileOpen(false)} className="p-1 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full" aria-label="Close Menu"><X className="w-5 h-5" /></button>
-              </div>
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-white z-[10000] lg:hidden flex flex-col h-[100dvh]"
+          >
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <span className="font-bold text-lg text-gray-900">Menu Navigasi</span>
+              <button 
+                onClick={() => setMobileOpen(false)} 
+                className="p-2 text-gray-500 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-              <div className="space-y-1">
-                <Link href="/" onClick={() => setMobileOpen(false)} className={`block px-4 py-3 font-medium rounded-xl transition ${pathname === "/" ? "bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-bold" : "text-gray-700 hover:bg-blue-50"}`}>Home</Link>
-                
+            <div className="flex-1 overflow-y-auto p-4">
+              <Link 
+                href="/" 
+                onClick={() => setMobileOpen(false)} 
+                className={`block px-4 py-3.5 text-base font-semibold rounded-xl mb-2 transition-colors ${
+                  pathname === "/" ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-slate-50"
+                }`}
+              >
+                Beranda
+              </Link>
+              
+              <div className="space-y-2">
                 {NAV_ITEMS.map((menu) => {
-                  const isActive = pathname.startsWith(`/${menu.key}`);
+                  const isActive = isPathActive(menu.key);
+                  const isExpanded = activeMobileSub === menu.key;
 
                   return (
-                    <div key={menu.key} className="overflow-hidden">
+                    <div key={menu.key} className="bg-slate-50/50 rounded-xl overflow-hidden border border-gray-100">
                       <button 
-                        onClick={() => setActiveMobileSub(activeMobileSub === menu.key ? null : menu.key)} 
-                        className={`w-full flex items-center justify-between px-4 py-3 font-medium rounded-xl transition ${
-                           activeMobileSub === menu.key 
-                              ? "bg-blue-50 text-blue-700" 
-                              : isActive 
-                                 ? "bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-bold" // <-- INDIKATOR MOBILE AKTIF
-                                 : "text-gray-700 hover:bg-blue-50"
+                        onClick={() => setActiveMobileSub(isExpanded ? null : menu.key)} 
+                        className={`w-full flex items-center justify-between px-4 py-3.5 text-base font-semibold transition-colors ${
+                          isActive || isExpanded ? "text-blue-700" : "text-gray-700"
                         }`}
-                        aria-expanded={activeMobileSub === menu.key}
                       >
-                        {menu.label} 
+                        {menu.label}
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
                       </button>
 
                       <AnimatePresence>
-                        {activeMobileSub === menu.key && (
-                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                            <div className="bg-gray-50/50 rounded-xl mt-1 mb-2 px-3 py-2 space-y-1 border border-gray-100">
+                        {isExpanded && (
+                          <motion.div 
+                            initial={{ height: 0, opacity: 0 }} 
+                            animate={{ height: "auto", opacity: 1 }} 
+                            exit={{ height: 0, opacity: 0 }} 
+                            className="overflow-hidden bg-white"
+                          >
+                            <div className="p-2 space-y-1">
                               {menu.items.map((item) => {
-                                const isSubActive = pathname === item.href;
-                                return (
-                                  <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition ${isSubActive ? 'bg-white text-blue-700 font-bold shadow-sm border border-gray-100' : 'text-gray-600 hover:text-blue-600 hover:bg-white'}`}>
-                                    <span className={`p-1.5 rounded-lg shadow-sm ${isSubActive ? 'bg-blue-50 text-blue-600' : 'bg-white text-blue-500'}`}>{item.icon}</span>
-                                    {item.name}
-                                  </Link>
-                                );
-                              })}
+                            const isSubActive = pathname === item.href;
+                            return (
+                              <Link 
+                                key={item.href} 
+                                href={item.href} 
+                                onClick={() => setActiveDesktop(null)} 
+                                // REVISI BORDER: Garis dipertegas (gray-200) & diberi shadow ringan
+                                className={`block p-3 rounded-xl border shadow-sm transition-all group/item ${
+                                  isSubActive 
+                                    ? 'bg-blue-50 border-blue-200' 
+                                    : 'bg-white border-gray-200 hover:bg-slate-50 hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5'
+                                }`}
+                              >
+                                <p className={`text-sm font-semibold mb-0.5 transition-colors ${
+                                  isSubActive ? 'text-blue-700' : 'text-gray-800 group-hover/item:text-blue-600'
+                                }`}>
+                                  {item.name}
+                                </p>
+                                <p className="text-[12px] text-gray-500 leading-snug">
+                                  {item.desc}
+                                </p>
+                              </Link>
+                            );
+                          })}
                             </div>
                           </motion.div>
                         )}
@@ -235,11 +305,31 @@ export default function Navbar() {
                     </div>
                   );
                 })}
-                
-                <Link href="/contact" onClick={() => setMobileOpen(false)} className={`block mt-6 px-4 py-3 text-center font-bold rounded-xl transition ${pathname.startsWith('/contact') ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-600 hover:bg-blue-700 hover:text-white hover:border-blue-700'}`}>Kontak Kami</Link>
+
+                {/* TAMBAHAN MENU LAYANAN DATA DI MOBILE */}
+                <Link 
+                  href="/layanan" 
+                  onClick={() => setMobileOpen(false)} 
+                  className={`block px-4 py-3.5 mt-2 text-base font-semibold rounded-xl transition-colors border border-transparent ${
+                    pathname.startsWith("/layanan") ? "bg-blue-50 text-blue-700 border-blue-100" : "bg-slate-50/50 text-gray-700 hover:bg-slate-50 border-gray-100"
+                  }`}
+                >
+                  Layanan Data
+                </Link>
+
               </div>
-            </motion.div>
-          </>
+            </div>
+
+            <div className="p-4 border-t border-gray-100 bg-slate-50">
+              <Link 
+                href="/contact" 
+                onClick={() => setMobileOpen(false)} 
+                className="flex items-center justify-center w-full py-3.5 bg-gray-900 text-white font-semibold rounded-xl"
+              >
+                Hubungi Kami
+              </Link>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

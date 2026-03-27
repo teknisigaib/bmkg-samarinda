@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import { MahakamLocation } from '@/lib/mahakam-data';
+import { MahakamLocation, translateWindDir } from '@/lib/mahakam-data';
 import { 
-    Navigation2, Droplets, X, MapPin, CalendarDays, Clock, 
-    Thermometer, Eye, CloudSun 
+    Navigation2, Droplets, X, CalendarDays, Clock, 
+    Thermometer, Eye, CloudSun, Cloud 
 } from 'lucide-react';
 
 interface Props {
@@ -12,7 +12,6 @@ interface Props {
   onClose?: () => void;
 }
 
-// --- HELPER FORMATTER ---
 const formatTime = (isoString: string) => {
     try {
       const date = new Date(isoString);
@@ -31,185 +30,165 @@ const formatDate = (isoString: string) => {
     } catch (e) { return "-"; }
 };
 
-// Helper Arah Angin
-const getCardinalDirection = (angle: number) => {
-    if (angle === undefined) return "-";
-    const directions = ['U', 'TL', 'T', 'TG', 'S', 'BD', 'B', 'BL'];
-    return directions[Math.round(angle / 45) % 8];
-};
-
-const WeatherIconDisplay = ({ iconUrl, condition }: { iconUrl?: string, condition: string }) => {
-    if (iconUrl) return <img src={iconUrl} alt={condition} className="w-12 h-12 object-contain drop-shadow-sm" />;
-    return <div className="w-12 h-12 bg-slate-100 rounded-full animate-pulse"></div>;
-};
-
 export default function StationDetailView({ data, onClose }: Props) {
-
   return (
     <div className="w-full animate-in fade-in slide-in-from-bottom-6 duration-500 pb-10">
         
         {/* CONTAINER UTAMA */}
-        <div className="bg-white rounded-2xl shadow-2xl border border-blue-50 overflow-hidden relative flex flex-col h-[700px]">
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden relative flex flex-col h-[700px]">
             
-            {/* --- HEADER --- */}
-            <div className="px-6 py-5 border-b border-blue-100/50 flex items-center justify-between bg-white sticky top-0 z-50">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 shadow-sm">
-                        <MapPin size={24} />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-black text-slate-800 leading-tight">
-                            {data.name}
-                        </h3>
-                        <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1.5">
-                            {data.regency} <span className="w-1 h-1 rounded-full bg-slate-300"/> Detail Per Jam
-                        </p>
-                    </div>
+            {/* --- 1. HEADER UTAMA --- */}
+            <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white z-50">
+                <div className="w-10 md:block hidden"></div>
+                <div className="flex flex-col items-center text-center">
+                    <h2 className="text-2xl font-black text-slate-900 leading-none uppercase">
+                        {data.name}
+                    </h2>
+                    <p className="text-[10px] text-blue-600 font-bold mt-3 uppercase tracking-widest px-4 py-1.5 bg-blue-50 rounded-full border border-blue-100/50">
+                        {data.regency}
+                    </p>
                 </div>
-                
-                {onClose && (
+                {onClose ? (
                     <button 
                         onClick={onClose}
-                        className="p-2.5 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all border border-transparent hover:border-blue-100"
-                        title="Tutup Detail"
+                        className="p-2 hover:bg-slate-100 text-slate-400 hover:text-slate-900 rounded-full transition-all border border-slate-100"
                     >
-                        <X size={22} />
+                        <X size={20} />
                     </button>
-                )}
+                ) : <div className="w-10"></div>}
             </div>
 
-            {/* --- LIST AREA --- */}
-            {/* Background diganti ke slate-50 murni agar kartu putih lebih menonjol */}
-            <div className="overflow-y-auto custom-scrollbar flex-1 bg-slate-50 p-4 space-y-3 relative">
+            {/* --- AREA SCROLL --- */}
+            <div className="overflow-y-auto custom-scrollbar flex-1 bg-slate-50 relative">
                 
-                {data.forecasts && data.forecasts.length > 0 ? (
-                    data.forecasts.map((fc, idx) => {
-                        // Grouping Tanggal
-                        const prevDate = idx > 0 ? formatDate(data.forecasts![idx - 1].time) : null;
-                        const currDate = formatDate(fc.time);
-                        const showDateHeader = prevDate !== currDate;
+                {/* --- 2. HEADER KOLOM STICKY (AWAN DILEBARKAN KE 110px) --- */}
+                <div className="sticky top-0 z-50 bg-slate-100/95 backdrop-blur-md border-b border-slate-200 shadow-sm px-8 py-3 hidden md:flex items-center gap-6">
+                   <div className="w-24 shrink-0 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                      <Clock size={12}/> Waktu
+                   </div>
+                   <div className="w-48 shrink-0 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">
+                      Kondisi
+                   </div>
+                   
+                   {/* Proporsi: Suhu | Awan (110px) | Angin | Visibilitas */}
+                   <div className="flex-1 grid grid-cols-[1fr_110px_1.5fr_1fr] gap-4">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-4">Suhu / RH</div>
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Awan</div>
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-4">Angin & Arah</div>
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-4">Visibilitas</div>
+                   </div>
+                </div>
 
-                        return (
-                            <React.Fragment key={idx}>
-                                
-                                {/* --- HEADER TANGGAL (REDESIGNED) --- */}
-                                {showDateHeader && (
-                                    <div className="sticky top-0 z-40 py-3 -mx-4 px-4 bg-slate-50/95 backdrop-blur-sm transition-all">
-                                        <div className="flex items-center gap-3">
-                                            {/* Garis Kiri */}
-                                            <div className="h-px flex-1 bg-blue-200/50"></div>
-                                            
-                                            {/* Label Tanggal */}
-                                            <div className="flex items-center gap-2 text-blue-600 bg-blue-50/50 px-3 py-1 rounded-lg border border-blue-100/50">
+                {/* --- 3. LIST CONTENT --- */}
+                <div className="p-4 space-y-3">
+                    {data.forecasts && data.forecasts.length > 0 ? (
+                        data.forecasts.map((fc, idx) => {
+                            const prevDate = idx > 0 ? formatDate(data.forecasts![idx - 1].time) : null;
+                            const currDate = formatDate(fc.time);
+                            const showDateHeader = prevDate !== currDate;
+
+                            return (
+                                <React.Fragment key={idx}>
+                                    
+                                    {showDateHeader && (
+                                        <div className="sticky top-[45px] z-40 py-3 flex items-center justify-center gap-4">
+                                            <div className="h-px flex-1 bg-slate-200"></div>
+                                            <div className="flex items-center gap-2 text-slate-500 bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-sm">
                                                 <CalendarDays size={14} />
-                                                <span className="text-[10px] font-bold uppercase tracking-widest">
-                                                    {currDate}
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">{currDate}</span>
+                                            </div>
+                                            <div className="h-px flex-1 bg-slate-200"></div>
+                                        </div>
+                                    )}
+
+                                    {/* CARD ITEM */}
+                                    <div className="bg-white rounded-2xl p-4 md:px-8 border border-slate-100 hover:border-blue-200 shadow-sm transition-all group">
+                                        <div className="flex flex-col md:flex-row items-center gap-6">
+                                            
+                                            {/* Waktu */}
+                                            <div className="w-full md:w-24 shrink-0 flex items-center">
+                                                <span className="text-xl font-black text-slate-800 tracking-tight">
+                                                    {formatTime(fc.time)}
                                                 </span>
                                             </div>
 
-                                            {/* Garis Kanan */}
-                                            <div className="h-px flex-1 bg-blue-200/50"></div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* CARD ITEM */}
-                                <div className="bg-white rounded-2xl p-4 border border-slate-100 hover:border-blue-300 shadow-[0_2px_8px_rgb(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgb(0,0,0,0.05)] transition-all group">
-                                    <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-                                        
-                                        {/* 1. WAKTU & IKON */}
-                                        <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4 border-b md:border-b-0 border-slate-50 pb-3 md:pb-0">
-                                            <div className="flex items-center gap-2 min-w-[80px]">
-                                                <div className="p-1.5 bg-slate-100 text-slate-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                                    <Clock size={16} />
-                                                </div>
-                                                <span className="text-xl font-black text-slate-800">{formatTime(fc.time)}</span>
-                                            </div>
-                                            
-                                            <div className="flex items-center gap-3">
-                                                 <WeatherIconDisplay iconUrl={fc.weatherIcon} condition={fc.condition} />
-                                                 <span className="text-sm font-bold text-slate-700 capitalize w-24 leading-tight md:hidden">
-                                                    {fc.condition}
-                                                 </span>
-                                            </div>
-                                        </div>
-
-                                        {/* 2. DETAIL PARAMETER GRID */}
-                                        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
-                                            
-                                            {/* Kondisi (Desktop) */}
-                                            <div className="hidden md:flex flex-col justify-center border-l border-slate-50 pl-4">
-                                                <span className="text-[10px] uppercase font-bold text-slate-400 mb-0.5 whitespace-nowrap">Kondisi</span>
-                                                <span className="text-sm font-bold text-slate-700 capitalize leading-tight whitespace-nowrap">
+                                            {/* Kondisi */}
+                                            <div className="w-full md:w-48 shrink-0 flex flex-col items-center justify-center md:border-r md:border-slate-100 md:pr-6">
+                                                <img src={fc.weatherIcon} alt={fc.condition} className="w-8 h-8 object-contain" />
+                                                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center leading-tight mt-1">
                                                     {fc.condition}
                                                 </span>
                                             </div>
 
-                                            {/* Suhu */}
-                                            <div className="bg-slate-50 rounded-xl p-2.5 flex items-center gap-3 border border-slate-100">
-                                                <div className="p-1.5 bg-white rounded-lg text-rose-500 shadow-sm border border-slate-100">
-                                                    <Thermometer size={14} />
-                                                </div>
-                                                <div>
-                                                    <span className="block text-[9px] uppercase font-bold text-slate-400 whitespace-nowrap">Suhu</span>
-                                                    <span className="text-sm font-black text-slate-800 whitespace-nowrap">{fc.temp}°C</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Angin */}
-                                            <div className="bg-slate-50 rounded-xl p-2.5 flex items-center gap-3 border border-slate-100">
-                                                <div className="p-1.5 bg-white rounded-lg text-blue-600 shadow-sm border border-slate-100">
-                                                    <Navigation2 
-                                                        size={14} 
-                                                        style={{ transform: `rotate(${fc.windDeg}deg)` }} 
-                                                        fill="currentColor"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <span className="block text-[9px] uppercase font-bold text-slate-400 whitespace-nowrap">
-                                                        Angin ({getCardinalDirection(fc.windDeg)})
-                                                    </span>
-                                                    <span className="text-sm font-black text-slate-800 whitespace-nowrap">{fc.windSpeed} <span className="text-[10px] font-normal text-slate-500">km/j</span></span>
-                                                </div>
-                                            </div>
-
-                                            {/* Visibility & Humid */}
-                                            <div className="bg-slate-50 rounded-xl p-2.5 flex items-center justify-between border border-slate-100 col-span-2 md:col-span-1">
-                                                <div className="flex items-center gap-2">
-                                                    <Eye size={14} className="text-slate-400"/>
-                                                    <div>
-                                                        <span className="block text-[9px] uppercase font-bold text-slate-400 whitespace-nowrap">Visibilitas</span>
-                                                        <span className="text-xs font-bold text-slate-800 whitespace-nowrap">{fc.visibility_text || "-"}</span>
+                                            {/* Parameter Grid */}
+                                            <div className="flex-1 grid grid-cols-2 md:grid-cols-[1fr_110px_1.5fr_1fr] gap-4 w-full items-center">
+                                                
+                                                {/* Suhu & RH */}
+                                                <div className="flex flex-col border-l border-slate-100 pl-4">
+                                                    <span className="md:hidden text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-1">Suhu / RH</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-1">
+                                                            <Thermometer size={14} className="text-rose-400" />
+                                                            <span className="text-base font-bold text-slate-800">{fc.temp}°</span>
+                                                        </div>
+                                                        <div className="w-px h-3 bg-slate-200"></div>
+                                                        <div className="flex items-center gap-1">
+                                                            <Droplets size={14} className="text-blue-400" />
+                                                            <span className="text-base font-bold text-slate-800">{fc.humidity}%</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="w-px h-6 bg-slate-200"></div>
-                                                <div className="flex items-center gap-2">
-                                                    <Droplets size={14} className="text-blue-400"/>
-                                                    <div>
-                                                        <span className="block text-[9px] uppercase font-bold text-slate-400 whitespace-nowrap">RH</span>
-                                                        <span className="text-xs font-bold text-slate-800 whitespace-nowrap">{fc.humidity}%</span>
+
+                                                {/* Tutupan Awan (Sedikit lebih lebar) */}
+                                                <div className="flex flex-col md:items-center md:border-l border-slate-100">
+                                                    <span className="md:hidden text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-1">Awan</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <Cloud size={15} className="text-slate-400" />
+                                                        <span className="text-base font-bold text-slate-800">
+                                                            {fc.tcc}<span className="text-[10px] text-slate-400 ml-0.5">%</span>
+                                                        </span>
                                                     </div>
                                                 </div>
-                                            </div>
 
+                                                {/* Angin & Arah (Inline) */}
+                                                <div className="flex flex-col md:border-l border-slate-100 pl-0 md:pl-4">
+                                                    <span className="md:hidden text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-1">Angin</span>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-base font-bold text-slate-800 whitespace-nowrap">
+                                                            {fc.windSpeed} <span className="text-[10px] text-slate-400 font-normal">km/j</span>
+                                                        </span>
+                                                        <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 text-[9px] font-bold text-blue-600 uppercase shrink-0">
+                                                           <Navigation2 size={10} style={{ transform: `rotate(${fc.windDeg}deg)` }} fill="currentColor" />
+                                                           {translateWindDir(fc.windDir)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Visibilitas */}
+                                                <div className="flex flex-col md:border-l border-slate-100 pl-0 md:pl-4">
+                                                    <span className="md:hidden text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-1">Visibilitas</span>
+                                                    <div className="flex items-center gap-2 text-slate-700">
+                                                        <Eye size={14} className="text-slate-400" />
+                                                        <span className="text-sm font-bold whitespace-nowrap">{fc.visibility_text}</span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </React.Fragment>
-                        );
-                    })
-                ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-4 min-h-[300px]">
-                        <CloudSun size={48} className="text-slate-200" />
-                        <p className="text-sm font-medium italic">Data prakiraan cuaca tidak tersedia untuk lokasi ini.</p>
+                                </React.Fragment>
+                            );
+                        })
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-4 min-h-[400px]">
+                            <CloudSun size={64} strokeWidth={1} />
+                            <p className="text-xs font-bold uppercase tracking-[0.2em]">Data Tidak Ditemukan</p>
+                        </div>
+                    )}
+
+                    <div className="py-12 text-center">
+                        <span className="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-bold bg-slate-200/50 px-6 py-2 rounded-full">End of Data Transmission</span>
                     </div>
-                )}
-
-                {/* Footer List */}
-                <div className="py-6 text-center">
-                    <p className="text-[10px] text-slate-300 uppercase tracking-widest font-semibold">
-                        Akhir dari data prakiraan
-                    </p>
                 </div>
             </div>
         </div>

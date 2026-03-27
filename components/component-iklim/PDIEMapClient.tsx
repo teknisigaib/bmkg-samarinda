@@ -60,7 +60,7 @@ export default function ClimateMapClient({ geoJsonData, warningData, warningType
     layer.on({
       mouseover: (e) => {
         const l = e.target;
-        l.setStyle({ weight: 2, color: '#333', fillOpacity: 0.9 });
+        l.setStyle({ weight: 2, color: '#1e293b', fillOpacity: 0.9 });
         l.bringToFront();
         setHoveredRegion({ name: regionName, level, warningText });
       },
@@ -74,13 +74,13 @@ export default function ClimateMapClient({ geoJsonData, warningData, warningType
   };
 
   return (
-    <div className="relative h-full w-full  rounded-3xl overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden">
       <MapContainer 
         center={[0.5, 116.5]} 
         zoom={7} 
         scrollWheelZoom={false}
         className="w-full h-full z-0"
-        style={{ background: '#f1f5f9' }} 
+        style={{ background: '#f8fafc' }} 
       >
         <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"/>
 
@@ -95,35 +95,35 @@ export default function ClimateMapClient({ geoJsonData, warningData, warningType
       </MapContainer>
 
       {/* FLOATING INFO CARD */}
-      <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300">
-        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+      <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-slate-100 transition-all duration-300">
+        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-100 pb-2">
              Info Wilayah
         </h4>
         
         {hoveredRegion ? (
           <div>
-            <div className="text-blue-900 font-bold leading-tight text-sm mb-2">
+            <div className="text-slate-800 font-black tracking-tight leading-tight text-sm mb-3">
                 {hoveredRegion.name}
             </div>
             
             <div className="flex flex-col gap-2">
-               <div className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
-                  <span className="text-gray-500">Peringatan:</span>
-                  <span className="font-medium text-blue-600">
+               <div className="flex items-center justify-between text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-slate-500 font-medium">Peringatan:</span>
+                  <span className={`font-bold ${warningType === "HUJAN" ? "text-blue-600" : "text-amber-600"}`}>
                     {hoveredRegion.warningText}
                   </span>
                </div>
                
-               <div className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
-                  <span className="text-gray-500">Status:</span>
-                  <span className="font-bold px-2 py-0.5 rounded text-white" style={{ backgroundColor: getColor(hoveredRegion.level) }}>
+               <div className="flex items-center justify-between text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-slate-500 font-medium">Status:</span>
+                  <span className="font-bold px-2 py-0.5 rounded text-white shadow-sm uppercase tracking-widest text-[10px]" style={{ backgroundColor: getColor(hoveredRegion.level) }}>
                     {hoveredRegion.level}
                   </span>
                </div>
             </div>
           </div>
         ) : (
-          <div className="text-gray-400 text-xs italic">
+          <div className="text-slate-400 text-xs font-medium leading-relaxed">
             Arahkan kursor pada wilayah peta untuk melihat informasi detail peringatan dini.
           </div>
         )}

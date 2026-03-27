@@ -6,7 +6,7 @@ import { DEFAULT_STATION_ID } from '@/lib/aws-config';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'AWS Monitoring - BMKG Samarinda',
+  title: 'AWS Monitoring | BMKG APT Pranoto Samarinda',
   description: 'Data cuaca real-time dari Automatic Weather Station.',
 };
 

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { 
   Ship, Anchor, Info, Clock, Map, Waves, Loader2 
 } from "lucide-react";
+import SectionDivider from "@/components/ui/SectionDivider";
 
 // Import Components
 import MaritimeControl from "./MaritimeControl";
@@ -131,35 +132,35 @@ export default function MaritimeDashboard({ initialData, geoJsonData }: Dashboar
   return (
     <div className="w-full space-y-8 pb-20">
       
-      {/* --- HEADER --- */}
-      <section className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      {/* --- HEADER: REFINED SYMMETRICAL LIGHT --- */}
+      <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
           
-          <div className="bg-white p-4 rounded-full shadow-sm w-fit shrink-0 ring-4 ring-blue-50/50">
-              <Ship className="w-8 h-8 text-blue-600" />
+          {/* Efek Cahaya Halus (Glow) di Latar Belakang */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
+             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
           </div>
-  
-          <div className="flex-1 w-full">
-              <h2 className="text-2xl font-bold text-slate-800">
-                  Cuaca Maritim & Pelabuhan
-              </h2>
-              <p className="text-slate-600 text-sm mt-2 leading-relaxed mx-auto md:mx-0">
-                 Informasi tinggi gelombang, arus laut, dan cuaca pelabuhan di wilayah perairan Kalimantan Timur.
-              </p>
-              
-              <div className="mt-5 flex flex-wrap items-center justify-center md:justify-start gap-3">
-                <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
-                    <Clock className="w-3.5 h-3.5 text-blue-500" />
-                    <span>{todayLabel}</span>
-                </div>
-                <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
-                    <Map className="w-3.5 h-3.5 text-blue-500" />
-                    <span><strong>{totalPoints}</strong> Area & Pelabuhan</span>
-                </div>
-                <div className="inline-flex items-center gap-2 bg-blue-600 px-3 py-1.5 rounded-md border border-blue-600 text-xs font-bold text-white shadow-sm shadow-blue-200">
-                    <Waves className="w-3.5 h-3.5" />
-                    <span>Sumber: Maritim BMKG</span>
-                </div>
-              </div>
+
+          
+          {/* Judul Utama */}
+          <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+             Cuaca Maritim
+          </h1>
+          
+          {/* Deskripsi */}
+          <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
+             Sistem pemantauan perairan terpadu. Menyediakan informasi tinggi gelombang, arus laut, dan cuaca pelabuhan di wilayah Kalimantan Timur.
+          </p>
+
+          {/* Symmetrical Status Bar (Unified Capsule) */}
+          <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-full shadow-sm p-1">
+             <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
+                <Map className="w-4 h-4 text-emerald-500" />
+                <span className="text-xs font-semibold text-slate-700">{totalPoints} Area Terpantau</span>
+             </div>
+             <div className="flex items-center gap-2 px-4 py-1.5">
+                <Clock className="w-4 h-4 text-blue-500" />
+                <span className="text-xs font-medium text-slate-500">Sync: {todayLabel}</span>
+             </div>
           </div>
       </section>
 
@@ -212,11 +213,16 @@ export default function MaritimeDashboard({ initialData, geoJsonData }: Dashboar
 
       {/* --- TABEL DETAIL --- */}
       {selectedDetail && !loadingDetail && (
-        <MaritimeForecastTable 
-           data={selectedDetail.combined} 
-           locationName={selectedDetail.name} 
-           isPort={currentType === 'port'} 
-        />
+        <div className="w-full mx-auto mt-24 mb-16">
+            {/* Tambahkan Divider di sini */}
+            <SectionDivider title={`Rincian Prakiraan - ${selectedDetail.name}`} className="mb-8" />
+            
+            <MaritimeForecastTable 
+               data={selectedDetail.combined} 
+               locationName={selectedDetail.name} 
+               isPort={currentType === 'port'} 
+            />
+        </div>
       )}
     </div>
   );

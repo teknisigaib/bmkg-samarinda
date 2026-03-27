@@ -59,7 +59,7 @@ export default function Home() {
   return (
     <main className="min-h-screen  pb-20 selection:bg-blue-100">
       
-      <div className="w-full mx-auto px-4 sm:px-6 pt-8 space-y-8">
+      <div className="w-full mx-auto sm:px-6 pt-8 space-y-8">
         
         <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
            <div className="order-2 md:order-1 flex-1 overflow-hidden">

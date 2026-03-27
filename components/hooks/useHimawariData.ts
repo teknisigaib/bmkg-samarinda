@@ -2,12 +2,21 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { TimeFrame } from './useTimeMachine'; // Pastikan path importnya sesuai
 
-const BMKG_API_MODELRUN = "https://satellite.bmkg.go.id/api22/modelrun";
+// 1. Kita buat tipe data mandiri khusus untuk Satelit
+export interface HimawariFrame {
+  timeUTC: string;
+  label: string;
+  dateLabel: string;
+  url: string;
+}
 
 export function useHimawariData() {
-  const [frames, setFrames] = useState<TimeFrame[]>([]);
+  // 2. Gunakan tipe data mandiri tersebut di sini
+  const [frames, setFrames] = useState<HimawariFrame[]>([]);
+  const [latest, setLatest] = useState<HimawariFrame | null>(null);
+  const [serverTime, setServerTime] = useState<string | null>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
@@ -15,46 +24,20 @@ export function useHimawariData() {
     try {
       setIsLoading(true);
       
-      // 1. Ambil daftar waktu dari BMKG
-      // Tambahkan timestamp untuk menghindari cache bawaan browser
-      const response = await fetch(`${BMKG_API_MODELRUN}?t=${Date.now()}`, {
-          cache: 'no-store' 
-      });
+      // Ambil data dari API internal Next.js kita sendiri (Sangat aman dan tersembunyi)
+      const response = await fetch(`/api/himawari/info?t=${Date.now()}`, { cache: 'no-store' });
       
-      if (!response.ok) throw new Error("Gagal mengambil modelrun BMKG");
+      if (!response.ok) throw new Error("Gagal mengambil data dari API lokal");
       
       const data = await response.json();
-      const himawariDates: string[] = data.himawari9 || [];
 
-      if (himawariDates.length === 0) {
-          throw new Error("Data himawari kosong");
-      }
-
-      // 2. Olah Data untuk Time Machine
-      // BMKG memberikan urutan: [Paling Baru -> Paling Lama]
-      // Kita ambil 12 terbaru, lalu di REVERSE agar pemutar jalan maju: [Lama -> Baru]
-      const recentDates = himawariDates.slice(0, 12).reverse();
-
-      // 3. Ubah menjadi format TimeFrame
-      const processedFrames: TimeFrame[] = recentDates.map((isoStr) => {
-        const d = new Date(isoStr);
-        
-        // Buat Template URL Tile untuk jam ini
-        const tileUrl = `https://satellite.bmkg.go.id/api22/tile/{z}/{x}/{y}.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=${isoStr}`;
-
-        return {
-          timestamp: d,
-          label: d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC',
-          dateLabel: d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', timeZone: 'UTC' }),
-          url: tileUrl
-        };
-      });
-
-      setFrames(processedFrames);
+      setFrames(data.frames);
+      setLatest(data.latest);
+      setServerTime(data.serverTimeUTC);
       setIsError(false);
 
     } catch (error) {
-      console.error("Error fetching BMKG Satellite API:", error);
+      console.error("Himawari Fetch Error:", error);
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -69,5 +52,5 @@ export function useHimawariData() {
     return () => clearInterval(interval);
   }, []);
 
-  return { frames, isLoading, isError };
+ return { frames, latest, serverTime, isLoading, isError, refresh: fetchSatelliteData };
 }

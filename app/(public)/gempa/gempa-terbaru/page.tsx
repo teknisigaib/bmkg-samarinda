@@ -1,185 +1,254 @@
-import Image from "next/image";
-import { getGempaTerbaru, getGempaTerkiniList } from "@/lib/bmkg/gempa";
-import { MapPin, Calendar, Activity, Waves, Clock } from "lucide-react";
+import Breadcrumb from "@/components/ui/Breadcrumb";
+import SectionDivider from "@/components/ui/SectionDivider"; 
+import { Activity, MapPin, Clock, Layers, AlertTriangle, Info, Calendar, Radio } from "lucide-react";
+import { Metadata } from "next";
 
-export const revalidate = 60; 
+// IMPORT KOMPONEN CLIENT INTERAKTIF KITA
+import { ClickableMainMap, ShakemapButton } from "@/components/component-gempa/ClientGempaInteractions";
+
+export const metadata: Metadata = {
+  title: "Gempa Bumi Terbaru & Dirasakan | BMKG",
+  description: "Informasi gempa bumi terbaru dan daftar gempa bumi yang dirasakan di wilayah Indonesia.",
+};
+
+// ... (Interface GempaTerbaru, GempaDirasakan, dan Helper generateShakemapUrl tetap sama persis) ...
+interface GempaTerbaru {
+  Tanggal: string;
+  Jam: string;
+  DateTime: string;
+  Coordinates: string;
+  Lintang: string;
+  Bujur: string;
+  Magnitude: string;
+  Kedalaman: string;
+  Wilayah: string;
+  Potensi: string;
+  Dirasakan: string;
+  Shakemap: string;
+}
+
+interface GempaDirasakan {
+  Tanggal: string;
+  Jam: string;
+  DateTime: string;
+  Coordinates: string;
+  Lintang: string;
+  Bujur: string;
+  Magnitude: string;
+  Kedalaman: string;
+  Wilayah: string;
+  Dirasakan: string;
+}
+
+function generateShakemapUrl(dateTimeUtc: string) {
+  if (!dateTimeUtc) return "";
+  const d = new Date(dateTimeUtc);
+  d.setHours(d.getHours() + 7);
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const min = String(d.getUTCMinutes()).padStart(2, '0');
+  const ss = String(d.getUTCSeconds()).padStart(2, '0');
+  return `https://data.bmkg.go.id/DataMKG/TEWS/${yyyy}${mm}${dd}${hh}${min}${ss}.mmi.jpg`;
+}
+
+// ... (Fungsi Fetch Server-Side tetap sama persis) ...
+async function getLatestEarthquake(): Promise<GempaTerbaru | null> {
+  try {
+    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json", { next: { revalidate: 60 } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.Infogempa.gempa;
+  } catch (error) { return null; }
+}
+
+async function getFeltEarthquakes(): Promise<GempaDirasakan[]> {
+  try {
+    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json", { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.Infogempa.gempa || [];
+  } catch (error) { return []; }
+}
+
 
 export default async function GempaTerbaruPage() {
-  const [autoGempa, listGempa] = await Promise.all([
-    getGempaTerbaru(),
-    getGempaTerkiniList()
+  const [gempaTerbaru, listGempaDirasakan] = await Promise.all([
+    getLatestEarthquake(),
+    getFeltEarthquakes()
   ]);
 
   return (
-    <div className="space-y-12 w-full">
-      
-      {/* --- 1. HERO: GEMPA MUTAKHIR --- */}
-      {autoGempa && (
-        <section>
-          <div className="bg-gradient-to-br  border border-red-100 rounded-3xl p-5 md:p-8 flex flex-col lg:flex-row gap-8 items-center shadow-sm">
-                
-                {/* Peta Shakemap (Responsive Aspect Ratio) */}
-                <div className="w-full lg:w-1/3 relative aspect-square md:aspect-video lg:aspect-[3/4] rounded-2xl overflow-hidden border border-red-100 shadow-md group">
-                    {autoGempa.ShakemapUrl ? (
-                        <Image 
-                            src={autoGempa.ShakemapUrl} 
-                            alt="Peta Guncangan" 
-                            fill 
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                    ) : (
-                        <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">No Map</div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-2 text-center backdrop-blur-sm">
-                        Shakemap BMKG
-                    </div>
-                </div>
-
-                {/* Detail Gempa */}
-                <div className="flex-1 w-full space-y-6">
-                    <div className="text-center lg:text-left">
-                        <div className="text-sm text-gray-500 mb-1 font-medium flex items-center justify-center lg:justify-start gap-2">
-                            <Calendar className="w-4 h-4" /> {autoGempa.Tanggal} 
-                            <span className="hidden md:inline">•</span> 
-                            <Clock className="w-4 h-4 ml-2 md:ml-0" /> {autoGempa.Jam}
-                        </div>
-                        <h3 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight mt-2">{autoGempa.Wilayah}</h3>
-                    </div>
-
-                    {/* Grid Info Utama (Mobile Friendly) */}
-                    <div className="grid grid-cols-2 gap-3 md:gap-4">
-                        <div className="bg-white p-4 rounded-xl border border-red-100 shadow-sm text-center">
-                            <div className="text-[10px] md:text-xs text-gray-500 uppercase font-bold mb-1">Magnitudo</div>
-                            <div className="text-2xl md:text-4xl font-bold text-red-600">{autoGempa.Magnitude}</div>
-                        </div>
-                        <div className="bg-white p-4 rounded-xl border border-red-100 shadow-sm text-center">
-                            <div className="text-[10px] md:text-xs text-gray-500 uppercase font-bold mb-1">Kedalaman</div>
-                            <div className="text-2xl md:text-3xl font-bold text-gray-800">{autoGempa.Kedalaman}</div>
-                        </div>
-                        <div className="bg-white p-4 rounded-xl border border-red-100 shadow-sm text-center col-span-2">
-                            <div className="text-[10px] md:text-xs text-gray-500 uppercase font-bold mb-1">Koordinat</div>
-                            <div className="text-lg md:text-xl font-bold text-gray-800 flex items-center justify-center gap-2">
-                                <MapPin className="w-4 h-4 text-red-500" />
-                                {autoGempa.Lintang} - {autoGempa.Bujur}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className={`p-4 rounded-xl border flex flex-col md:flex-row items-center md:items-start gap-3 text-center md:text-left ${
-                        autoGempa.Potensi?.toLowerCase().includes("tidak") 
-                        ? "bg-green-50 border-green-200 text-green-800" 
-                        : "bg-red-50 border-red-200 text-red-800 animate-pulse"
-                    }`}>
-                        <Waves className="w-6 h-6 flex-shrink-0" />
-                        <span className="font-bold text-sm md:text-base">{autoGempa.Potensi}</span>
-                    </div>
-                    
-                    {autoGempa.Dirasakan && (
-                        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100 text-center lg:text-left">
-                            <span className="font-bold text-gray-800 block mb-1">Dirasakan (MMI):</span> 
-                            {autoGempa.Dirasakan}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </section>
-      )}
-
-      {/* --- 2. LIST GEMPA TERKINI --- */}
-      <section>
-        <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2 border-l-4 border-red-600 pl-3">
-            <Activity className="w-5 h-5 text-red-600" />
-            15 Gempabumi Terkini (M ≥ 5.0)
-        </h2>
+    <div className="min-h-screen pb-24 bg-slate-50/50">
+      <div className="w-full mx-auto pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl">
         
-        {/* A. TAMPILAN DESKTOP (TABLE) - Hidden di Mobile */}
-        <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-            <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-gray-500 font-bold border-b border-gray-200">
-                    <tr>
-                        <th className="p-4 whitespace-nowrap">Waktu Gempa</th>
-                        <th className="p-4 text-center">Mag</th>
-                        <th className="p-4 text-center">Dalam</th>
-                        <th className="p-4">Lokasi Pusat Gempa</th>
-                        <th className="p-4">Potensi</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                    {listGempa.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-red-50/30 transition-colors">
-                            <td className="p-4 whitespace-nowrap">
-                                <div className="font-medium text-gray-900">{item.Tanggal}</div>
-                                <div className="text-xs text-gray-500">{item.Jam}</div>
-                            </td>
-                            <td className="p-4 text-center">
-                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded font-bold">{item.Magnitude}</span>
-                            </td>
-                            <td className="p-4 text-center text-gray-600">{item.Kedalaman}</td>
-                            <td className="p-4">
-                                <div className="font-medium text-gray-800 mb-1 line-clamp-1" title={item.Wilayah}>{item.Wilayah}</div>
-                                <div className="text-xs text-gray-500 flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" /> {item.Lintang}, {item.Bujur}
-                                </div>
-                            </td>
-                            <td className="p-4">
-                                <span className={`text-xs px-2 py-1 rounded border inline-block whitespace-nowrap ${
-                                    item.Potensi?.toLowerCase().includes("tidak") 
-                                    ? "bg-green-50 text-green-700 border-green-200" 
-                                    : "bg-red-50 text-red-700 border-red-200"
-                                }`}>
-                                    {item.Potensi?.replace("berpotensi ", "")}
-                                </span>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        {/* BREADCRUMB */}
+        <Breadcrumb 
+          className="mb-8" 
+          items={[{ label: "Beranda", href: "/" }, { label: "Gempa", href: "/gempa" }, { label: "Gempa Bumi Terbaru" }]} 
+        />
 
-        {/* B. TAMPILAN MOBILE (CARD LIST) - Hidden di Desktop */}
-        <div className="md:hidden space-y-4">
-            {listGempa.map((item, idx) => (
-                <div key={idx} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
-                    {/* Header Card: Mag & Waktu */}
-                    <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-red-100 text-red-700 w-12 h-12 flex flex-col items-center justify-center rounded-lg border border-red-200">
-                                <span className="text-xs font-bold uppercase">Mag</span>
-                                <span className="text-lg font-extrabold">{item.Magnitude}</span>
-                            </div>
-                            <div>
-                                <p className="text-sm font-bold text-gray-900">{item.Tanggal}</p>
-                                <p className="text-xs text-gray-500">{item.Jam}</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <span className="block text-xs text-gray-400 font-bold uppercase">Dalam</span>
-                            <span className="text-sm font-bold text-gray-700">{item.Kedalaman}</span>
-                        </div>
-                    </div>
+        {/* HEADER UTAMA */}
+        <section className="mb-8 max-w-3xl">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 text-slate-900">
+            Gempa Bumi Terbaru
+          </h1>
+          <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">
+            Parameter gempa bumi terkini (M &ge; 5.0) di wilayah Indonesia. Data diperbarui otomatis dari BMKG.
+          </p>
+        </section>
 
-                    {/* Lokasi */}
-                    <div className="border-t border-gray-100 pt-3">
-                        <p className="text-sm font-medium text-gray-800 mb-1">{item.Wilayah}</p>
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                            <MapPin className="w-3 h-3" /> {item.Lintang}, {item.Bujur}
-                        </p>
-                    </div>
+        {/* --- SECTION 1: GEMPA TERBARU --- */}
+        {gempaTerbaru ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-16">
+            
+            {/* KOLOM KIRI: SHAKEMAP (MEMANGGIL KOMPONEN CLIENT) */}
+            <div className="lg:col-span-4 flex flex-col">
+              <div className="bg-white rounded-2xl p-2.5 border border-slate-200 shadow-sm h-full flex flex-col">
+                <ClickableMainMap shakemapUrl={`https://data.bmkg.go.id/DataMKG/TEWS/${gempaTerbaru.Shakemap}`} />
+              </div>
+            </div>
 
-                    {/* Potensi (Badge) */}
-                    <div className={`text-xs px-3 py-2 rounded-lg font-medium text-center ${
-                        item.Potensi?.toLowerCase().includes("tidak") 
-                        ? "bg-green-50 text-green-700 border border-green-200" 
-                        : "bg-red-50 text-red-700 border border-red-200"
-                    }`}>
-                        {item.Potensi}
+            {/* KOLOM KANAN: KARTU PARAMETER GEMPA (Tetap Full Server-Side) */}
+            <div className="lg:col-span-8 flex flex-col">
+              <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col h-full">
+                
+                {/* 1. SECTION HIGHLIGHT */}
+                <div className="flex flex-col md:flex-row md:items-center gap-6 pb-6 border-b border-slate-100">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-14 h-14 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                      <span className="text-xl font-black text-rose-600">{gempaTerbaru.Magnitude}</span>
                     </div>
+                    <div>
+                      <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-1">Magnitudo</p>
+                      <h2 className="text-2xl font-extrabold text-slate-900 leading-none">M {gempaTerbaru.Magnitude}</h2>
+                    </div>
+                  </div>
+                  <div className="hidden md:block w-px h-12 bg-slate-100"></div>
+                  <div className="flex items-center gap-4 flex-1 md:pl-4">
+                    <div className="w-14 h-14 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                      <Clock size={22} className="text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-1">Waktu Kejadian</p>
+                      <p className="text-lg font-bold text-slate-900 leading-tight">{gempaTerbaru.Tanggal}</p>
+                      <p className="text-sm font-medium text-slate-500">{gempaTerbaru.Jam}</p>
+                    </div>
+                  </div>
                 </div>
-            ))}
-        </div>
 
-      </section>
+                {/* 2. SECTION LOKASI & KEDALAMAN */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6 border-b border-slate-100">
+                  <div className="flex gap-4">
+                    <div className="mt-0.5 shrink-0 text-slate-400"><MapPin size={20} /></div>
+                    <div>
+                      <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-1.5">Titik Koordinat</p>
+                      <p className="text-base font-bold text-slate-900 mb-0.5">{gempaTerbaru.Lintang}, {gempaTerbaru.Bujur}</p>
+                      <p className="text-sm text-slate-600 leading-relaxed">{gempaTerbaru.Wilayah}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="mt-0.5 shrink-0 text-slate-400"><Layers size={20} /></div>
+                    <div>
+                      <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-1.5">Kedalaman</p>
+                      <p className="text-base font-bold text-slate-900">{gempaTerbaru.Kedalaman}</p>
+                    </div>
+                  </div>
+                </div>
 
+                {/* 3. SECTION POTENSI & DIRASAKAN */}
+                <div className="flex flex-col gap-6 pt-6">
+                  <div className="flex gap-4">
+                    <div className="mt-0.5 shrink-0 text-rose-400"><AlertTriangle size={20} /></div>
+                    <div>
+                      <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-1.5">Potensi Tsunami</p>
+                      <p className="text-base font-bold text-slate-900">{gempaTerbaru.Potensi}</p>
+                    </div>
+                  </div>
+                  {gempaTerbaru.Dirasakan !== "-" && (
+                    <div className="flex gap-4">
+                      <div className="mt-0.5 shrink-0 text-blue-400"><Activity size={20} /></div>
+                      <div>
+                        <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-1.5">Wilayah Dirasakan (Skala MMI)</p>
+                        <p className="text-sm md:text-base text-slate-700 leading-relaxed">{gempaTerbaru.Dirasakan}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </div>
+            
+          </div>
+        ) : null}
+
+        {/* --- SECTION 2: DAFTAR GEMPA DIRASAKAN --- */}
+        {listGempaDirasakan.length > 0 && (
+          <section className="max-w-5xl mx-auto">
+            
+            <SectionDivider title="Daftar Gempa Dirasakan" className="mb-6" />
+
+            {/* Stack List Vertikal */}
+            <div className="flex flex-col gap-5">
+              {listGempaDirasakan.map((gempa, index) => {
+                const shakemapUrl = generateShakemapUrl(gempa.DateTime);
+
+                return (
+                  <div key={index} className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row overflow-hidden hover:shadow-md transition-shadow">
+                    
+                    {/* KOLOM KIRI */}
+                    <div className="w-full md:w-40 flex md:flex-col items-center justify-around md:justify-center p-4 md:py-8 border-b md:border-b-0 md:border-r border-slate-100 shrink-0">
+                      <div className="text-center">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Magnitudo</p>
+                        <p className="text-3xl font-black text-orange-600 leading-none">{gempa.Magnitude}</p>
+                      </div>
+                      <div className="w-px h-10 md:w-8 md:h-px bg-slate-100 my-0 md:my-5"></div>
+                      <div className="text-center">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Kedalaman</p>
+                        <p className="text-base font-bold text-slate-800 leading-none">{gempa.Kedalaman}</p>
+                      </div>
+                    </div>
+
+                    {/* KOLOM KANAN */}
+                    <div className="flex-1 p-5 md:p-6 lg:px-8 flex flex-col justify-center gap-3">
+                      
+                      {/* Baris Atas: Waktu & Tombol Shakemap (MEMANGGIL KOMPONEN CLIENT) */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 font-medium">
+                          <div className="flex items-center gap-1.5"><Calendar size={16} className="text-slate-400" /><span>{gempa.Tanggal}</span></div>
+                          <div className="flex items-center gap-1.5"><Clock size={16} className="text-slate-400" /><span>{gempa.Jam}</span></div>
+                        </div>
+
+                        {/* Panggil komponen Client untuk tombol Shakemap */}
+                        <ShakemapButton shakemapUrl={shakemapUrl} wilayah={gempa.Wilayah} />
+                      </div>
+
+                      {/* Wilayah & Kordinat */}
+                      <h3 className="text-lg font-bold text-slate-900 leading-snug">{gempa.Wilayah}</h3>
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                        <MapPin size={16} className="text-blue-500" /><span>{gempa.Lintang}, {gempa.Bujur}</span>
+                      </div>
+
+                      {/* Kotak MMI */}
+                      {gempa.Dirasakan && gempa.Dirasakan !== "-" && (
+                        <div className="mt-2 bg-slate-50/80 border border-slate-100 rounded-lg p-4">
+                          <div className="flex items-center gap-2 text-xs font-bold text-orange-600 uppercase tracking-widest mb-2">
+                            <Radio size={14} /><span>Dirasakan (MMI)</span>
+                          </div>
+                          <p className="text-sm text-slate-700 leading-relaxed font-medium">{gempa.Dirasakan}</p>
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+      </div>
     </div>
   );
 }

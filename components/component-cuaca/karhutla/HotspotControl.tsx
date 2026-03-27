@@ -12,9 +12,6 @@ interface HotspotControlProps {
 export default function HotspotControl({ timestamps, selectedIndex, onSelect }: HotspotControlProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // --- FORMATTER BARU ---
-
-  // 1. Ambil Nama Hari (Sen, Sel)
   const getDayShort = (isoString: string) => {
       try {
         const date = new Date(isoString);
@@ -22,7 +19,6 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
       } catch (e) { return "" }
   }
 
-  // 2. Ambil Tanggal Angka (01, 02, 31)
   const getDateNumber = (isoString: string) => {
       try {
           const d = new Date(isoString);
@@ -30,15 +26,13 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
       } catch (e) { return "" }
   }
 
-  // 3. Ambil Nama Bulan (Maret) - PERBAIKAN DI SINI
   const getMonthName = (isoString: string) => {
       try {
         const date = new Date(isoString);
-        return new Intl.DateTimeFormat("id-ID", { month: "long", timeZone: "Asia/Makassar" }).format(date);
+        return new Intl.DateTimeFormat("id-ID", { month: "short", timeZone: "Asia/Makassar" }).format(date);
       } catch (e) { return "" }
   }
 
-  // 4. Label Panjang untuk Badge atas
   const getFullLabel = (isoString: string) => {
       try {
         const date = new Date(isoString);
@@ -49,7 +43,6 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
       } catch (e) { return "" }
   }
 
-  // Auto scroll
   useEffect(() => {
     if (scrollRef.current && selectedIndex >= 0) {
       const selectedElement = scrollRef.current.children[selectedIndex] as HTMLElement;
@@ -69,28 +62,27 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-fit max-w-[95vw] px-0 animate-in slide-in-from-bottom-6 fade-in duration-700">
       
       {/* 1. INFO BADGE (Floating Header) */}
-      <div className="flex justify-center mb-2">
-         <div className="bg-white/90 backdrop-blur-md text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-sm border border-white/40 flex items-center gap-2 ring-1 ring-black/5">
+      <div className="flex justify-center mb-3">
+         <div className="bg-white/95 backdrop-blur-md text-slate-700 text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg border border-slate-200 flex items-center gap-2 ring-1 ring-black/5 transition-all">
             {isLatest ? (
-                 <div className="flex items-center gap-1.5">
+                 <div className="flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                     </span>
-                    <span className="uppercase tracking-wide text-red-600">Pantauan Hari Ini</span>
+                    <span className="uppercase tracking-widest text-red-600">Data Terbaru ({getFullLabel(timestamps[selectedIndex])})</span>
                  </div>
             ) : (
-                <>
-                    <CalendarClock size={12} className="text-orange-600"/>
-                    <span className="uppercase tracking-wide">{getFullLabel(timestamps[selectedIndex])}</span>
-                </>
+                <div className="flex items-center gap-2">
+                    <CalendarClock size={14} className="text-orange-500"/>
+                    <span className="uppercase tracking-widest text-slate-600">{getFullLabel(timestamps[selectedIndex])}</span>
+                </div>
             )}
          </div>
       </div>
 
       {/* 2. TIMELINE BAR (Container) */}
-      {/* Perubahan: w-full menjadi w-fit agar tidak ada ruang kosong */}
-      <div className="bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl shadow-orange-900/10 rounded-xl p-1 ring-1 ring-black/5 w-fit mx-auto">
+      <div className="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-[1.5rem] p-1.5 ring-1 ring-black/5 w-fit mx-auto">
         <div 
           ref={scrollRef}
           className="flex overflow-x-auto gap-1 custom-scrollbar scroll-smooth snap-x touch-pan-x no-scrollbar"
@@ -100,7 +92,7 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
             const isActive = idx === selectedIndex;
             const dayName = getDayShort(time); 
             const dateNum = getDateNumber(time);
-            const monthName = getMonthName(time); // Menggunakan nama bulan
+            const monthName = getMonthName(time); 
 
             return (
               <button
@@ -108,28 +100,31 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
                 onClick={() => onSelect(idx)}
                 className={`
                   snap-center shrink-0 flex flex-col items-center justify-center gap-0.5
-                  w-[4.5rem] h-10 rounded-lg transition-all duration-200 group relative border overflow-hidden
+                  w-14 h-[3.5rem] rounded-2xl transition-all duration-300 group relative border overflow-hidden
                   ${isActive 
-                    ? "bg-gradient-to-br from-orange-500 to-red-600 border-orange-500 shadow-md shadow-orange-200 scale-100" 
-                    : "bg-transparent border-transparent text-slate-500 hover:bg-white hover:shadow-sm" 
+                    ? "bg-gradient-to-b from-orange-500 to-red-600 border-red-500 shadow-md scale-100" 
+                    : "bg-transparent border-transparent text-slate-500 hover:bg-slate-100" 
                   }
                 `}
               >
-                {/* Baris 1: Hari */}
-                <span className={`text-[9px] font-bold uppercase leading-none ${isActive ? "text-orange-100" : "text-slate-400"}`}>
+                {/* Baris 1: Hari & Bulan (Kecil) */}
+                <span className={`text-[8px] font-black uppercase tracking-widest leading-none mt-1 ${isActive ? "text-orange-100" : "text-slate-400"}`}>
                   {dayName.replace('.', '')}
                 </span>
                 
-                {/* Baris 2: Tanggal Angka */}
-                <span className={`text-md font-black leading-none my-0.5 ${isActive ? "text-white" : "text-slate-700"}`}>
+                {/* Baris 2: Tanggal Angka (Besar) */}
+                <span className={`text-lg font-black leading-none my-0.5 ${isActive ? "text-white" : "text-slate-800 group-hover:text-red-500 transition-colors"}`}>
                    {dateNum}
                 </span>
 
-                
-                
+                {/* Baris 3: Bulan Singkat */}
+                 <span className={`text-[8px] font-bold uppercase tracking-widest leading-none mb-1 ${isActive ? "text-orange-100" : "text-slate-400"}`}>
+                  {monthName}
+                </span>
+
                 {/* Ikon Api Halus (Hanya saat Aktif) */}
                 {isActive && (
-                    <Flame size={12} className="absolute -bottom-1 -right-1 text-white/20 rotate-12" fill="currentColor"/>
+                    <Flame size={16} className="absolute -bottom-2 -right-2 text-white/20 rotate-12" fill="currentColor"/>
                 )}
 
               </button>

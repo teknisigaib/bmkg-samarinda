@@ -1,7 +1,9 @@
-import FlightMap from "@/components/penerbangan/FlightMap"; 
-import AviationCharts from "@/components/penerbangan/AviationCharts";
-import AwosWidget from "@/components/penerbangan/AwosWidget"; 
-import { Plane, Activity, Radio, Clock, ShieldCheck } from "lucide-react";
+import FlightMap from "@/components/component-cuaca/penerbangan/FlightMap"; 
+import AviationCharts from "@/components/component-cuaca/penerbangan/AviationCharts";
+import AwosWidget from "@/components/component-cuaca/penerbangan/AwosWidget"; 
+import Breadcrumb from "@/components/ui/Breadcrumb";
+import SectionDivider from "@/components/ui/SectionDivider"; // Import komponen Divider
+import { ShieldCheck, RefreshCw } from "lucide-react"; // Ikon Radio & Activity dihapus
 import { getAirportWeather, AIRPORT_DB } from "@/lib/aviation"; 
 import { Metadata } from "next";
 
@@ -30,91 +32,61 @@ export default async function AviationPage() {
 
   return (
     <div className="min-h-screen">
-       <div className="w-full mx-auto pt-8">
+       <div className="w-full mx-auto pt-6 pb-10 sm:px-4 lg:px-6">
            
-           {/* --- HEADER SECTION --- */}
-           <section className="bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col md:flex-row gap-6 items-center text-center md:items-start md:text-left shadow-sm transition-all mb-8">
-              
-              {/* Icon Box */}
-              <div className="bg-white p-3 rounded-full shadow-sm w-fit ring-4 ring-blue-50/50">
-                <Plane className="w-8 h-8 text-blue-600" />
+           {/* --- 1. BREADCRUMB NAVIGATION --- */}
+           <Breadcrumb 
+             className="mb-10" 
+             items={[
+               { label: "Beranda", href: "/" },
+               { label: "Cuaca" }, 
+               { label: "Cuaca Penerbangan" } 
+             ]} 
+           />
+
+           {/* --- 2. HEADER SECTION --- */}
+           <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
+                 <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
               </div>
-      
-              <div className="flex-1 w-full">
-                
-                {/* Judul & Deskripsi */}
-                <div>
-                    <h1 className="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-2 justify-center md:justify-start">
-                        Prakiraan Cuaca Penerbangan
-                    </h1>
-                    <p className="text-gray-600 text-sm mt-1 leading-relaxed">
-                        Sistem pemantauan cuaca penerbangan terpadu. Menyediakan data observasi METAR, prakiraan TAF, peringatan dini SIGMET, dan instrumen AWOS Real-time untuk wilayah udara Indonesia.
-                    </p>
-                </div>
+              
+              <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+                 Cuaca Penerbangan
+              </h1>
+              
+              <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-4xl mb-8">
+                 Sistem pemantauan udara terpadu. Menyediakan data observasi METAR, prakiraan TAF, peringatan SIGMET, dan instrumen AWOS Real-time.
+              </p>
 
-                {/* Container Badge */}
-                <div className="mt-5 flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  
-                  {/* Badge Status */}
-                  <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border text-xs font-bold shadow-sm border-emerald-200 text-emerald-700">
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                    </span>
-                    System Online
-                  </div>
-                  
-                  {/* Badge Waktu Update */}
-                  <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-200 text-xs font-medium text-gray-600 shadow-sm">
-                      <Clock className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Sync: {serverTime} UTC</span>
-                  </div>
-
-                  {/* Badge Info Tambahan (Menggantikan Selector AWS) */}
-                  <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-200 text-xs font-medium text-gray-600 shadow-sm">
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-                      <span>{onlineAirportsCount} Airports Monitored</span>
-                  </div>
-
-                </div>
+              <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm p-1">
+                 <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs font-semibold text-slate-700">{onlineAirportsCount} Bandara Terpantau</span>
+                 </div>
+                 
+                 <div className="flex items-center gap-2 px-4 py-1.5">
+                    <RefreshCw className="w-4 h-4 text-blue-500" />
+                    <span className="text-xs font-medium text-slate-500">Sync: {serverTime} UTC</span>
+                 </div>
               </div>
            </section>
 
-           {/* --- 2. PETA UTAMA --- */}
-           
-            <div className="w-full h-[500px] md:h-[600px] rounded-xl overflow-hidden relative">
-                <FlightMap initialAirports={initialAirportData} />
-            </div>
+           {/* --- 3. PETA UTAMA --- */}
+           <div className="w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden relative shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-200/50 bg-slate-900">
+               <FlightMap initialAirports={initialAirportData} />
+           </div>
 
-           {/* --- 3. LIVE AWOS INSTRUMENT PANEL --- */}
-           <div className="w-full mx-auto mt-12 mb-8">
-            <div className="mb-6 flex items-center gap-4">
-                   <div className="h-px bg-slate-200 flex-1"></div>
-                   <div className="flex items-center gap-2 text-slate-400 px-2">
-                       <Radio size={16} className="text-blue-500" />
-                       <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                           Live AWOS Instruments
-                       </span>
-                   </div>
-                   <div className="h-px bg-slate-200 flex-1"></div>
-               </div>
-
+           {/* --- 4. LIVE AWOS INSTRUMENT PANEL --- */}
+           <div className="w-full mx-auto mt-24 mb-12 max-w-7xl">
+               {/* Memanggil komponen Divider Baru */}
+               <SectionDivider title="Data AWOS Live" className="mb-8" />
                <AwosWidget />
            </div>
 
-           {/* --- 4. DATA STATIS (CHARTS) --- */}
-           <div className="w-full mx-auto mt-12 mb-12">
-               <div className="mb-6 flex items-center gap-4">
-                   <div className="h-px bg-slate-200 flex-1"></div>
-                   <div className="flex items-center gap-2 text-slate-400 px-2">
-                       <Activity size={16} className="text-emerald-500" />
-                       <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                           BMKG Forecast Models
-                       </span>
-                   </div>
-                   <div className="h-px bg-slate-200 flex-1"></div>
-               </div>
-
+           {/* --- 5. DATA STATIS (CHARTS) --- */}
+           <div className="w-full mx-auto mt-24 mb-16 max-w-7xl">
+               {/* Memanggil komponen Divider Baru */}
+               <SectionDivider title="Forecast" className="mb-8" />
                <AviationCharts />
            </div>
 
