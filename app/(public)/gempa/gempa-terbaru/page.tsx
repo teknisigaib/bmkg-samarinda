@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   description: "Informasi gempa bumi terbaru dan daftar gempa bumi yang dirasakan di wilayah Indonesia.",
 };
 
-// ... (Interface GempaTerbaru, GempaDirasakan, dan Helper generateShakemapUrl tetap sama persis) ...
 interface GempaTerbaru {
   Tanggal: string;
   Jam: string;
@@ -53,7 +52,6 @@ function generateShakemapUrl(dateTimeUtc: string) {
   return `https://data.bmkg.go.id/DataMKG/TEWS/${yyyy}${mm}${dd}${hh}${min}${ss}.mmi.jpg`;
 }
 
-// ... (Fungsi Fetch Server-Side tetap sama persis) ...
 async function getLatestEarthquake(): Promise<GempaTerbaru | null> {
   try {
     const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json", { next: { revalidate: 60 } });
@@ -72,7 +70,6 @@ async function getFeltEarthquakes(): Promise<GempaDirasakan[]> {
   } catch (error) { return []; }
 }
 
-
 export default async function GempaTerbaruPage() {
   const [gempaTerbaru, listGempaDirasakan] = await Promise.all([
     getLatestEarthquake(),
@@ -81,17 +78,19 @@ export default async function GempaTerbaruPage() {
 
   return (
     <div className="min-h-screen pb-24 bg-slate-50/50">
-      <div className="w-full mx-auto pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl">
+      {/* Tambahkan kembali max-w-7xl agar tidak melebar tak terbatas di layar besar */}
+      <div className="w-full mx-auto pt-6">
         
-        {/* BREADCRUMB */}
+        {/* BREADCRUMB (Tetap anteng di Kiri) */}
         <Breadcrumb 
           className="mb-8" 
           items={[{ label: "Beranda", href: "/" }, { label: "Gempa", href: "/gempa" }, { label: "Gempa Bumi Terbaru" }]} 
         />
 
-        {/* HEADER UTAMA */}
-        <section className="mb-8 max-w-3xl">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 text-slate-900">
+        {/* HEADER UTAMA (Tepat di Tengah Halaman) */}
+        {/* REVISI: Tambahkan mx-auto, text-center, flex, flex-col, dan items-center */}
+        <section className="mb-12 max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-slate-900">
             Gempa Bumi Terbaru
           </h1>
           <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">
