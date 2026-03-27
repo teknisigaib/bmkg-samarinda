@@ -16,10 +16,10 @@ export function useTimeAnimation(intervalMinutes: number, durationMinutes: numbe
       arr.push(new Date(t));
       t = new Date(t.getTime() + intervalMinutes * 60000);
     }
-    return arr;
+    return arr; 
   }, [intervalMinutes, durationMinutes]);
 
-  // Set default ke frame terakhir (terbaru) saat pertama load
+  // Set default ke frame terakhir (terbaru) saat pertama loads
   useEffect(() => {
     if (steps.length > 0) {
       setCurrentIndex(steps.length - 1);
