@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import prisma from "@/lib/prisma";
 import PrakiraanTabs from "@/components/component-iklim/PrakiraanTabs";
 import Breadcrumb from "@/components/ui/Breadcrumb";
-import { Layers, CalendarClock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Prakiraan Hujan | BMKG APT Pranoto Samarinda",
@@ -33,11 +32,18 @@ async function getClimateData(type: string) {
 }
 
 export default async function PrakiraanHujanPage() {
-  // Ambil 4 jenis data
-  const [dataDasarian, dataBulanan, dataSifat, dataProbabilitas] = await Promise.all([
+  // Ambil 5 jenis data dari database secara paralel
+  const [
+    dataDasarian, 
+    dataBulanan, 
+    dataSifatDasarian, 
+    dataSifatBulanan, 
+    dataProbabilitas
+  ] = await Promise.all([
     getClimateData("PrakiraanHujanDasarian"),
     getClimateData("PrakiraanHujanBulanan"),
     getClimateData("PrakiraanSifatDasarian"),
+    getClimateData("PrakiraanSifatBulanan"), // <-- INI QUERY BARU
     getClimateData("PrakiraanProbabilitas"),
   ]);
 
@@ -57,8 +63,7 @@ export default async function PrakiraanHujanPage() {
         {/* --- HEADER SECTION --- */}
         <section className="relative flex flex-col items-center justify-center text-center mb-12 mx-auto pt-2">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
-              {/* Glow biru lembut untuk tema hujan */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-green-500/10 rounded-full blur-3xl"></div>
            </div>
            
            <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
@@ -66,17 +71,16 @@ export default async function PrakiraanHujanPage() {
            </h1>
            
            <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
-              Peta dan analisis prakiraan curah hujan dasarian, bulanan, sifat hujan, hingga probabilitas curah hujan di wilayah Kalimantan Timur.
+              Peta dan analisis prakiraan curah hujan, sifat hujan (dasarian & bulanan), hingga probabilitas curah hujan di wilayah Kalimantan Timur.
            </p>
-
-           
         </section>
 
         {/* Tab Manager (Client Component) */}
         <PrakiraanTabs 
           dataDasarian={dataDasarian}
           dataBulanan={dataBulanan}
-          dataSifat={dataSifat}
+          dataSifatDasarian={dataSifatDasarian}
+          dataSifatBulanan={dataSifatBulanan} // <-- PASSING DATA BARU KE CLIENT
           dataProbabilitas={dataProbabilitas}
         />
 

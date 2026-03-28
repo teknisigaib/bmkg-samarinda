@@ -18,6 +18,13 @@ export const CLIMATE_TYPES: Record<string, { dbType: string; title: string }> = 
     dbType: "PrakiraanSifatDasarian", 
     title: "Prakiraan Sifat Hujan Dasarian" 
   },
+  
+  // 👇 INI YANG BARU KITA TAMBAHKAN 👇
+  "prakiraan-sifat-bulanan": { 
+    dbType: "PrakiraanSifatBulanan", 
+    title: "Prakiraan Sifat Hujan Bulanan" 
+  },
+  
   "prakiraan-probabilitas": { 
     dbType: "PrakiraanProbabilitas", 
     title: "Prakiraan Probabilitas Hujan" 

@@ -68,7 +68,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="pl-9 mt-1 space-y-1 border-l-2 border-gray-100 ml-4">
                     <SubItem href="/admin/iklim/prakiraan-hujan-dasarian" label="Hujan Dasarian" />
                     <SubItem href="/admin/iklim/prakiraan-hujan-bulanan" label="Hujan Bulanan" />
-                    <SubItem href="/admin/iklim/prakiraan-sifat-dasarian" label="Sifat Hujan" />
+                    <SubItem href="/admin/iklim/prakiraan-sifat-dasarian" label="Sifat Dasarian" />
+                    <SubItem href="/admin/iklim/prakiraan-sifat-bulanan" label="Sifat Bulanan" />                   
                     <SubItem href="/admin/iklim/prakiraan-probabilitas" label="Probabilitas" />
                 </div>
             </details>

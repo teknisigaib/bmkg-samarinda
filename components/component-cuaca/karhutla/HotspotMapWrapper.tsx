@@ -46,13 +46,13 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
     setIsMounted(true);
   }, []);
 
-  // --- LOGIKA DATA TANGGAL ---
+  // --- LOGIKA DATA TANGGAL (SUDAH TIDAK MUNDUR 1 HARI) ---
   const last7Days = useMemo(() => {
     const dates = [];
     const today = new Date();
-    // Mundurkan 'today' 1 hari karena data BMKG adalah data pantauan kemarin
-    today.setDate(today.getDate() - 1); 
-
+    
+    // LOGIKA H-1 SUDAH DIHAPUS. 'today' sekarang murni hari ini.
+    
     for (let i = 0; i < 7; i++) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
@@ -61,7 +61,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
     return dates.reverse(); // Urutan: Lama -> Terbaru
   }, []);
 
-  const [selectedIndex, setSelectedIndex] = useState(last7Days.length - 1);
+  const [selectedIndex, setSelectedIndex] = useState(last7Days.length - 2);
   const selectedDate = last7Days[selectedIndex];
 
   const timestamps = useMemo(() => {
@@ -78,7 +78,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
   // --- SSR FALLBACK (Loading UI saat di Server) ---
   if (!isMounted) {
     return (
-      <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-[2rem] border border-slate-200 animate-pulse">
+      <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
           <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Menyiapkan Data...</p>
       </div>
     );
@@ -91,23 +91,19 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
       {/* --- 1. HEADER SECTION --- */}
       <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
          
-         {/* Efek Cahaya Halus (Glow) di Latar Belakang */}
          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl"></div>
          </div>
          
-         {/* Judul Utama */}
          <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
             Monitoring Hotspot
          </h1>
          
-         {/* Deskripsi */}
          <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
-            Peta sebaran titik panas di wilayah Kalimantan Timur berdasarkan pantauan satelit (SNPP/NOAA20) sebagai peringatan dini kebakaran hutan dan lahan.
+            Peta sebaran titik panas di wilayah Kalimantan Timur berdasarkan pantauan satelit (SNPP/NOAA20) sebagai peringatan dini kebakaran hutan dan lahan. Data berlaku 24 jam ke depan.
          </p>
 
-         {/* Symmetrical Status Bar */}
-         <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-full shadow-sm p-1">
+         <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm p-1">
             <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                <Flame className="w-4 h-4 text-orange-500" />
                <span className="text-xs font-bold text-slate-700">{filteredData.length} Titik Api</span>
@@ -124,12 +120,9 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
       </section>
       
       {/* --- 2. PETA INTERAKTIF + KONTROL WAKTU --- */}
-      <div className="relative group rounded-[2rem] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-200/50 bg-slate-900">
-        
-        {/* Komponen Peta */}
+      <div className="relative group rounded-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-200/50 bg-slate-900">
         <HotspotMap data={filteredData} />
 
-        {/* Kontrol Waktu Melayang */}
         <div className="absolute bottom-0 left-0 w-full z-[800]"> 
              <HotspotControl 
                 timestamps={timestamps}
@@ -138,7 +131,6 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
              />
         </div>
 
-        {/* Overlay Info Kosong */}
         {filteredData.length === 0 && (
              <div className="absolute inset-0 z-[300] flex items-center justify-center pointer-events-none pb-20">
                 <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg border border-slate-200 text-center">
@@ -150,7 +142,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
       </div>
 
       {/* --- 3. TABEL DAFTAR TITIK PANAS --- */}
-      <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm w-full mt-6">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm w-full mt-6">
         <div className="p-5 border-b border-slate-100 bg-white flex flex-col md:flex-row justify-between md:items-center gap-4">
             <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest text-xs">
                 <MapPin className="w-4 h-4 text-red-500" />
@@ -196,7 +188,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
                                     </td>
                                     <td className="px-5 py-4 align-top">
                                         <span className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold border ${confColor} whitespace-nowrap`}>
-                                            {item.conf >= 9 ? "Tinggi" : (item.conf >= 7 ? "Sedang" : "Rendah")} ({item.conf}%)
+                                            {item.conf >= 9 ? "Tinggi" : (item.conf >= 7 ? "Sedang" : "Rendah")} ({item.conf})
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-600 font-bold text-xs hidden md:table-cell align-top">

@@ -58,7 +58,7 @@ export default async function AviationPage() {
                  Sistem pemantauan udara terpadu. Menyediakan data observasi METAR, prakiraan TAF, peringatan SIGMET, dan instrumen AWOS Real-time.
               </p>
 
-              <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm p-1">
+              <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-xl shadow-sm p-1">
                  <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
                     <span className="text-xs font-semibold text-slate-700">{onlineAirportsCount} Bandara Terpantau</span>

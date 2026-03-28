@@ -43,6 +43,7 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
       } catch (e) { return "" }
   }
 
+  // Efek pintar: Otomatis scroll/geser ke tombol yang aktif agar selalu di tengah layar
   useEffect(() => {
     if (scrollRef.current && selectedIndex >= 0) {
       const selectedElement = scrollRef.current.children[selectedIndex] as HTMLElement;
@@ -59,7 +60,8 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
   const isLatest = selectedIndex === timestamps.length - 1;
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-fit max-w-[95vw] px-0 animate-in slide-in-from-bottom-6 fade-in duration-700">
+    // PERBAIKAN 1: Tambahkan w-full sm:w-fit agar di mobile mengambil lebar penuh, tapi tetap max 95vw
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-full sm:w-fit max-w-[95vw] px-0 animate-in slide-in-from-bottom-6 fade-in duration-700">
       
       {/* 1. INFO BADGE (Floating Header) */}
       <div className="flex justify-center mb-3">
@@ -82,10 +84,12 @@ export default function HotspotControl({ timestamps, selectedIndex, onSelect }: 
       </div>
 
       {/* 2. TIMELINE BAR (Container) */}
-      <div className="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-[1.5rem] p-1.5 ring-1 ring-black/5 w-fit mx-auto">
+      {/* PERBAIKAN 2: Tambahkan w-full sm:w-fit max-w-full agar kontainer tidak bocor keluar layar */}
+      <div className="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-[1.5rem] p-1.5 ring-1 ring-black/5 w-full sm:w-fit mx-auto max-w-full">
         <div 
           ref={scrollRef}
-          className="flex overflow-x-auto gap-1 custom-scrollbar scroll-smooth snap-x touch-pan-x no-scrollbar"
+          // PERBAIKAN 3: Tambahkan w-full, snap-mandatory, dan [&::-webkit-scrollbar]:hidden
+          className="flex overflow-x-auto gap-1 scroll-smooth snap-x snap-mandatory touch-pan-x w-full [&::-webkit-scrollbar]:hidden"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {timestamps.map((time, idx) => {

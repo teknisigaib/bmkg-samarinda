@@ -17,20 +17,13 @@ const formatDateYMD = (date: Date) => {
   return `${yyyy}${mm}${dd}`;
 };
 
-// Helper: Fetch Data per Tanggal (DENGAN LOGIKA H-1)
-async function fetchBMKGHotspot(displayDate: Date): Promise<HotspotData[]> {
+// Helper: Fetch Data per Tanggal (LOGIKA H-1 SUDAH DIHAPUS, MURNI TANGGAL ASLI)
+async function fetchBMKGHotspot(targetDate: Date): Promise<HotspotData[]> {
   
-  // 1. Tentukan Tanggal Fetch (H-1 dari displayDate)
-  // Jika displayDate = 15, maka fetchDate = 14
-  const fetchDate = new Date(displayDate);
-  fetchDate.setDate(fetchDate.getDate() - 1);
-  const fetchDateStr = formatDateYMD(fetchDate);
-
-  // 2. Tentukan Tanggal Display (Untuk ID agar filter UI tidak rusak)
-  const displayDateStr = formatDateYMD(displayDate);
+  const dateStr = formatDateYMD(targetDate);
   
-  // URL File TXT BMKG menggunakan fetchDateStr (H-1)
-  const url = `https://cews.bmkg.go.id/tempatirk/HOTSPOT/${fetchDateStr}/hotspot_${fetchDateStr}.txt`;
+  // URL File TXT BMKG langsung menggunakan tanggal yang direquest
+  const url = `https://cews.bmkg.go.id/tempatirk/HOTSPOT/${dateStr}/hotspot_${dateStr}.txt`;
 
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } }); // Cache 1 jam
@@ -60,8 +53,7 @@ async function fetchBMKGHotspot(displayDate: Date): Promise<HotspotData[]> {
         if (!prov.toUpperCase().includes("KALIMANTAN TIMUR")) return null;
 
         return {
-          // PENTING: Gunakan displayDateStr sebagai ID agar UI tetap menampilkan data ini di tanggal 15
-          id: `${displayDateStr}-${index}`,
+          id: `${dateStr}-${index}`,
           lng: parseFloat(col[0]),        
           lat: parseFloat(col[1]),       
           conf: parseInt(col[2]) || 0,    
@@ -76,25 +68,9 @@ async function fetchBMKGHotspot(displayDate: Date): Promise<HotspotData[]> {
     return cleanData;
 
   } catch (error) {
-    console.error(`Error fetching hotspot for URL date ${fetchDateStr}:`, error);
+    console.error(`Error fetching hotspot for URL date ${dateStr}:`, error);
     return [];
   }
-}
-
-// Ambil Data Terbaru
-export async function getHotspots(): Promise<HotspotData[]> {
-  const today = new Date();
-  
-  let data = await fetchBMKGHotspot(today);
-
-  // Jika kosong, coba ambil hari sebelumnya lagi
-  if (data.length === 0) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    data = await fetchBMKGHotspot(yesterday);
-  }
-
-  return data;
 }
 
 // Ambil Trend 7 Hari Terakhir (Digunakan oleh komponen KarhutlaStats)
