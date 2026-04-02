@@ -52,9 +52,9 @@ interface RadarLayerProps {
 
 export default function RadarLayer({ opacity = 0.65, targetTime }: RadarLayerProps) {
   const RADAR_STATIONS = [
-    { id: "BAL", name: "Balikpapan", lat: -1.259733, lon: 116.897, radius: 250000 },
-    { id: "MTW", name: "Muara Teweh", lat: -0.941719, lon: 114.896027, radius: 250000 },
-    { id: "TRK", name: "Tarakan", lat: 3.326, lon: 117.565, radius: 250000 },
+    { id: "BAL", name: "Balikpapan", lat: -1.259733, lon: 116.897, radius: 200000 },
+    { id: "MTW", name: "Muara Teweh", lat: -0.941719, lon: 114.896027, radius: 200000 },
+    { id: "TRK", name: "Tarakan", lat: 3.326, lon: 117.565, radius: 240000 },
   ];
 
   return (

@@ -101,6 +101,7 @@ export default async function HomePage() {
             <InfoWidgetWrapper />
          </Suspense>
       </div>
+      
 
       {/* 4. AVIATION SECTION */}
       <Suspense fallback={<AviationSkeleton />}>

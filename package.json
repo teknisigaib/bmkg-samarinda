@@ -20,6 +20,7 @@
     "fast-xml-parser": "^5.3.3",
     "framer-motion": "^12.23.21",
     "leaflet": "^1.9.4",
+    "leaflet-velocity": "^2.1.4",
     "lucide-react": "^0.544.0",
     "metar-taf-parser": "^9.1.2",
     "next": "^15.5.7",

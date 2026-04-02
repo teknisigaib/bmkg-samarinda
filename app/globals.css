@@ -76,3 +76,46 @@
   background: #94a3b8; 
 }
 
+/* 🌟 CUSTOM KEYFRAMES UNTUK IRAMA DETAK GANDA (tiptip-tiptip-tiptip) 🌟 */
+@keyframes rainTipDouble {
+  /* Detakan Pertama (Mula) */
+  0%, 15% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  
+  /* Selesai Detakan Pertama */
+  20% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+  
+  /* Jeda Jantung (Diam/Mati) */
+  21%, 35% {
+    transform: scale(1);
+    opacity: 0;
+  }
+
+  /* Detakan Kedua (Double Tip) */
+  40%, 55% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  
+  /* Selesai Detakan Kedua */
+  60% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+
+  /* Jeda Panjang (Istirahat Jantung) */
+  61%, 100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Class Utility untuk Memanggil Animasi */
+.animate-rain-tip-double {
+  animation: rainTipDouble 1.2s infinite ease-out; /* Total irama 1.2s */
+}

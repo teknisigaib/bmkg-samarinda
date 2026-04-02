@@ -18,7 +18,7 @@ const formatDateYMD = (date: Date) => {
 };
 
 // Helper: Fetch Data per Tanggal (LOGIKA H-1 SUDAH DIHAPUS, MURNI TANGGAL ASLI)
-async function fetchBMKGHotspot(targetDate: Date): Promise<HotspotData[]> {
+export async function fetchBMKGHotspot(targetDate: Date): Promise<HotspotData[]> {
   
   const dateStr = formatDateYMD(targetDate);
   

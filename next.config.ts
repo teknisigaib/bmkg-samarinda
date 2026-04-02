@@ -85,14 +85,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/bmkg/:path*",
-        destination: "https://radar.bmkg.go.id/sidarma-nowcast/:path*",
-      },
-    ];
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
