@@ -98,7 +98,7 @@ export default function AwsWidgetContent({ data }: AwsWidgetContentProps) {
 
         {/* Tombol Panah */}
         <Link
-          href="/cuaca/aws"
+          href="/cuaca/peta-cuaca"
           className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-gray-50 text-blue-400 hover:bg-blue-500 hover:text-white transition group shrink-0 ml-2 shadow-sm"
           title="Lihat Detail Lengkap"
         >
