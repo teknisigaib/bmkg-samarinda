@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// 👉 Tambahkan GeoJSON di import
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Polygon, Tooltip, GeoJSON } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
 import { WeatherStationData } from "@/lib/api-cuaca"; 
@@ -14,7 +12,7 @@ import HourlyRainChart from "./HourlyRainChart";
 import RadarLayer from "@/components/component-cuaca/penerbangan/Radarlayer"; 
 import HimawariLayer from "@/components/component-cuaca/penerbangan/HimawariLayer"; 
 import LayerControl from "./LayerControl";
-import WindLayer from "./WindLayer"; // Sesuaikan dengan path Anda 
+import WindLayer from "./WindLayer"; 
 
 function MapInteraction({ onMapClick }: { onMapClick: () => void }) {
   useMapEvents({ click: () => onMapClick() });
@@ -31,24 +29,31 @@ function MapFlyToController({ targetPos, zoom = 9, trigger }: { targetPos: [numb
   return null;
 }
 
+
 // --- HELPER: IKON STASIUN CUACA ---
 const createCustomIcon = (rainTotal: number, isSelected: boolean, isOffline: boolean, type: string) => {
   let pulseColor = "";
-  if (rainTotal > 0 && !isOffline) {
-    if (rainTotal <= 5) pulseColor = "bg-slate-400";
-    else if (rainTotal <= 20) pulseColor = "bg-sky-400";
-    else if (rainTotal <= 50) pulseColor = "bg-yellow-400";
-    else if (rainTotal <= 100) pulseColor = "bg-orange-500";
-    else pulseColor = "bg-red-500";
+  // 👉 ATURAN BAKU: Inti ikon HANYA Biru (Online) atau Abu-abu (Offline)
+  const coreColor = isOffline ? "bg-slate-400" : "bg-blue-500"; 
+  
+  if (rainTotal >= 0.2 && !isOffline) {
+    // 👉 Skala Warna Pastel HANYA untuk efek denyutan (pulse) di latar belakang
+    if (rainTotal <= 5) pulseColor = "bg-blue-300";
+    else if (rainTotal <= 20) pulseColor = "bg-green-300";
+    else if (rainTotal <= 50) pulseColor = "bg-yellow-300";
+    else if (rainTotal <= 100) pulseColor = "bg-orange-300";
+    else if (rainTotal <= 150) pulseColor = "bg-red-300";
+    else pulseColor = "bg-purple-300";
   }
-  const coreColor = isOffline ? "bg-slate-400" : "bg-blue-500";
+
   const scaleClass = isSelected ? "scale-110" : "scale-100";
   const isAWS = type === "AWS";
   const shapeStyle = isAWS ? "rounded-full h-3 w-3" : "h-3 w-3"; 
   const triangleClip = !isAWS ? "style='clip-path: polygon(50% 0%, 0% 100%, 100% 100%);'" : "";
+  
   const html = `
     <div class="relative flex items-center justify-center w-full h-full ${scaleClass}">
-      ${(rainTotal > 0 && !isOffline) ? `<span class="animate-ping absolute inline-flex h-5 w-5 rounded-full ${pulseColor} opacity-75"></span>` : ''}
+      ${(rainTotal >= 0.2 && !isOffline) ? `<span class="animate-ping absolute inline-flex h-5 w-5 rounded-full ${pulseColor} opacity-75"></span>` : ''}
       <div ${triangleClip} class="relative inline-flex ${shapeStyle} ${coreColor} border-[1px] border-white shadow-sm transition-all duration-300"></div>
     </div>
   `;
@@ -115,25 +120,22 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
   const [isLoadingWind, setIsLoadingWind] = useState(false);
   const [windTime, setWindTime] = useState<string | null>(null);
 
-  // 👉 STATE BARU UNTUK GEOJSON & MASKING
+  const [windHoverText, setWindHoverText] = useState<string>("");
+
   const [kaltimMask, setKaltimMask] = useState<any[] | null>(null);
   const [kaltimBorder, setKaltimBorder] = useState<any>(null);
 
-  // 👉 FETCH GEOJSON KALTIM & BUAT POLIGON TERBALIK (MASK)
   useEffect(() => {
     fetch('/geojson/WilayahKaltim1.json')
       .then(res => res.json())
       .then(data => {
-        setKaltimBorder(data); // Simpan untuk garis batas
-        
-        // Buat kotak raksasa menutupi seluruh dunia
+        setKaltimBorder(data); 
         const worldRing = [ [90, -180], [90, 180], [-90, 180], [-90, -180] ];
         const holes: any[] = [];
         
-        // Ekstrak koordinat Kaltim sebagai "lubang"
         const extractHoles = (coords: any[]) => {
           if (typeof coords[0][0] === 'number') {
-            holes.push(coords.map((c: any[]) => [c[1], c[0]])); // Tukar Lng,Lat jadi Lat,Lng
+            holes.push(coords.map((c: any[]) => [c[1], c[0]])); 
           } else {
             coords.forEach(extractHoles);
           }
@@ -144,8 +146,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
             if (f.geometry && f.geometry.coordinates) extractHoles(f.geometry.coordinates);
           });
         }
-        
-        // Gabungkan dunia dan lubang
         setKaltimMask([worldRing, ...holes]);
       })
       .catch(err => console.error("Gagal memuat GeoJSON Kaltim:", err));
@@ -176,7 +176,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
     }
   }, [showWarning, capData]);
 
-  // 👉 FETCH DATA ANGIN SAAT TOGGLE DINYALAKAN
   useEffect(() => {
     if (showWind && !windData) {
       setIsLoadingWind(true);
@@ -184,7 +183,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         .then(res => res.json())
         .then(data => {
           setWindData(data);
-          // Ekstrak waktu dari JSON Header Open-Meteo
           if (data && data.length > 0 && data[0].header) {
             const refTime = data[0].header.refTime;
             const timeString = new Date(refTime).toLocaleTimeString("id-ID", { timeZone: "Asia/Makassar", hour: "2-digit", minute: "2-digit" }) + " WITA";
@@ -198,6 +196,20 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         });
     }
   }, [showWind, windData]);
+
+  useEffect(() => {
+    if (!showWind) {
+      setWindHoverText("");
+      return;
+    }
+    const interval = setInterval(() => {
+      const controlBox = document.querySelector('.leaflet-control-velocity');
+      if (controlBox) {
+        setWindHoverText(controlBox.textContent || "");
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [showWind]);
 
   const [touchStartY, setTouchStartY] = useState(0);
   const handleTouchStart = (e: React.TouchEvent) => setTouchStartY(e.touches[0].clientY);
@@ -262,12 +274,13 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
   };
 
   const getStatusBadge = (rainTotal: number) => {
-    if (rainTotal === 0) return { text: "Tidak Hujan", style: "bg-slate-100 text-slate-600 border-slate-200" };
-    if (rainTotal <= 5) return { text: "Hujan Sangat Ringan", style: "bg-slate-100 text-slate-600 border-slate-300" };
-    if (rainTotal <= 20) return { text: "Hujan Ringan", style: "bg-sky-100 text-sky-700 border-sky-300" };
-    if (rainTotal <= 50) return { text: "Hujan Sedang", style: "bg-yellow-100 text-yellow-800 border-yellow-400" };
-    if (rainTotal <= 100) return { text: "Hujan Lebat", style: "bg-orange-100 text-orange-800 border-orange-400" };
-    return { text: "Hujan Ekstrem", style: "bg-red-100 text-red-700 border-red-300" };
+    if (rainTotal < 0.2) return { text: "Tidak Hujan", style: "bg-slate-50 text-slate-500 border-slate-200 font-light" };
+    if (rainTotal <= 5) return { text: "Hujan Sangat Ringan", style: "bg-blue-50 text-blue-500 border-blue-200 font-light" };
+    if (rainTotal <= 20) return { text: "Hujan Ringan", style: "bg-green-50 text-green-500 border-green-200 font-light" };
+    if (rainTotal <= 50) return { text: "Hujan Sedang", style: "bg-yellow-50 text-yellow-600 border-yellow-200 font-light" };
+    if (rainTotal <= 100) return { text: "Hujan Lebat", style: "bg-orange-50 text-orange-500 border-orange-200 font-light" };
+    if (rainTotal <= 150) return { text: "Hujan Sangat Lebat", style: "bg-red-50 text-red-500 border-red-200 font-light" };
+    return { text: "Hujan Ekstrem", style: "bg-purple-50 text-purple-500 border-purple-200 font-light" };
   };
 
   const getRainStatusContent = () => {
@@ -296,57 +309,28 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
   };
 
   return (
-    <div className={`transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-[9999] w-screen h-screen bg-slate-100 rounded-none m-0" : "h-[500px] md:h-[600px] w-full relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-slate-200"}`}>
+    // 👉 REVISI DI SINI: Kembali ke h-[500px] md:h-[600px], dan gunakan h-[100dvh] untuk Fullscreen!
+    <div className={`transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-[9999] w-screen h-[100dvh] bg-slate-100 rounded-none m-0" : "h-[500px] md:h-[600px] w-full relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-slate-200"}`}>
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-150%); } } 
         .animate-marquee { display: inline-block; white-space: nowrap; animation-name: marquee; animation-timing-function: linear; animation-iteration-count: infinite; padding-left: 100%; }
         
-        /* 👇 SULAP KOTAK INFO ANGIN JADI TAILWIND CARD (MIRIP ARG/AWS) 👇 */
-        .leaflet-control-velocity { 
-          background-color: rgba(255, 255, 255, 0.98) !important; 
-          backdrop-filter: blur(12px) !important; 
-          border: 1px solid #f1f5f9 !important; 
-          border-radius: 1.25rem !important; /* rounded-2xl / 3xl */
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important; 
-          padding: 16px 20px !important; 
-          color: #1e293b !important; /* slate-800 */
-          margin-top: 110px !important; 
-          margin-right: 16px !important; 
-          z-index: 1000 !important;
-          pointer-events: none !important; 
-          min-width: 240px !important;
-          font-family: inherit !important;
-        }
-
-        /* HEADER CARD (Menambahkan Judul Info dan Garis Bawah) */
-        .leaflet-control-velocity::before {
-          content: "ⓘ INFO ANGIN";
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 10px;
-          font-weight: 800;
-          color: #3b82f6; /* text-blue-500 (Senada dengan icon ARG) */
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          border-bottom: 2px solid #f1f5f9; /* slate-100 */
-          padding-bottom: 12px;
-          margin-bottom: 12px;
-        }
-
-        /* Teks Nilai Kecepatan dan Arah */
-        .leaflet-control-velocity .velocity-overlay,
+        /* 🚨 GHOST MODE: Sembunyikan kotak asli plugin leaflet-velocity 🚨 */
         .leaflet-control-velocity {
-          font-size: 13px !important;
-          font-weight: 800 !important;
-          color: #0f172a !important; /* slate-900 */
-          line-height: 1.6 !important;
+          opacity: 0 !important;
+          position: absolute !important;
+          top: -9999px !important;
+          left: -9999px !important;
+          pointer-events: none !important;
+          width: 0 !important;
+          height: 0 !important;
+          overflow: hidden !important;
         }
       `}} />
 
       {/* STATUS HUJAN */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] w-[75%] max-w-[280px] sm:max-w-[360px] pointer-events-auto transition-all duration-500">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] w-[75%] max-w-[250px] sm:max-w-[480px] pointer-events-auto transition-all duration-500">
         <div className={`flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg border backdrop-blur-md overflow-hidden ${statusContent.bgClass}`}>
           {statusContent.icon}
           <div className="flex-1 overflow-hidden relative w-full flex items-center">
@@ -392,33 +376,27 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
 
           {userPos && <Marker position={userPos} icon={userLocationIcon} interactive={false} />}
           
-          {/* LAYER CUACA: Satelit & Radar ditaruh SEBELUM Mask Kaltim */}
           {showSatellite && <HimawariLayer opacity={0.65} />}
           {showRadar && <RadarLayer opacity={0.65} />}
-          {/* 👉 RENDER ANGIN (KIRIM DATA LEWAT PROPS) */}
           {showWind && windData && <WindLayer data={windData} />}
 
-          {/* 👉 LAYER EFEK SPOTLIGHT (MASKING) */}
-          {/* Ini akan menggelapkan semua area di luar Kaltim, termasuk menutupi radar/satelit di area tersebut */}
           {kaltimMask && (
             <Polygon 
               positions={kaltimMask} 
               pathOptions={{ 
-                fillColor: '#0f172a', // Warna gelap (Slate 900)
-                fillOpacity: mapStyle === 'dark' || mapStyle === 'satellite' ? 0.6 : 0.4, // Lebih pekat di mode gelap
+                fillColor: '#d1d1d1', 
+                fillOpacity: mapStyle === 'dark' || mapStyle === 'satellite' ? 0.6 : 0.4,
                 stroke: false 
               }} 
-              interactive={false} // Agar klik mouse tembus ke layer bawahnya
+              interactive={false} 
             />
           )}
 
-          {/* 👉 GARIS BATAS KALTIM */}
-          {/* Digambar secara halus agar Kaltim terlihat lebih terdefinisi */}
           {kaltimBorder && (
             <GeoJSON 
               data={kaltimBorder} 
               style={{ 
-                color: mapStyle === 'dark' || mapStyle === 'satellite' ? '#94a3b8' : '#64748b', // Warna garis batas (Slate)
+                color: mapStyle === 'dark' || mapStyle === 'satellite' ? '#94a3b8' : '#64748b', 
                 weight: 0.2, 
                 fillOpacity: 0
               }} 
@@ -426,7 +404,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
             />
           )}
 
-          {/* RENDER POLIGON PERINGATAN DINI (CAP BMKG) */}
           {showWarning && capData?.active && capData.polygons.map((poly: any, idx: number) => (
             <Polygon 
               key={`cap-${idx}`}
@@ -442,7 +419,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
             </Polygon>
           ))}
 
-          {/* RENDER TITIK HOTSPOT */}
           {showHotspot && hotspotData.map((hotspot) => {
             const isSelected = selectedHotspot?.id === hotspot.id;
             return (
@@ -457,7 +433,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
             )
           })}
 
-          {/* RENDER STASIUN CUACA */}
           {data.map((station, idx) => {
             const lat = parseFloat(station.latitude); const lng = parseFloat(station.longitude);
             if (isNaN(lat) || isNaN(lng) || !showStations) return null;
@@ -473,7 +448,52 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         </MapContainer>
       </div>
 
-      {/* MASTER BOTTOM SHEET */}
+      {/* 🔴 CARD INFO ANGIN (TAILWIND RESPONSIVE MOBILE) 🔴 */}
+      {showWind && (
+        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-[1000] w-48 sm:w-72 bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-xl sm:rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex flex-col overflow-hidden pointer-events-none transition-all duration-300 animate-in slide-in-from-right-4 fade-in">
+          <div className="p-2 sm:p-3 flex items-start justify-between shrink-0 bg-white/50">
+            <div className="flex gap-1.5 sm:gap-2.5 items-center">
+              <Wind size={14} className="text-blue-500 shrink-0 sm:w-4 sm:h-4 mt-0.5" />
+              <div>
+                <p className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">INFO ANGIN 10M</p>
+                <h3 className="text-xs sm:text-sm font-black text-slate-800 leading-tight line-clamp-1">Model ECMWF</h3>
+              </div>
+            </div>
+          </div>
+          
+          <div className="px-2 sm:px-3 shrink-0"><hr className="border-slate-100" /></div>
+          
+          <div className="p-2 sm:p-3 flex flex-col gap-1.5 sm:gap-2.5 min-h-[50px] sm:min-h-[64px] justify-center">
+            {(() => {
+              const text = windHoverText;
+              const dirMatch = text.match(/([\d.]+)\s*°/);
+              const spdMatch = text.match(/([\d.]+)\s*(m\/s|km\/h|kt|mph)/i);
+
+              if (dirMatch && spdMatch) {
+                return (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] sm:text-xs text-slate-500 font-medium">Arah Angin:</span>
+                      <span className="text-xs sm:text-sm font-black text-slate-800">{dirMatch[1]} <span className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase">°</span></span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] sm:text-xs text-slate-500 font-medium">Kecepatan:</span>
+                      <span className="text-xs sm:text-sm font-black text-slate-800">{spdMatch[1]} <span className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase">{spdMatch[2]}</span></span>
+                    </div>
+                  </>
+                );
+              }
+              return (
+                <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium text-center py-1 sm:py-2 animate-pulse">
+                  Arahkan kursor ke area peta
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* MASTER BOTTOM SHEET (Floating Card Stasiun) */}
       {(selectedStation || selectedHotspot) && (
         <div 
           className={`fixed inset-x-0 bottom-0 z-[1000] bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] border-t border-slate-200/60 pb-8 sm:absolute sm:bottom-auto sm:top-4 sm:inset-x-auto sm:left-auto sm:right-16 sm:rounded-2xl sm:pb-0 pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden flex flex-col ${
@@ -549,7 +569,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
           {/* 🔴 TAMPILAN 2: INFO HOTSPOT (TITIK API) */}
           {selectedHotspot && (
             <div className="flex flex-col h-full animate-in fade-in duration-300">
-              
               <div className="p-3 flex items-start justify-between shrink-0">
                 <div className="flex gap-2.5 items-center">
                   <Flame size={18} className="text-red-500 shrink-0" />
@@ -568,7 +587,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
 
               <div className="overflow-y-auto custom-scrollbar flex-1">
                 <div className="p-3 space-y-3">
-                  
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-slate-500 font-medium">Tingkat Kepercayaan:</span>
                     <span className={`px-2 py-0.5 rounded-md text-[11px] font-black border shadow-sm ${
@@ -600,7 +618,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
                       <p>Lon: <span className="font-bold text-slate-700">{selectedHotspot.lng.toFixed(4)}</span></p>
                     </div>
                   </div>
-
                 </div>
               </div>
 
@@ -613,13 +630,10 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
                   {selectedHotspot.date}
                 </div>
               </div>
-
             </div>
           )}
-
         </div>
       )}
-
     </div>
   );
 }

@@ -206,24 +206,24 @@ export default function HourlyRainChart({ stationName }: HourlyRainChartProps) {
           </p>
           <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5">
             <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-full bg-blue-300"></div>
-              <span className="text-[9px] font-medium text-slate-500 uppercase">&le; 1 (S. Ringan)</span>
+              <div className="w-3.5 h-3.5 rounded-sm bg-blue-300"></div>
+              <span className="text-[9px] font-medium text-slate-500">&le; 1 (S. Ringan)</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-300"></div>
-              <span className="text-[9px] font-medium text-slate-500 uppercase">1-5 (Ringan)</span>
+              <div className="w-3.5 h-3.5 rounded-sm bg-green-300"></div>
+              <span className="text-[9px] font-medium text-slate-500">1-5 (Ringan)</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-300"></div>
-              <span className="text-[9px] font-medium text-slate-500 uppercase">5-10 (Sedang)</span>
+              <div className="w-3.5 h-3.5 rounded-sm bg-yellow-300"></div>
+              <span className="text-[9px] font-medium text-slate-500">5-10 (Sedang)</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-full bg-orange-300"></div>
-              <span className="text-[9px] font-medium text-slate-500 uppercase">10-20 (Lebat)</span>
+              <div className="w-3.5 h-3.5 rounded-sm bg-orange-300"></div>
+              <span className="text-[9px] font-medium text-slate-500">10-20 (Lebat)</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-300"></div>
-              <span className="text-[9px] font-medium text-slate-500 uppercase">&gt; 20 (S. Lebat)</span>
+              <div className="w-3.5 h-3.5 rounded-sm bg-red-300"></div>
+              <span className="text-[9px] font-medium text-slate-500">&gt; 20 (S. Lebat)</span>
             </div>
           </div>
         </div>

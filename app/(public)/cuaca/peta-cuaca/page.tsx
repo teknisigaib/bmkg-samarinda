@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/ui/Breadcrumb";
-import WeatherMapWrapper from "@/components/component-cuaca/pantauan-cuaca/WeatherMapWrapper"; 
+import WeatherMapWrapper from "@/components/component-cuaca/peta-cuaca/WeatherMapWrapper"; 
 // 👉 Import fungsi dari lib yang baru kita buat
 import { getRealtimeWeatherData } from "@/lib/api-cuaca";
 

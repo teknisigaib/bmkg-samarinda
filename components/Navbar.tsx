@@ -39,7 +39,7 @@ const NAV_ITEMS: NavItem[] = [
       { name: "Cuaca Mahakam", desc: "Prakiraan cuaca sungai Mahakam", href: "/cuaca/mahakam" },
       { name: "Satelit Cuaca", desc: "Visualisasi citra satelit cuaca", href: "/cuaca/satelit" },
       { name: "Peringatan Karhutla", desc: "Kebakaran hutan dan lahan", href: "/cuaca/karhutla" },
-      { name: "Cuaca RealTime", desc: "Data Realtime Automatic Weather Station", href: "/cuaca/aws" },
+      { name: "Peta Cuaca", desc: "Peta pantauan cuaca secara real-time", href: "/cuaca/peta-cuaca" },
     ]
   },
   {

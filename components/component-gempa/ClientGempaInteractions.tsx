@@ -1,42 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import ImageLightbox from "@/components/ui/ImageLightbox";
 import Image from "next/image";
-import { MapPin, Map } from "lucide-react";
+import { MapPin, Map, ZoomIn } from "lucide-react";
+import ImageLightbox from "@/components/ui/ImageLightbox";
 
-// Tipe props untuk gambar utama
-interface MainMapProps {
-  shakemapUrl: string;
-}
-
-// Komponen 1: Peta Utama yang bisa diklik
-export function ClickableMainMap({ shakemapUrl }: MainMapProps) {
+// --- KOMPONEN 1: PETA UTAMA GEMPA TERBARU ---
+export function ClickableMainMap({ shakemapUrl }: { shakemapUrl: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* Gambar Peta di Halaman */}
       <div 
-        className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 flex-1 group cursor-pointer"
+        className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 flex-1 group cursor-pointer border border-slate-200 shadow-sm"
         onClick={() => setIsOpen(true)}
       >
         <Image 
           src={shakemapUrl}
           alt="Peta Guncangan (Shakemap) Gempa BMKG"
           fill
-          className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, 33vw"
+          unoptimized // BMKG sering memblokir optimasi gambar Next.js
           priority
         />
-        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/60 shadow-sm pointer-events-none">
+        
+        {/* Label Pojok Kiri Atas */}
+        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/60 shadow-sm pointer-events-none z-10">
            <span className="text-slate-700 text-[11px] font-bold flex items-center gap-1.5 uppercase tracking-wider">
               <MapPin size={12} className="text-rose-500" /> Peta Guncangan
            </span>
         </div>
+
+        {/* Overlay Hover "Perbesar Peta" (Diambil dari file yang dihapus) */}
+        <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors duration-300 flex items-center justify-center z-20">
+            <div className="bg-white/95 backdrop-blur-sm text-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm translate-y-2 group-hover:translate-y-0">
+                <ZoomIn className="w-4 h-4 text-blue-600" /> Perbesar Peta
+            </div>
+        </div>
       </div>
 
-      {/* Modal Lightbox tersembunyi */}
       <ImageLightbox 
         isOpen={isOpen}
         imageUrl={shakemapUrl}
@@ -47,14 +50,8 @@ export function ClickableMainMap({ shakemapUrl }: MainMapProps) {
   );
 }
 
-// Tipe props untuk tombol di daftar gempa
-interface MapButtonProps {
-  shakemapUrl: string;
-  wilayah: string;
-}
-
-// Komponen 2: Tombol "Shakemap" di daftar gempa yang bisa diklik
-export function ShakemapButton({ shakemapUrl, wilayah }: MapButtonProps) {
+// --- KOMPONEN 2: TOMBOL SHAKEMAP DI DAFTAR GEMPA DIRASAKAN ---
+export function ShakemapButton({ shakemapUrl, wilayah }: { shakemapUrl: string, wilayah: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -68,7 +65,6 @@ export function ShakemapButton({ shakemapUrl, wilayah }: MapButtonProps) {
         <span className="hidden sm:inline">Shakemap</span>
       </button>
 
-      {/* Modal Lightbox tersembunyi */}
       <ImageLightbox 
         isOpen={isOpen}
         imageUrl={shakemapUrl}

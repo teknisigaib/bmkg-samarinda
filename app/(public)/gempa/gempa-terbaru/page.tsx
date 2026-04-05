@@ -1,13 +1,13 @@
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import SectionDivider from "@/components/ui/SectionDivider"; 
-import { Activity, MapPin, Clock, Layers, AlertTriangle, Info, Calendar, Radio } from "lucide-react";
+import { Activity, MapPin, Clock, Layers, AlertTriangle, Calendar, Radio } from "lucide-react";
 import { Metadata } from "next";
 
-// IMPORT KOMPONEN CLIENT INTERAKTIF KITA
+// IMPORT DARI 1 FILE CLIENT SAJA
 import { ClickableMainMap, ShakemapButton } from "@/components/component-gempa/ClientGempaInteractions";
 
 export const metadata: Metadata = {
-  title: "Gempa Bumi Terbaru & Dirasakan | BMKG",
+  title: "Gempa Bumi Terbaru & Dirasakan | BMKG APT Pranoto Samarinda",
   description: "Informasi gempa bumi terbaru dan daftar gempa bumi yang dirasakan di wilayah Indonesia.",
 };
 
@@ -39,35 +39,57 @@ interface GempaDirasakan {
   Dirasakan: string;
 }
 
+// 🚨 HEADER SAKTI: Mencegah server Vercel/VPS diblokir oleh API BMKG
+const BMKG_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  "Accept": "application/json",
+};
+
 function generateShakemapUrl(dateTimeUtc: string) {
   if (!dateTimeUtc) return "";
-  const d = new Date(dateTimeUtc);
-  d.setHours(d.getHours() + 7);
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  const hh = String(d.getUTCHours()).padStart(2, '0');
-  const min = String(d.getUTCMinutes()).padStart(2, '0');
-  const ss = String(d.getUTCSeconds()).padStart(2, '0');
-  return `https://data.bmkg.go.id/DataMKG/TEWS/${yyyy}${mm}${dd}${hh}${min}${ss}.mmi.jpg`;
+  try {
+    const d = new Date(dateTimeUtc);
+    d.setHours(d.getHours() + 7);
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    const min = String(d.getUTCMinutes()).padStart(2, '0');
+    const ss = String(d.getUTCSeconds()).padStart(2, '0');
+    return `https://data.bmkg.go.id/DataMKG/TEWS/${yyyy}${mm}${dd}${hh}${min}${ss}.mmi.jpg`;
+  } catch (e) {
+    return "";
+  }
 }
 
 async function getLatestEarthquake(): Promise<GempaTerbaru | null> {
   try {
-    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json", { next: { revalidate: 60 } });
+    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json", { 
+      headers: BMKG_HEADERS, // 👈 Pasang topeng di sini
+      next: { revalidate: 60 } 
+    });
     if (!res.ok) return null;
     const data = await res.json();
     return data.Infogempa.gempa;
-  } catch (error) { return null; }
+  } catch (error) { 
+    console.error("Gagal fetch gempa terbaru:", error);
+    return null; 
+  }
 }
 
 async function getFeltEarthquakes(): Promise<GempaDirasakan[]> {
   try {
-    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json", { next: { revalidate: 60 } });
+    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json", { 
+      headers: BMKG_HEADERS, // 👈 Pasang topeng di sini
+      next: { revalidate: 60 } 
+    });
     if (!res.ok) return [];
     const data = await res.json();
     return data.Infogempa.gempa || [];
-  } catch (error) { return []; }
+  } catch (error) { 
+    console.error("Gagal fetch gempa dirasakan:", error);
+    return []; 
+  }
 }
 
 export default async function GempaTerbaruPage() {
@@ -78,17 +100,15 @@ export default async function GempaTerbaruPage() {
 
   return (
     <div className="min-h-screen pb-24 bg-slate-50/50">
-      {/* Tambahkan kembali max-w-7xl agar tidak melebar tak terbatas di layar besar */}
-      <div className="w-full mx-auto pt-6">
+      <div className="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8">
         
-        {/* BREADCRUMB (Tetap anteng di Kiri) */}
+        {/* BREADCRUMB */}
         <Breadcrumb 
           className="mb-8" 
           items={[{ label: "Beranda", href: "/" }, { label: "Gempa", href: "/gempa" }, { label: "Gempa Bumi Terbaru" }]} 
         />
 
-        {/* HEADER UTAMA (Tepat di Tengah Halaman) */}
-        {/* REVISI: Tambahkan mx-auto, text-center, flex, flex-col, dan items-center */}
+        {/* HEADER UTAMA */}
         <section className="mb-12 max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-slate-900">
             Gempa Bumi Terbaru
@@ -102,14 +122,14 @@ export default async function GempaTerbaruPage() {
         {gempaTerbaru ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-16">
             
-            {/* KOLOM KIRI: SHAKEMAP (MEMANGGIL KOMPONEN CLIENT) */}
+            {/* KOLOM KIRI: SHAKEMAP PETA UTAMA */}
             <div className="lg:col-span-4 flex flex-col">
               <div className="bg-white rounded-2xl p-2.5 border border-slate-200 shadow-sm h-full flex flex-col">
                 <ClickableMainMap shakemapUrl={`https://data.bmkg.go.id/DataMKG/TEWS/${gempaTerbaru.Shakemap}`} />
               </div>
             </div>
 
-            {/* KOLOM KANAN: KARTU PARAMETER GEMPA (Tetap Full Server-Side) */}
+            {/* KOLOM KANAN: KARTU PARAMETER GEMPA */}
             <div className="lg:col-span-8 flex flex-col">
               <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col h-full">
                 
@@ -212,14 +232,13 @@ export default async function GempaTerbaruPage() {
                     {/* KOLOM KANAN */}
                     <div className="flex-1 p-5 md:p-6 lg:px-8 flex flex-col justify-center gap-3">
                       
-                      {/* Baris Atas: Waktu & Tombol Shakemap (MEMANGGIL KOMPONEN CLIENT) */}
+                      {/* Baris Atas: Waktu & Tombol Shakemap */}
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 font-medium">
                           <div className="flex items-center gap-1.5"><Calendar size={16} className="text-slate-400" /><span>{gempa.Tanggal}</span></div>
                           <div className="flex items-center gap-1.5"><Clock size={16} className="text-slate-400" /><span>{gempa.Jam}</span></div>
                         </div>
 
-                        {/* Panggil komponen Client untuk tombol Shakemap */}
                         <ShakemapButton shakemapUrl={shakemapUrl} wilayah={gempa.Wilayah} />
                       </div>
 

@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation"; 
-import { CloudRain, MapPin, Clock, Cloud, RefreshCw } from "lucide-react";
+import { CloudRain, MapPin, RefreshCw } from "lucide-react";
 
 // 👉 PERBAIKAN: Jalur impor diarahkan ke lib/api-cuaca
 import { WeatherStationData } from "@/lib/api-cuaca"; 
@@ -82,53 +82,6 @@ export default function WeatherMapWrapper({ data }: { data: WeatherStationData[]
 
       {/* --- PETA OBSERVASI --- */}
       <WeatherMap data={data} />
-    
-
-      {/* --- DAFTAR RINCIAN STASIUN --- */}
-      <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm p-4 sm:p-6 md:p-8">
-         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-             <CloudRain className="text-cyan-500" />
-             <h2 className="text-lg font-bold text-slate-800">Rincian Pengamatan Stasiun</h2>
-         </div>
-
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedData.map((station, idx) => {
-                const isRaining = station.rain_total > 0;
-                const dateObj = new Date(station.record_time);
-                const timeString = dateObj.toLocaleTimeString("id-ID", { timeZone: "Asia/Makassar", hour: "2-digit", minute: "2-digit" }) + " WITA";
-
-                return (
-                    <div key={idx} className={`p-4 rounded-xl border flex items-center justify-between transition-colors ${
-                        isRaining ? "bg-cyan-50 border-cyan-100 shadow-sm" : "bg-slate-50 border-slate-100 hover:bg-slate-100"
-                    }`}>
-                        <div className="flex gap-3 items-center">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                                isRaining ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/20" : "bg-white text-slate-400 border border-slate-200"
-                            }`}>
-                                {isRaining ? <CloudRain size={18} /> : <Cloud size={18} />}
-                            </div>
-                            <div>
-                                <h3 className={`font-bold text-sm ${isRaining ? "text-cyan-900" : "text-slate-700"}`}>
-                                    {station.station_name}
-                                </h3>
-                                <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 mt-0.5">
-                                    <Clock size={12} /> {timeString}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className={`text-xl font-black leading-none ${isRaining ? "text-cyan-600" : "text-slate-400"}`}>
-                                {station.rain_total}
-                            </p>
-                            <p className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isRaining ? "text-cyan-500" : "text-slate-400"}`}>
-                                mm
-                            </p>
-                        </div>
-                    </div>
-                );
-            })}
-         </div>
-      </div>
 
     </div>
   );
