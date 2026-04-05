@@ -13,17 +13,13 @@ const poppins = Poppins({
 // METADATA UTAMA 
 export const metadata: Metadata = {
   metadataBase: new URL('https://stamet-samarinda.bmkg.go.id'), 
-  
-  title: {
-    template: '%s | Stasiun Meteorologi APT Pranoto', // Template untuk halaman anak
-    default: 'Stasiun Meteorologi APT Pranoto - BMKG Samarinda', // Judul halaman utama
-  },
+  title: 'Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto',
   description: "Website Resmi Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto. Menyediakan informasi cuaca, iklim, dan penerbangan untuk wilayah Samarinda dan Kalimantan Timur.",
   verification: {
     google: "Ou2gyh8a7aDifDNw3zpQnyIYZDTlzfOQTLYJVB6fGq4",
   },
-  applicationName: 'Stasiun Meteorologi APT Pranoto', // PENTING: Ini sinyal pertama ke Google
-  authors: [{ name: 'Stasiun Meteorologi APT Pranoto', url: 'https://stamet-samarinda.bmkg.go.id' }],
+  applicationName: 'Stasiun Meteorologi APT Pranoto Samarinda', // PENTING: Ini sinyal pertama ke Google
+  authors: [{ name: 'Stasiun Meteorologi APT Pranoto Samarinda', url: 'https://stamet-samarinda.bmkg.go.id' }],
   keywords: ['Cuaca Samarinda', 'BMKG', 'APT Pranoto', 'Prakiraan Cuaca', 'Iklim', 'Penerbangan', 'Kalimantan Timur'],
   icons: {
     icon: '/logo-bmkg.png',

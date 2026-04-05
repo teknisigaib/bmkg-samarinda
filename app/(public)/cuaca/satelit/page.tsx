@@ -6,8 +6,7 @@ import RPSatelitSection from "@/components/component-cuaca/satelit/RPSatelitSect
 
 export const metadata: Metadata = {
   title: "Citra Satelit Cuaca | BMKG APT Pranoto Samarinda",
-  description:
-    "Citra satelit Himawari dan HCAI dari BMKG untuk pemantauan cuaca di wilayah Indonesia dan Kalimantan Timur.",
+  description: "Citra satelit Himawari dan HCAI dari BMKG untuk pemantauan cuaca di wilayah Indonesia dan Kalimantan Timur.",
 };
 
 export default function SatelitPage() {

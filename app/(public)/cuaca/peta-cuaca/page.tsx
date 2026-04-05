@@ -6,7 +6,7 @@ import WeatherMapWrapper from "@/components/component-cuaca/peta-cuaca/WeatherMa
 import { getRealtimeWeatherData } from "@/lib/api-cuaca";
 
 export const metadata: Metadata = {
-  title: "Pantauan Cuaca Real-Time | BMKG APT Pranoto Samarinda",
+  title: "Peta Cuaca Real-Time | BMKG APT Pranoto Samarinda",
   description: "Pantauan curah hujan dan kondisi cuaca real-time dari stasiun otomatis (ARG & AWS) di Kalimantan Timur.",
 };
 

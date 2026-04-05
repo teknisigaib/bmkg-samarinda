@@ -9,7 +9,7 @@ import { getTidalForecast } from "@/lib/tide-service";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cuaca Sungai Mahakam | BMKG APT Pranoto Samarinda",
+  title: "Prakiraan Cuaca Sungai Mahakam | BMKG APT Pranoto Samarinda",
   description: "Informasi prakiraan cuaca maritim dan pasang surut Sungai Mahakam.",
 };
 

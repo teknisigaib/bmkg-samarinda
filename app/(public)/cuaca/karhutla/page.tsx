@@ -11,7 +11,7 @@ import SectionDivider from "@/components/ui/SectionDivider";
 export const revalidate = 600; 
 
 export const metadata: Metadata = {
-  title: "Peringatan Karhutla | BMKG APT PranotoSamarinda",
+  title: "Titik Panas (Hotspot) | BMKG APT Pranoto Samarinda",
   description: "Monitoring titik panas (hotspot) di wilayah Kalimantan Timur.",
 };
 

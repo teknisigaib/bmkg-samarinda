@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 // --- METADATA (SEO) ---
 export const metadata: Metadata = {
-  title: "Cuaca Penerbangan | BMKG APT Pranoto Samarinda",
+  title: "Prakiraan Cuaca Penerbangan | BMKG APT Pranoto Samarinda",
   description: "Monitor cuaca penerbangan real-time, METAR, TAF, SIGMET, dan data AWOS live untuk bandara APT Pranoto Samarinda dan sekitarnya.",
   keywords: ["Cuaca Penerbangan", "WALS", "AWOS Samarinda", "METAR Indonesia", "Peta Penerbangan"],
 };

@@ -65,9 +65,8 @@ export default function RPSatelitSection() {
         </div>
 
         {/* AREA DESKRIPSI */}
-        <div className="mt-5 bg-slate-50 border border-slate-100 rounded-xl p-4 flex gap-3">
-            <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-            <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium text-justify">
+        <div className="bg-blue-50 text-gray-700 rounded-xl p-4 mt-4 border border-blue-100">
+            <p className="text-sm sm:text-base text-justify">
               Produk <strong>Himawari-9 Potential Rainfall</strong> adalah produk yang digunakan 
               untuk mengestimasi potensi curah hujan, yang disajikan berdasarkan kategori 
               ringan, sedang, lebat, hingga sangat lebat, dengan menggunakan hubungan antara 
