@@ -81,7 +81,7 @@ export default function PrakicuAIPanel({ isOpen, onClose, meteogramData, selecte
         <div className="bg-indigo-600 px-4 py-3 flex items-center justify-between text-white">
           <div className="flex items-center gap-2">
             <Bot className="w-4 h-4" />
-            <h3 className="font-bold text-xs tracking-wide">Asisten AI BMKG</h3>
+            <h3 className="font-bold text-xs tracking-wide">Asisten AI BMKG Samarinda</h3>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors">
             <X className="w-4 h-4" />
