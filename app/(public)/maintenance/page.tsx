@@ -38,7 +38,7 @@ export default function MaintenancePage() {
           </Link>
           
           <a
-            href="https://wa.me/6281249425470"
+            href="https://wa.me/6285350611416"
             target="_blank"
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all font-medium"
           >

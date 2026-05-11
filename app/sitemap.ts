@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.2,
     },
     {
-      url: `${baseUrl}/cuaca/prakiraan-cuaca`,
+      url: `${baseUrl}/cuaca/prakicu`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.9,
@@ -69,10 +69,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9, 
     },
     {
-      url: `${baseUrl}/cuaca/aws`,
+      url: `${baseUrl}/cuaca/peta-cuaca`,
       lastModified: new Date(),
       changeFrequency: 'always',
-      priority: 0.7,
+      priority: 0.9, 
     },
     {
       url: `${baseUrl}/gempa/gempa-terbaru`,
@@ -83,19 +83,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${baseUrl}/iklim/hari-tanpa-hujan`,
       lastModified: new Date(),
-      changeFrequency: 'always',
+      changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/iklim/prakiraan-hujan`,
       lastModified: new Date(),
-      changeFrequency: 'always',
+      changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/iklim/analisis-hujan`,
       lastModified: new Date(),
-      changeFrequency: 'always',
+      changeFrequency: 'daily',
       priority: 0.9,
     },
     {
@@ -113,19 +113,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${baseUrl}/publikasi/berita-kegiatan`,
       lastModified: new Date(),
-      changeFrequency: 'always',
+      changeFrequency: 'hourly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/publikasi/buletin`,
       lastModified: new Date(),
-      changeFrequency: 'always',
+      changeFrequency: 'hourly',
       priority: 0.6,
     },
     {
       url: `${baseUrl}/publikasi/artikel`,
       lastModified: new Date(),
-      changeFrequency: 'always',
+      changeFrequency: 'daily',
       priority: 0.6,
     },
   ];
@@ -145,9 +145,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 4. Buat URL untuk setiap Berita
   const dynamicRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${baseUrl}/berita/${post.slug}`, 
+    url: `${baseUrl}/publikasi/berita-kegiatan/${post.slug}`, 
     lastModified: post.updatedAt,
-    changeFrequency: 'weekly',
+    changeFrequency: 'daily',
     priority: 0.7,
   }));
 

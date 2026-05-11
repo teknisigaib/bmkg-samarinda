@@ -197,6 +197,7 @@ const transformToUIData = (json: BMKGResponse, requestedId: string): WeatherData
 };
 
 // FUNGSI 1: AMBIL DATA PROVINSI (KALTIM)
+// FUNGSI 1: AMBIL DATA PROVINSI (KALTIM)
 export const getKaltimWeather = async () => {
   try {
     const res = await fetch(
@@ -218,18 +219,40 @@ export const getKaltimWeather = async () => {
 
       if (!current) return null;
 
+      // 1. Ambil semua data prakiraan dalam bentuk flat array
+      const flatCuaca = item.cuaca.flat();
+      
+      // 2. Filter hanya untuk 24 jam ke depan dari waktu sekarang
+      const nowTime = new Date(current.local_datetime).getTime();
+      const next24h = flatCuaca.filter((c: any) => {
+        const t = new Date(c.local_datetime).getTime();
+        return t >= nowTime && t <= nowTime + 24 * 60 * 60 * 1000;
+      });
+
+      // Gunakan data 24 jam, atau gunakan semua jika array kosong
+      const targetData = next24h.length > 0 ? next24h : flatCuaca;
+
+      // 3. Ekstrak nilai Min & Max dari targetData
+      const allTemps = targetData.map((c: any) => c.t);
+      const allHu = targetData.map((c: any) => c.hu);
+      const allWs = targetData.map((c: any) => Math.round(c.ws * 1.852)); // Konversi knot/ms ke km/j
+      
+      // Ekstrak arah angin unik (Menghindari array panjang)
+      const allWd = [...new Set(targetData.map((c: any) => c.wd))].filter(Boolean);
+
       return {
         wilayah: namaWilayah,
-        suhu: current.t,
-        cuaca: current.weather_desc,
-        kodeCuaca: String(current.weather),
+        suhuMin: Math.min(...allTemps),
+        suhuMax: Math.max(...allTemps),
+        cuaca: current.weather_desc, // Cuaca dominan / saat ini
         iconUrl: current.image || "",
-        jam: current.local_datetime 
-              ? current.local_datetime.split(' ')[1].substring(0, 5) 
-              : "Terkini",
-        anginSpeed: Math.round(current.ws * 1.852),
-        anginDir: current.wd,
-        kelembapan: current.hu
+        anginSpeedMin: Math.min(...allWs),
+        anginSpeedMax: Math.max(...allWs),
+        // Jika arah angin bervariasi, tampilkan "Dari - Ke", jika tidak, tampilkan 1 saja
+        anginDir: allWd.length > 1 ? `${allWd[0]} - ${allWd[allWd.length - 1]}` : (allWd[0] || current.wd),
+        kelembapanMin: Math.min(...allHu),
+        kelembapanMax: Math.max(...allHu),
+        jam: current.local_datetime ? current.local_datetime.split(' ')[1].substring(0, 5) : "Terkini",
       };
     });
 

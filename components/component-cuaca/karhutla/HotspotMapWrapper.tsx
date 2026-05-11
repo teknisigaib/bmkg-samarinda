@@ -106,7 +106,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
          <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm p-1">
             <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                <Flame className="w-4 h-4 text-orange-500" />
-               <span className="text-xs font-bold text-slate-700">{filteredData.length} Titik Api</span>
+               <span className="text-xs font-bold text-slate-700">{filteredData.length} Titik Panas</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                <CalendarDays className="w-4 h-4 text-blue-500" />

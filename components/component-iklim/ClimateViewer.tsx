@@ -110,22 +110,23 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
         </div>
       </div>
 
-      {/* KOLOM KANAN */}
-      <div className="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:sticky lg:top-8 h-fit lg:max-h-[calc(100vh-2rem)] flex flex-col">
-        <div className="flex items-center justify-between text-slate-800 font-bold text-base mb-2 border-b border-slate-100 pb-3">
+      {/* KOLOM KANAN (PERBAIKAN SCROLL) */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:sticky lg:top-8 flex flex-col h-[500px] lg:h-[calc(100vh-6rem)]">
+        
+        <div className="flex items-center justify-between text-slate-800 font-bold text-base mb-4 border-b border-slate-100 pb-3 shrink-0">
             <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-blue-600" />
                 Arsip Data
             </div>
         </div>
         
-        {/* List Scrollable */}
-        <div className="grid gap-2 overflow-y-auto pr-1 custom-scrollbar flex-1">
+        {/* List Scrollable (min-h-0 adalah kunci agar tidak bocor) */}
+        <div className="flex flex-col gap-2 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-0">
             {data.map((item) => (
                 <button
                     key={item.id}
                     onClick={() => setActiveData(item)}
-                    className={`text-left w-full p-3 rounded-xl border transition-all flex gap-3 items-center group relative overflow-hidden ${
+                    className={`text-left w-full p-3 rounded-xl border transition-all flex gap-3 items-center group relative overflow-hidden shrink-0 ${
                         activeData.id === item.id 
                         ? "bg-blue-50 border-blue-200 shadow-sm ring-1 ring-blue-100" 
                         : "bg-white border-slate-100 hover:bg-slate-50 hover:border-slate-200"

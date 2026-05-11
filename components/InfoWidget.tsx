@@ -1,230 +1,186 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { 
-  CloudSun, Activity, Wind, Droplets, ArrowRight, MapPin, Calendar, Waves,
-  Sun, Cloud, CloudRain, CloudLightning, CloudFog, Radio
-} from "lucide-react";
-import type { GempaData } from "@/lib/bmkg/gempa";
-import type { CuacaData } from "@/lib/bmkg/cuaca";
-import HomeAwsWidget from "@/components/HomeAwsWidget";
+import Image from "next/image";
+import { Activity, MapPin, Clock, Wind, Thermometer, AlertTriangle, Droplets, Cloud, Compass } from "lucide-react";
+
+interface WeatherData {
+  wilayah: string;
+  suhuMin: number;
+  suhuMax: number;
+  cuaca: string;
+  iconUrl: string;
+  anginSpeedMin: number;
+  anginSpeedMax: number;
+  anginDir: string;
+  kelembapanMin: number;
+  kelembapanMax: number;
+  jam: string;
+}
 
 interface InfoWidgetProps {
-  dataGempa: GempaData | null;
-  listCuaca: CuacaData[]; 
+  dataGempa: any;
+  listCuaca: WeatherData[];
 }
 
 export default function InfoWidget({ dataGempa, listCuaca }: InfoWidgetProps) {
-  const [activeTab, setActiveTab] = useState<"cuaca" | "gempa" | "aws">("cuaca");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (!listCuaca || listCuaca.length <= 1 || isPaused || activeTab !== "cuaca") return;
+    if (!listCuaca || listCuaca.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % listCuaca.length);
-    }, 5000); 
+    }, 5000);
     return () => clearInterval(interval);
-  }, [listCuaca, isPaused, activeTab]);
+  }, [listCuaca]);
 
-  const currentCuaca = listCuaca && listCuaca.length > 0 ? listCuaca[currentIndex] : null;
-
-  const getFallbackIcon = (code: string, sizeClass: string = "w-20 h-20") => {
-    const c = parseInt(code);
-    if (isNaN(c)) return <CloudSun className={`${sizeClass} text-yellow-500`} />;
-    if (c === 0 || c === 1 || c === 2) return <Sun className={`${sizeClass} text-yellow-500`} />;
-    if (c === 3 || c === 4) return <Cloud className={`${sizeClass} text-gray-400`} />;
-    if (c >= 5 && c <= 45) return <CloudFog className={`${sizeClass} text-slate-400`} />;
-    if (c >= 60 && c <= 63) return <CloudRain className={`${sizeClass} text-blue-500`} />;
-    if (c >= 80) return <CloudLightning className={`${sizeClass} text-purple-500`} />;
-    return <CloudSun className={`${sizeClass} text-yellow-500`} />;
-  };
+  const cuacaAktif = listCuaca && listCuaca.length > 0 ? listCuaca[currentIndex] : null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-28 relative z-20 mb-12">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col md:flex-row min-h-[220px]">
-    
-        <div className="md:w-1/4 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 flex md:flex-col">
-          
-          <button 
-            onClick={() => setActiveTab("cuaca")}
-            className={`flex-1 p-4 md:p-5 flex items-center justify-center md:justify-start gap-3 transition-all ${
-                activeTab === 'cuaca' ? 'bg-white text-blue-600 font-bold shadow-sm md:border-l-4 md:border-l-blue-600' : 'text-gray-500 hover:bg-gray-100'
-            }`}
-          >
-            {currentCuaca?.iconUrl ? (
-                 <img src={currentCuaca.iconUrl} alt="icon" className="w-6 h-6 object-contain" />
-            ) : <CloudSun className="w-6 h-6" />}
-            <span className="text-sm">Cuaca Kaltim</span>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab("gempa")}
-            className={`flex-1 p-4 md:p-5 flex items-center justify-center md:justify-start gap-3 transition-all ${
-                activeTab === 'gempa' ? 'bg-white text-red-600 font-bold shadow-sm md:border-l-4 md:border-l-red-600' : 'text-gray-500 hover:bg-gray-100'
-            }`}
-          >
-            <Activity className="w-6 h-6" /> 
-            <span className="text-sm">Gempa Bumi</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab("aws")}
-            className={`flex-1 p-4 md:p-5 flex items-center justify-center md:justify-start gap-3 transition-all ${
-                activeTab === 'aws' ? 'bg-white text-blue-600 font-bold shadow-sm md:border-l-4 md:border-l-blue-600' : 'text-gray-500 hover:bg-gray-100'
-            }`}
-          >
-            <Radio className={`w-6 h-6 animate-pulse`} /> 
-            <span className="text-sm">Live Data</span>
-          </button>
-
+    <div className="w-full bg-white flex flex-col lg:flex-row">
+      
+      {/* ======================================= */}
+      {/* BAGIAN KIRI: GEMPA TERBARU */}
+      {/* ======================================= */}
+      <div className="w-full lg:w-1/2 p-5 sm:p-8 flex flex-col justify-center relative">
+        
+        {/* JUDUL GEMPA */}
+        <div className="w-full flex justify-center items-center mb-6 relative">
+          <div className="flex items-center gap-2.5">
+            <Activity className="w-5 h-5 text-red-500" />
+            <h3 className="font-bold text-lg text-slate-800 tracking-tight">Gempa Terbaru</h3>
+          </div>
+          {dataGempa?.Potensi?.includes("Tsunami") && (
+            <span className="absolute right-0 animate-pulse bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest hidden sm:flex items-center gap-1.5 shadow-sm">
+              <AlertTriangle className="w-3 h-3" /> Tsunami
+            </span>
+          )}
         </div>
 
-        {/*  KONTEN UTAMA */}
-        <div 
-            className="flex-1 p-6 md:p-8 flex flex-col justify-center relative bg-white"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-        >
-            
-            {/* KONTEN CUACA */}
-            {activeTab === "cuaca" && (
-                <div className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300"> 
-                    {currentCuaca ? (
-                        <div key={currentCuaca.wilayah}>
-                            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                                {/* ICON */}
-                                <div className="flex items-center">
-                                    {currentCuaca.iconUrl ? (
-                                        <div className="w-24 h-24 relative">
-                                            <img 
-                                                src={currentCuaca.iconUrl} 
-                                                alt={currentCuaca.cuaca}
-                                                className="w-full h-full object-contain drop-shadow-md scale-125"
-                                            />
-                                        </div>
-                                    ) : (
-                                        getFallbackIcon(currentCuaca.kodeCuaca)
-                                    )}   
-                                </div>
-                                {/* INFO CUACA */}
-                                <div className="flex items-center">
-                                    <div className="justify-items-center text-center space-y-0.5">
-                                        <h3 className="text-gray-500 font-medium text-sm md:text-base flex items-center gap-1">
-                                            {currentCuaca.wilayah}
-                                        </h3>
-                                        <div className="text-4xl font-bold text-gray-800 my-1">
-                                            {currentCuaca.suhu}<span className="text-3xl text-gray-400">°C</span>
-                                        </div>
-                                        <div className="text-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
-                                            {currentCuaca.cuaca}
-                                        </div>
-                                        <div className="text-center text-md text-gray-400">
-                                            {currentCuaca.jam} WITA
-                                        </div>
-                                    </div>
-                                </div>
+        {dataGempa ? (
+          <div className="flex flex-col items-center">
+            <div className="flex gap-5 sm:gap-6 items-center justify-center w-full">
+              {/* Box Magnitudo (Dimensi Diselaraskan: 92x92) */}
+              <div className="flex flex-col items-center justify-center bg-red-50/40 border border-red-100 rounded-2xl w-[92px] h-[92px] flex-shrink-0">
+                <span className="text-[34px] font-black text-red-600 tracking-tighter leading-none mb-1">
+                  {dataGempa.Magnitude}
+                </span>
+                <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                  Magnitudo
+                </span>
+              </div>
 
-                                {/* DETAIL LAINNYA */}
-                                <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-600">
-                                    <div className="flex items-center gap-2">
-                                        <Wind className="w-5 h-5 text-blue-400" />
-                                        <div>
-                                            <span className="block font-bold text-gray-800">{currentCuaca.anginSpeed} km/j</span>
-                                            <span className="text-xs">Arah {currentCuaca.anginDir}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Droplets className="w-5 h-5 text-blue-400" />
-                                        <div>
-                                            <span className="block font-bold text-gray-800">{currentCuaca.kelembapan}%</span>
-                                            <span className="text-xs">Kelembapan</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <Link href="/cuaca/prakiraan" className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition group">
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </Link>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="text-center text-gray-500 py-4 flex flex-col items-center">
-                           <div className="animate-spin w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full mb-2"></div>
-                           Memuat data cuaca...
-                        </div>
-                    )}
-
-                    {/* DOTS PAGINATION */}
-                    {listCuaca && listCuaca.length > 1 && (
-                        <div className="flex justify-center items-center gap-1.5 mt-0 w-full">
-                            {listCuaca.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setCurrentIndex(idx)}
-                                    className="p-1 focus:outline-none"
-                                >
-                                    <div className={`h-1.5 rounded-full transition-all duration-500 ${
-                                        idx === currentIndex ? "w-6 bg-blue-500" : "w-1.5 bg-gray-300 hover:bg-gray-400"
-                                    }`} />
-                                </button>
-                            ))}
-                        </div>
-                    )}
+              {/* List Detail Gempa */}
+              <div className="flex flex-col gap-2.5 flex-1 max-w-[260px]">
+                <div className="flex items-start gap-2 text-slate-700">
+                  <MapPin className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm font-semibold leading-snug line-clamp-2">
+                    {dataGempa.Wilayah}
+                  </span>
                 </div>
-            )}
-
-            {/* KONTEN GEMPA */}
-            {activeTab === "gempa" && (
-                <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    {dataGempa ? (
-                        <div className="flex flex-col md:flex-row items-center gap-6">
-                            <div className="flex-shrink-0 bg-red-50 p-4 rounded-xl border border-red-100 text-center min-w-[120px]">
-                                <span className="block text-xs text-red-500 font-bold uppercase tracking-wider mb-1">Magnitudo</span>
-                                <span className="text-4xl font-extrabold text-red-600">{dataGempa.Magnitude}</span>
-                                <span className="text-sm text-red-400 font-medium">SR</span>
-                            </div>
-                            
-                            <div className="flex-1 space-y-2 text-center md:text-left">
-                                <div className="flex items-center justify-center md:justify-start gap-3 text-gray-500 text-sm">
-                                    <div className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {dataGempa.Tanggal}</div>
-                                    <div className="flex items-center gap-1"><Activity className="w-4 h-4" /> {dataGempa.Jam}</div>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-800 leading-tight">
-                                    {dataGempa.Wilayah}
-                                </h3>
-                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 text-sm mt-2">
-                                    <span className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded text-gray-600 border border-gray-200">
-                                        <MapPin className="w-3 h-3" /> Kedalaman: {dataGempa.Kedalaman}
-                                    </span>
-                                    <span className={`px-3 py-1 rounded font-bold text-xs border flex items-center gap-1 ${
-                                        dataGempa?.Potensi?.includes("tidak") || dataGempa?.Potensi?.includes("Tidak")
-                                        ? "bg-green-100 text-green-700 border-green-200" 
-                                        : "bg-red-100 text-red-700 border-red-200 animate-pulse"
-                                    }`}>
-                                        <Waves className="w-3 h-3" /> {dataGempa.Potensi}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <Link href="/gempa/gempa-terbaru" className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition group">
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="text-center text-gray-500 py-4">Data gempa tidak tersedia.</div>
-                    )}
+                <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
+                  <Clock className="w-3.5 h-3.5 opacity-70" />
+                  <span>{dataGempa.Tanggal}, {dataGempa.Jam}</span>
                 </div>
-            )}
+                <div className="mt-0.5 inline-flex w-fit items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200/60">
+                  Kedalaman: {dataGempa.Kedalaman}
+                </div>
+              </div>
+            </div>
 
-            {/* KONTEN AWS REALTIME  */}
-            {activeTab === "aws" && (
-                <HomeAwsWidget />
-            )}
-
-        </div>
+            {/* Spacer Siluman: Untuk menyeimbangkan tinggi dot carousel di sisi Cuaca */}
+            <div className="h-1.5 mt-6 w-full invisible"></div>
+          </div>
+        ) : (
+          <div className="text-sm text-slate-400 py-6 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl">
+            <Activity className="w-4 h-4 opacity-50" /> Data gempa belum tersedia.
+          </div>
+        )}
       </div>
+
+      {/* GARIS PEMBATAS TENGAH */}
+      <div className="w-full lg:w-px h-px lg:h-auto bg-slate-100 my-0 lg:my-6"></div>
+
+      {/* ======================================= */}
+      {/* BAGIAN KANAN: RINGKASAN CUACA KOTA */}
+      {/* ======================================= */}
+      <div className="w-full lg:w-1/2 p-5 sm:p-8 flex flex-col justify-center relative">
+        
+        {/* JUDUL CUACA */}
+        <div className="w-full flex justify-center items-center mb-6 relative">
+          <div className="flex items-center gap-2.5">
+            <Thermometer className="w-5 h-5 text-blue-500" />
+            <h3 className="font-bold text-lg text-slate-800 tracking-tight">Ringkasan Cuaca</h3>
+          </div>
+        </div>
+
+        {cuacaAktif ? (
+          <div className="w-full flex flex-col items-center animate-in fade-in zoom-in duration-500" key={cuacaAktif.wilayah}>
+            
+            <div className="flex gap-5 sm:gap-6 items-center justify-center w-full">
+              
+              {/* Box Ikon & Suhu (Dimensi Tinggi Diselaraskan: 92px) */}
+              <div className="flex flex-col items-center justify-center bg-blue-50/40 border border-blue-100 rounded-2xl min-w-[104px] px-3 h-[92px] flex-shrink-0">
+                <div className="relative w-9 h-9 mb-1 drop-shadow-sm">
+                  {cuacaAktif.iconUrl ? (
+                    <Image src={cuacaAktif.iconUrl} alt={cuacaAktif.cuaca} fill className="object-contain" unoptimized />
+                  ) : (
+                    <Cloud className="w-full h-full text-blue-300" />
+                  )}
+                </div>
+                <span className="text-[17px] font-black text-blue-600 tracking-tighter leading-none mb-0.5 whitespace-nowrap">
+                  {cuacaAktif.suhuMin}°<span className="opacity-40 font-medium mx-0.5">-</span>{cuacaAktif.suhuMax}°
+                </span>
+              </div>
+
+              {/* List Detail Cuaca (Lebar Diselaraskan dengan Gempa) */}
+              <div className="flex flex-col gap-2.5 flex-1 max-w-[260px]">
+                <div className="flex items-start gap-2 text-slate-700">
+                  <MapPin className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm font-semibold leading-snug line-clamp-1">{cuacaAktif.wilayah}</span>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-slate-500 text-xs font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <Droplets className="w-3.5 h-3.5 opacity-70 text-cyan-500" />
+                    <span>{cuacaAktif.kelembapanMin}-{cuacaAktif.kelembapanMax}%</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Wind className="w-3.5 h-3.5 opacity-70 text-teal-500" />
+                    <span>{cuacaAktif.anginSpeedMin}-{cuacaAktif.anginSpeedMax} km/j</span>
+                  </div>
+                </div>
+
+                <div className="mt-0.5 flex flex-wrap gap-1.5">
+                  <div className="inline-flex w-fit items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-blue-50/80 text-blue-700 capitalize border border-blue-100/80">
+                    {cuacaAktif.cuaca}
+                  </div>
+                  <div className="inline-flex w-fit items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200/60">
+                    <Compass className="w-3 h-3 text-slate-400" /> {cuacaAktif.anginDir}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Indikator Titik Carousel (Dots) */}
+            <div className="flex justify-center gap-1.5 mt-6 h-1.5">
+              {listCuaca.slice(0, 8).map((_, idx) => (
+                <div 
+                  key={idx} 
+                  className={`h-full rounded-full transition-all duration-300 ${idx === currentIndex ? "w-6 bg-blue-500" : "w-1.5 bg-slate-200"}`}
+                />
+              ))}
+            </div>
+
+          </div>
+        ) : (
+          <div className="text-sm text-slate-400 py-6 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl">
+            <Wind className="w-4 h-4 opacity-50" /> Memuat data BMKG...
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

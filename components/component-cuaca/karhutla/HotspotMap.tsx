@@ -13,9 +13,9 @@ const createHotspotIcon = (conf: number, isHovered: boolean) => {
   if (conf >= 9) {
     mainColor = "bg-red-600";
   } else if (conf >= 7) {
-    mainColor = "bg-orange-500";
-  } else {
     mainColor = "bg-yellow-400";
+  } else {
+    mainColor = "bg-green-400";
   }
   
   const sizeClass = isHovered ? "w-5 h-5 border-[3px]" : "w-3 h-3 border-2";

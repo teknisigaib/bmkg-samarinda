@@ -37,7 +37,7 @@ export const DATA_KALTIM: CityNode[] = [
                     { id: "64.01.01.2015", name: "RANTAU BUTA" },
                     { id: "64.01.01.2016", name: "RANTAU LAYUNG" },
                     { id: "64.01.01.2017", name: "SONGKA" },
-                ]
+                ],
             },
             {
                 id: "64.01.02",

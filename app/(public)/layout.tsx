@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/ui/WhatsAppButton";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
        {/* Footer */}
        <Footer />
+
+       {/* Tombol WhatsApp Melayang (Fixed) */}
+       <WhatsAppButton />
     </div>
   );
 }
