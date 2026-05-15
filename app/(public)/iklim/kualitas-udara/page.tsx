@@ -1,10 +1,8 @@
 export const dynamic = 'force-dynamic'; 
 import type { Metadata } from "next";
-import { Wind, ActivitySquare, Clock } from "lucide-react"; // <-- Tambahkan Clock disini
+import { Wind, ActivitySquare, Clock } from "lucide-react"; 
 import AirQualityView from "@/components/component-iklim/kualitas-udara/AirQualityView";
 import Breadcrumb from "@/components/ui/Breadcrumb";
-import fs from 'fs';
-import path from 'path';
 
 export const metadata: Metadata = {
   title: "Kualitas Udara | BMKG APT Pranoto Samarinda",
@@ -13,19 +11,24 @@ export const metadata: Metadata = {
 
 async function getPm25Data() {
   try {
-    const filePath = path.join(process.cwd(), 'public', 'data', 'pm25-cache.json');
-    if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
-      return JSON.parse(fileContent);
-    } else {
-       console.log("File tidak ditemukan di:", filePath);
-    }
-  } catch (error) {
-    console.error("Gagal baca cache di server:", error);
-  }
+    // 🔥 MENGUBAH SUMBER DATA: Dari FTP lokal ke API Gateway Eksternal (Server-Side Fetch)
+    const res = await fetch('https://pm25.bmkgaptpranoto.com/api/v1/pm25', {
+      // Revalidate cache setiap 60 detik agar data Next.js tetap fresh mengikuti cron gateway
+      next: { revalidate: 60 } 
+    });
 
-  // Data default jika gagal
-  return { success: false, current: 0, history: [], lastUpdate: "-" };
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data;
+
+  } catch (error) {
+    console.error("Gagal mengambil data dari API Gateway PM2.5:", error);
+    // Data default fallback tetap dipertahankan jika API down
+    return { success: false, current: 0, history: [], lastUpdate: "-" };
+  }
 }
 
 export default async function AirQualityPage() {
@@ -60,16 +63,14 @@ export default async function AirQualityPage() {
            </p>
 
            <div className="relative z-10 flex flex-wrap justify-center items-center bg-white border border-slate-200 rounded-2xl shadow-sm p-1">
-             
               
-              {/* --- INFO WAKTU TERAKHIR DIPINDAH KESINI --- */}
+              {/* --- INFO WAKTU TERAKHIR --- */}
               <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                  <Clock className="w-4 h-4 text-blue-500" />
-                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                 <span className="text-[12px] font-semibold text-slate-500">
                     Update: {initialData.lastUpdate || '-'}
                  </span>
               </div>
-
               
            </div>
         </section>

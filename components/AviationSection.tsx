@@ -114,7 +114,7 @@ export default async function AviationSection() {
         </div>
 
         {/* INFO AWAN & CUACA */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
             <Layers className="w-4 h-4 text-blue-500" />
             <div className="flex gap-2">
@@ -134,6 +134,17 @@ export default async function AviationSection() {
                 {data.weatherConditions.length > 0 ? (
                   data.weatherConditions.map((w, i) => <span key={i} className="text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">{w}</span>)
                 ) : <span className="text-[11px] text-slate-400 italic">Tidak ada cuaca signifikan</span>}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <CloudRain className="w-4 h-4 text-blue-500" />
+            <div className="flex gap-2">
+              <span className="text-[10px] font-bold text-blue-600 uppercase w-12">Remarks:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {data.remarks.length > 0 ? (
+                  data.remarks.map((r, i) => <span key={i} className="text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">{r}</span>)
+                ) : <span className="text-[11px] text-slate-400 italic">N/A</span>}
               </div>
             </div>
           </div>
@@ -160,7 +171,7 @@ export default async function AviationSection() {
               {latestSpeciString ? (
                 <div className="text-[13px] text-slate-700 leading-relaxed bg-white p-3 rounded-lg border border-slate-200 shadow-sm">{latestSpeciString}</div>
               ) : (
-                <div className="text-[11px] text-slate-400 italic py-4 bg-white/50 rounded-lg border border-dashed border-slate-200 text-center h-full flex items-center justify-center">Nihil</div>
+                <div className="text-[13px] text-slate-400 italic py-4 bg-white/50 rounded-lg border border-dashed border-slate-200 text-center h-full flex items-center justify-center">Nihil</div>
               )}
             </div>
 
@@ -170,7 +181,7 @@ export default async function AviationSection() {
                 <CalendarClock className="w-3.5 h-3.5 text-blue-500" />
                 <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">TAF</span>
               </div>
-              <div className="text-[12px] text-slate-500 leading-relaxed bg-white p-3 rounded-lg border border-slate-200 shadow-sm line-clamp-3 hover:line-clamp-none transition-all">{latestTafString || "N/A"}</div>
+              <div className="text-[13px] text-slate-700 leading-relaxed bg-white p-3 rounded-lg border border-slate-200 shadow-sm line-clamp-3 hover:line-clamp-none transition-all">{latestTafString || "N/A"}</div>
             </div>
           </div>
         </div>

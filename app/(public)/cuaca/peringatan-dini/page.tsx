@@ -1,182 +1,220 @@
-import { Clock, FileText, ShieldCheck, AlertTriangle, MapPin, RadioTower } from "lucide-react"; 
-import { getLinkPeringatanDiniKaltim } from "@/lib/bmkg/warnings";
-import { getCAPAlertDetail } from "@/lib/bmkg/cap";
-import MapLoader from "@/components/component-cuaca/peringatan-dini/MapLoader";
-import AlertImageViewer from "@/components/component-cuaca/peringatan-dini/AlertImageViewer"; // <--- Import Komponen Baru
+import { ShieldCheck, AlertTriangle, FileText, Clock } from "lucide-react"; // ✅ Clock Ditambahkan
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import WarningMapWrapper from "@/components/component-cuaca/peringatan-dini/WarningMapWrapper";
+import InfografisGallery from "@/components/component-cuaca/peringatan-dini/InfografisGallery";
+import ShareButtons from "@/components/component-cuaca/peringatan-dini/ShareButtons";
+import { fetchArcgisNowcasting } from "@/lib/bmkg/nowcast";
 
 export const metadata: Metadata = {
   title: "Peringatan Dini Cuaca | BMKG APT Pranoto Samarinda",
-  description: "Informasi peringatan dini terjadinya hujan lebat di wilayah Kalimantan Timur.",
+  description: "Informasi peringatan dini Nowcasting Cuaca untuk wilayah Kalimantan Timur.",
 };
 
-// Helper format tanggal
-const formatDate = (isoStr: string) => {
-  if (!isoStr) return "-";
-  try {
-    const date = new Date(isoStr);
-    return new Intl.DateTimeFormat("id-ID", {
-      timeZone: "Asia/Makassar",
-      day: "numeric", month: "short",
-      hour: "2-digit", minute: "2-digit",
-      hour12: false
-    }).format(date).replace(/\./g, ":") + " WITA";
-  } catch (e) { return isoStr; }
+const formatDateKaltim = (timestamp: number) => {
+  if (!timestamp) return "-";
+  const date = new Date(timestamp);
+  const day = date.toLocaleString("id-ID", { timeZone: "Asia/Makassar", day: "2-digit" });
+  const month = date.toLocaleString("id-ID", { timeZone: "Asia/Makassar", month: "long" });
+  const year = date.toLocaleString("id-ID", { timeZone: "Asia/Makassar", year: "numeric" });
+  const time = date.toLocaleString("id-ID", { timeZone: "Asia/Makassar", hour: "2-digit", minute: "2-digit" }).replace(/\./g, ":");
+  return `${day} ${month} ${year} pkl. ${time}`;
+};
+
+const formatTimeKaltim = (timestamp: number) => {
+  if (!timestamp) return "-";
+  const date = new Date(timestamp);
+  return date.toLocaleString("id-ID", { timeZone: "Asia/Makassar", hour: "2-digit", minute: "2-digit" }).replace(/\./g, ":");
 };
 
 export default async function PeringatanPage() {
-  const xmlLink = await getLinkPeringatanDiniKaltim();
-  const alertData = xmlLink ? await getCAPAlertDetail(xmlLink) : null;
+  const geoData = await fetchArcgisNowcasting();
+  const features = geoData?.features || [];
+  const hasWarnings = features.length > 0;
+  
+  const now = new Date();
+  const year = now.toLocaleString("en-US", { timeZone: "Asia/Makassar", year: "numeric" });
+  const month = now.toLocaleString("en-US", { timeZone: "Asia/Makassar", month: "2-digit" });
+  const day = now.toLocaleString("en-US", { timeZone: "Asia/Makassar", day: "2-digit" });
+  const imgInfografis = `https://nowcasting.bmkg.go.id/infografis/CKT/${year}/${month}/${day}/infografis.jpg`;
+  const imgText = `https://nowcasting.bmkg.go.id/infografis/CKT/${year}/${month}/${day}/infografis_text.jpg`;
 
-  const isSevere = alertData?.severity === 'Severe';
+  // ✅ LOGIKA WAKTU SYNC LIVE
+  const syncLabel = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Makassar",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(now).replace(/\./g, ":") + " WITA";
 
-  const mapDisplayData = alertData ? {
-    polygons: alertData.polygons,
-    severity: alertData.severity,
-    event: alertData.event,
-    headline: alertData.headline,
-    areaDesc: alertData.areaDesc
-  } : {
-    polygons: [],
-    severity: 'None',
-    event: 'Normal',
-    headline: 'Tidak ada peringatan',
-    areaDesc: ''
-  };
+  const terjadi: Record<string, string[]> = {};
+  const meluas: Record<string, string[]> = {};
+  let waktuPembuatan = 0; let waktuBerlaku = 0; let waktuBerakhir = 0;
+
+  if (hasWarnings) {
+    waktuPembuatan = features[0].properties.waktupembuatan;
+    waktuBerlaku = features[0].properties.waktuberlaku;
+    waktuBerakhir = features[0].properties.waktuberakhir;
+
+    features.forEach((f: any) => {
+      const props = f.properties;
+      const isMeluas = String(props.tipearea || "").toLowerCase().includes("meluas");
+      if (isMeluas) {
+        if (!meluas[props.namakotakab]) meluas[props.namakotakab] = [];
+        if (!meluas[props.namakotakab].includes(props.namakecamatan)) meluas[props.namakotakab].push(props.namakecamatan);
+      } else {
+        if (!terjadi[props.namakotakab]) terjadi[props.namakotakab] = [];
+        if (!terjadi[props.namakotakab].includes(props.namakecamatan)) terjadi[props.namakotakab].push(props.namakecamatan);
+      }
+    });
+  }
+
+  let waText = "";
+  if (hasWarnings) {
+    waText += `*UPDATE Peringatan Dini Cuaca Wilayah Kalimantan Timur* tgl ${formatDateKaltim(waktuPembuatan)} WITA berpotensi terjadi hujan dengan intensitas sedang hingga lebat yang dapat disertai kilat/petir dan angin kencang pada pkl ${formatTimeKaltim(waktuBerlaku)} WITA di:\n\n`;
+
+    if (Object.keys(terjadi).length > 0) {
+      Object.keys(terjadi).forEach(kab => {
+        waText += `*${kab}:* ${terjadi[kab].join(", ")},\n`;
+      });
+      waText += "\n";
+    }
+
+    if (Object.keys(meluas).length > 0) {
+      waText += `Dan dapat meluas ke wilayah:\n`;
+      Object.keys(meluas).forEach(kab => {
+        waText += `*${kab}:* ${meluas[kab].join(", ")},\n`;
+      });
+      waText += "\n";
+    }
+
+    waText += `Kondisi ini diperkirakan masih dapat berlangsung hingga pkl *${formatTimeKaltim(waktuBerakhir)} WITA*\n`;
+    waText += `*Prakirawan BMKG - Kalimantan Timur*\n\n`;
+    waText += `🌍 *Peta Interaktif & Info Lengkap:*\nhttps://stamet-samarinda.bmkg.go.id/cuaca/peringatan-dini\n\n`;
+    waText += `🗺️ *Visual Infografis:*\n${imgInfografis}`;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
       <div className="w-full mx-auto pt-6 lg:px-8 space-y-6">
+        <Breadcrumb items={[ { label: "Beranda", href: "/" }, { label: "Cuaca" }, { label: "Peringatan Dini" } ]} />
 
-        {/* --- BREADCRUMB --- */}
-        <Breadcrumb 
-            items={[
-              { label: "Beranda", href: "/" },
-              { label: "Cuaca" }, 
-              { label: "Peringatan Dini" } 
-            ]} 
-        />
-
-        {/* --- HEADER TITLE & SIMPLE STATUS PILL --- */}
-        {/* --- HEADER SECTION (GAYA CUACA PENERBANGAN) --- */}
         <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
            </div>
-           
-           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
-              Peringatan Dini Cuaca
-           </h1>
-           
-           <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-4xl mb-8">
-              Sistem peringatan dini cuaca ekstrem untuk wilayah administrasi Provinsi Kalimantan Timur.
-           </p>
+           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">Peringatan Dini Cuaca</h1>
+           <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-4xl mb-8">Sistem peringatan dini cuaca (Nowcasting) untuk wilayah Provinsi Kalimantan Timur</p>
 
-           <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-2xl shadow-sm p-1">
-              {!alertData ? (
-                  <div className="flex items-center gap-2 px-4 py-1.5 border-slate-100">
-                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                     <span className="text-xs font-semibold text-slate-700">
-                        Tidak Ada Peringatan Dini Cuaca
-                     </span>
-                  </div>
-              ) : (
+           {/* ✅ SYMMETRICAL STATUS BAR (UNIFIED CAPSULE) */}
+           <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-xl shadow-sm p-1 transition-all hover:shadow-md">
+             
+             {/* KIRI: Status Peringatan */}
+             <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
+               {!hasWarnings ? (
                   <>
-                    <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
-                       <span className="relative flex h-2 w-2 shrink-0">
-                          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isSevere ? 'bg-red-400' : 'bg-amber-400'} opacity-75`}></span>
-                          <span className={`relative inline-flex rounded-full h-2 w-2 ${isSevere ? 'bg-red-500' : 'bg-amber-500'}`}></span>
-                       </span>
-                       <AlertTriangle className={`w-4 h-4 ${isSevere ? 'text-red-500' : 'text-amber-500'}`} />
-                       <span className={`text-xs font-semibold ${isSevere ? 'text-red-700' : 'text-amber-700'}`}>
-                          {alertData.event}
-                       </span>
-                    </div>
-                    <div className="flex items-center gap-2 px-4 py-1.5">
-                       <Clock className="w-4 h-4 text-blue-500" />
-                       <span className="text-xs font-semibold text-slate-700">
-                          s/d {formatDate(alertData.expires)}
-                       </span>
-                    </div>
+                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                     <span className="text-xs font-medium text-slate-500">Tidak Ada Peringatan Dini</span>
                   </>
-              )}
+               ) : (
+                  <>
+                     <span className="relative flex h-2.5 w-2.5 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#fdaf15] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#fdaf15]"></span>
+                     </span>
+                     <AlertTriangle className="w-4 h-4 text-[#d9940b]" />
+                     <span className="text-xs font-medium font-semibold text-slate-500">Peringatan Dini Aktif</span>
+                  </>
+               )}
+             </div>
+
+             {/* KANAN: Waktu Sinkronisasi Live */}
+             <div className="flex items-center gap-2 px-4 py-1.5">
+                <Clock className="w-4 h-4 text-blue-500" />
+                <span className="text-xs font-medium text-slate-500">Sync: {syncLabel}</span>
+             </div>
+
            </div>
         </section>
 
-        {/* --- BAGIAN PETA --- */}
-        <div className="relative w-full h-[400px] md:h-[550px] lg:h-[600px] bg-slate-100 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="absolute inset-0 w-full h-full overflow-hidden">
-               <MapLoader data={mapDisplayData} />
-            </div>
-            
-            {!alertData && (
-              <div className="absolute top-4 right-4 z-[400] max-w-[200px] animate-in fade-in zoom-in duration-500 pointer-events-none">
-                <div className="bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-lg border border-emerald-100">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 uppercase tracking-wider">
-                      <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                      </span>
-                      Aman Terkendali
-                    </div>
-                    <p className="text-[10px] font-medium text-slate-500 leading-tight">
-                      Tidak ada peringatan dini cuaca signifikan di area ini.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="absolute bottom-4 left-4 md:left-6 z-[400] pointer-events-none">
-                <div className="bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-0.5">
-                    <span className="text-[10px] font-bold text-slate-700 uppercase tracking-widest">Radar BMKG Kaltim</span>
-                    <span className="text-[9px] font-medium text-slate-500">
-                        {alertData ? "*Area berwarna menunjukkan potensi terdampak." : "*Seluruh wilayah terpantau normal."}
-                    </span>
-                </div>
-            </div>
+        <div className="relative w-full h-[450px] md:h-[600px] bg-slate-100 rounded-2xl shadow-sm overflow-hidden border border-slate-200">
+            <WarningMapWrapper data={geoData} />
         </div>
 
-        {/* --- BAGIAN DETAIL INFORMASI --- */}
-        {alertData && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-               
-               {/* KOLOM KIRI: Waktu & Teks (Span 2 Kolom Jika Ada Gambar) */}
-               <div className={`space-y-6 ${alertData.web ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
-                  
-                  {/* Blok Waktu */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50 border border-slate-100 p-4 md:px-5 rounded-xl">
-                     <div className="flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-blue-500" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Periode Berlaku</span>
-                     </div>
-                     <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                        <span className="font-bold text-sm text-slate-800 bg-white px-2.5 py-1 rounded border border-slate-200 shadow-sm">{formatDate(alertData.effective)}</span>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">S/D</span>
-                        <span className="font-bold text-sm text-blue-700 bg-white px-2.5 py-1 rounded border border-slate-200 shadow-sm">{formatDate(alertData.expires)}</span>
-                     </div>
-                  </div>
-
-                  {/* Blok Deskripsi */}
-                  <div>
-                     <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <FileText className="w-4 h-4 text-blue-500" /> Detail Peringatan Wilayah
-                     </h4>
-                     <div className="text-slate-700 leading-relaxed text-sm md:text-base font-medium whitespace-pre-line">
-                        {alertData.description}
-                     </div>
-                  </div>
-               </div>
-
-               {/* KOLOM KANAN: Integrasi Komponen ImageLightbox Anda */}
-               {alertData.web && (
-                  <AlertImageViewer imageUrl={alertData.web} />
-               )}
-
+        {hasWarnings && (
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-8 space-y-8 md:space-y-10">
+            
+            <div className="w-full">
+               <InfografisGallery imgMap={imgInfografis} imgText={imgText} />
             </div>
+
+            <div className="w-full space-y-6">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <FileText className="w-6 h-6 text-blue-600" />
+                <div>
+                  <h3 className="font-bold text-lg text-slate-800">Narasi Peringatan Dini</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Format rilis resmi sebaran wilayah terdampak</p>
+                </div>
+              </div>
+
+              <div className="text-slate-700 text-sm md:text-base leading-relaxed font-medium">
+                <p className="mb-6 text-justify">
+                  <strong>UPDATE Peringatan Dini Cuaca Wilayah Kalimantan Timur</strong> tgl {formatDateKaltim(waktuPembuatan)} berpotensi terjadi hujan dengan intensitas sedang hingga lebat yang dapat disertai kilat/petir dan angin kencang pada pkl {formatTimeKaltim(waktuBerlaku)} WITA.
+                </p>
+
+                <div className={`grid grid-cols-1 gap-6 md:gap-8 mb-8 ${Object.keys(meluas).length > 0 ? "md:grid-cols-2" : ""}`}>
+                  
+                  {Object.keys(terjadi).length > 0 && (
+                    <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                      <p className="font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#fdaf15]"></span>
+                        Wilayah Terdampak:
+                      </p>
+                      <div className="space-y-3">
+                        {Object.keys(terjadi).map(kab => (
+                          <div key={kab} className="pl-3 border-l-[3px] border-[#fdaf15]">
+                            <span className="font-bold text-slate-900">{kab}:</span> <span className="text-slate-600 leading-snug block mt-0.5">{terjadi[kab].join(", ")}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {Object.keys(meluas).length > 0 && (
+                    <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                      <p className="font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#fdfc14] border border-slate-300"></span>
+                        Potensi Meluas Ke:
+                      </p>
+                      <div className="space-y-3">
+                        {Object.keys(meluas).map(kab => (
+                          <div key={kab} className="pl-3 border-l-[3px] border-[#fdfc14]">
+                            <span className="font-bold text-slate-900">{kab}:</span> <span className="text-slate-600 leading-snug block mt-0.5">{meluas[kab].join(", ")}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-100">
+                  <p className="text-justify mb-1">
+                    Kondisi ini diperkirakan masih dapat berlangsung hingga pkl <strong>{formatTimeKaltim(waktuBerakhir)} WITA</strong>.
+                    Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+                    Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+                  </p>
+                  <p className="font-bold text-slate-900 mb-6">
+                    Prakirawan BMKG - Kalimantan Timur
+                  </p>
+                  
+                  <ShareButtons textToShare={waText} />
+                </div>
+              </div>
+            </div>
+
           </div>
         )}
 

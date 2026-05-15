@@ -25,13 +25,17 @@ const mapBMKGWeather = (code: number) => {
 };
 
 export default function PrakicuWrapper() {
-  const [activeLayer, setActiveLayer] = useState<"icon" | "temp" | "wind">("icon");
+  const [activeLayer, setActiveLayer] = useState<"icon" | "temp" | "wind">("icon"); // ✅ 3 Dasar Saja
+  const [showNowcast, setShowNowcast] = useState<boolean>(false); // ✅ State Khusus Nowcast Overlay
+  
   const [activeTimeIndex, setActiveTimeIndex] = useState(0);
   const [currentZoom, setCurrentZoom] = useState<number>(6);
   const [resetTrigger, setResetTrigger] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
   
   const [rawBmkgData, setRawBmkgData] = useState<any[]>([]);
+  const [nowcastData, setNowcastData] = useState<any>(null);
+  
   const [isLoadingMain, setIsLoadingMain] = useState(true);
   const [isFetchingSub, setIsFetchingSub] = useState(false);
   
@@ -46,11 +50,23 @@ export default function PrakicuWrapper() {
   const [lastZoomedId, setLastZoomedId] = useState("");
   const [isAIOpen, setIsAIOpen] = useState(false);
 
-  // =========================================================
-  // SISTEM PENGAMAN (Penjaga API & Kunci Animasi Peta)
-  // =========================================================
   const fetchedSubAreas = useRef(new Set<string>());
   const isMapFlying = useRef(false);
+
+  // ✅ AMBIL DATA PERINGATAN DINI LEWAT API PROXY
+  useEffect(() => {
+    const getNowcastData = async () => {
+      try {
+        const res = await fetch("/api/nowcast");
+        if (!res.ok) throw new Error("Gagal mengambil data Nowcasting");
+        const data = await res.json();
+        setNowcastData(data);
+      } catch (error) {
+        console.error("Gagal menyedot Nowcasting dari API", error);
+      }
+    };
+    getNowcastData();
+  }, []);
 
   // SINKRONISASI DROPDOWN
   const activeKotaId = useMemo(() => {
@@ -82,7 +98,6 @@ export default function PrakicuWrapper() {
   // AUTO-RESET SAAT ZOOM OUT
   useEffect(() => {
     if (isMapFlying.current) return;
-
     if (currentZoom <= 7 && selectedLocation.id !== "64") {
       setSelectedLocation({ id: "64", name: "Kalimantan Timur", type: "provinsi" });
       setLastZoomedId("64");
@@ -238,11 +253,11 @@ export default function PrakicuWrapper() {
     if (processedData.length === 0) return [];
     let filteredData: any[] = [];
     
-    if (currentZoom >= 12 && activeKecamatanId) {
+    if (currentZoom >= 11 && activeKecamatanId) {
       filteredData = processedData.filter(s => s.type === "kelurahan" && s.parentId === activeKecamatanId);
       if (filteredData.length === 0) filteredData = processedData.filter(s => s.type === "kecamatan" && s.parentId === activeKotaId);
     } 
-    else if (currentZoom >= 9 && activeKotaId) {
+    else if (currentZoom >= 8 && activeKotaId) {
       filteredData = processedData.filter(s => s.type === "kecamatan" && s.parentId === activeKotaId);
     }
     
@@ -319,17 +334,31 @@ export default function PrakicuWrapper() {
       <div className="relative w-full h-[60vh] min-h-[450px] md:min-h-[550px] bg-white rounded-2xl overflow-hidden shadow-xl border border-slate-200 z-[1]">
         
         <MapComponent 
-          data={currentMapData} activeLayer={activeLayer} onZoomChange={setCurrentZoom} resetTrigger={resetTrigger}
+          data={currentMapData} 
+          activeLayer={activeLayer} 
+          showNowcast={showNowcast} // ✅ Meneruskan instruksi overlay ke peta
+          geoData={nowcastData}
+          onZoomChange={setCurrentZoom} 
+          resetTrigger={resetTrigger}
           onMarkerClick={(id, name, type) => {
             setSelectedLocation({ id, name, type: type || 'kota' });
           }}
-          activeLocationId={selectedLocation.id} flyToTarget={flyToTarget} userCoords={userCoords}
+          activeLocationId={selectedLocation.id} 
+          flyToTarget={flyToTarget} 
+          userCoords={userCoords}
         />
 
         <PrakicuSideControls 
-          activeLayer={activeLayer} setActiveLayer={setActiveLayer} isLocating={isLocating}
-          handleFindLocation={handleFindLocation} handleResetMap={handleResetMap} setIsAIOpen={setIsAIOpen}
-          voiceModalIsOpen={voiceModal.isOpen} handleVoiceCommand={handleVoiceCommand}
+          activeLayer={activeLayer} 
+          setActiveLayer={setActiveLayer} 
+          showNowcast={showNowcast} // ✅ Meneruskan state toggle
+          setShowNowcast={setShowNowcast} 
+          isLocating={isLocating}
+          handleFindLocation={handleFindLocation} 
+          handleResetMap={handleResetMap} 
+          setIsAIOpen={setIsAIOpen}
+          voiceModalIsOpen={voiceModal.isOpen} 
+          handleVoiceCommand={handleVoiceCommand}
         />
 
         <PrakicuTimeline isPlaying={isPlaying} setIsPlaying={setIsPlaying} timeLabels={timeLabels} activeTimeIndex={activeTimeIndex} setActiveTimeIndex={setActiveTimeIndex} />

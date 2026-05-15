@@ -13,7 +13,8 @@ interface LayerControlProps {
   showWarning: boolean; setShowWarning: (val: boolean) => void;
   showStations: boolean; setShowStations: (val: boolean) => void;
   mapStyle: string; setMapStyle: (val: string) => void;
-  capData?: any; isLoadingHotspot: boolean; 
+  nowcastData?: any; // ✅ Terima data Nowcast
+  isLoadingHotspot: boolean; 
   showWind: boolean; setShowWind: (val: boolean) => void;
   isLoadingWind: boolean; windTime: string | null;
 }
@@ -22,7 +23,7 @@ export default function LayerControl({
   showRadar, setShowRadar, showSatellite, setShowSatellite,
   showHotspot, setShowHotspot, showWarning, setShowWarning,
   showStations, setShowStations, mapStyle, setMapStyle,
-  capData, isLoadingHotspot, showWind, setShowWind, isLoadingWind, windTime
+  nowcastData, isLoadingHotspot, showWind, setShowWind, isLoadingWind, windTime
 }: LayerControlProps) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -65,7 +66,6 @@ export default function LayerControl({
   );
 
   return (
-    // 🚨 KUNCI PERBAIKAN 1: Tambahkan 'bottom-4' agar kontainer tahu batas tinggi maksimalnya
     <div className="absolute top-4 left-4 bottom-4 z-[1000] pointer-events-none flex flex-col">
       {!isOpen && (
         <button onClick={() => setIsOpen(true)} className="pointer-events-auto bg-white/95 backdrop-blur-md p-2.5 rounded-xl shadow-lg border border-slate-200/60 text-slate-600 hover:text-blue-500 transition-all focus:outline-none w-fit">
@@ -74,8 +74,7 @@ export default function LayerControl({
       )}
 
       {isOpen && (
-        // 🚨 KUNCI PERBAIKAN 2: Gunakan 'max-h-full' karena parent-nya sekarang punya batas pasti
-        <div className="pointer-events-auto bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200/80 w-64 overflow-hidden animate-in slide-in-from-left-4 fade-in duration-300 flex flex-col max-h-full">
+        <div className="pointer-events-auto bg-white/50 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200/80 w-64 overflow-hidden animate-in slide-in-from-left-4 fade-in duration-300 flex flex-col max-h-full">
           
           {/* HEADER */}
           <div className="p-3 flex items-center justify-between border-b border-slate-100 bg-slate-50/50 shrink-0">
@@ -91,7 +90,6 @@ export default function LayerControl({
             </button>
           </div>
 
-          {/* 🚨 KUNCI PERBAIKAN 3: Tambahkan 'flex-1' agar area ini mengambil sisa tinggi dan memunculkan scrollbar jika isinya kepanjangan */}
           <div className="p-4 space-y-4 overflow-y-auto custom-scrollbar flex-1">
             
             {/* 1. PETA DASAR */}
@@ -144,7 +142,6 @@ export default function LayerControl({
                 {showRadar && (
                   <div className="mt-1 mb-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5 flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="space-y-1.5">
-                      {/* Item Balikpapan */}
                       <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">
                         <span className="text-[10px] font-medium text-slate-700">Balikpapan</span>
                         <div className="flex items-center gap-1.5 text-[9px]">
@@ -152,7 +149,6 @@ export default function LayerControl({
                           {!balTime && !balOffline ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : balOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
                         </div>
                       </div>
-                      {/* Item MTW */}
                       <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">
                         <span className="text-[10px] font-medium text-slate-700">Muara Teweh</span>
                         <div className="flex items-center gap-1.5 text-[9px]">
@@ -160,7 +156,6 @@ export default function LayerControl({
                           {!mtwTime && !mtwOffline ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : mtwOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
                         </div>
                       </div>
-                      {/* Item TRK */}
                       <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">
                         <span className="text-[10px] font-medium text-slate-700">Tarakan</span>
                         <div className="flex items-center gap-1.5 text-[9px]">
@@ -169,7 +164,6 @@ export default function LayerControl({
                         </div>
                       </div>
                     </div>
-                    {/* Radar Legend */}
                     <div className="pt-1.5">
                       <div className="flex items-center gap-1.5">
                         <div className="flex flex-1 h-3 rounded-md overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
@@ -192,52 +186,43 @@ export default function LayerControl({
                 {showStations && (
                   <div>
                       <p className="text-[9px] font-medium uppercase tracking-widest text-slate-400 mb-2">Intensitas Hujan (mm)</p>
-                      
-                      {/* 👇 LAYOUT LEGENDA PASTEL & FONT LIGHT 👇 */}
                       <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded-lg border border-slate-100 shadow-sm">
-                        
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-[10px] font-light text-slate-600">
                             <div className="w-2.5 h-2.5 rounded-full border-[3px] border-blue-400"></div>0.2 - 5 mm
                           </div>
                           <span className="text-[9px] font-light text-slate-500">Sangat Ringan</span>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-[10px] font-light text-slate-600">
                             <div className="w-2.5 h-2.5 rounded-full border-[3px] border-emerald-400"></div>5 - 20 mm
                           </div>
                           <span className="text-[9px] font-light text-slate-500">Ringan</span>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-[10px] font-light text-slate-600">
                             <div className="w-2.5 h-2.5 rounded-full border-[3px] border-yellow-400"></div>20 - 50 mm
                           </div>
                           <span className="text-[9px] font-light text-slate-500">Sedang</span>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-[10px] font-light text-slate-600">
                             <div className="w-2.5 h-2.5 rounded-full border-[3px] border-orange-400"></div>50 - 100 mm
                           </div>
                           <span className="text-[9px] font-light text-slate-500">Lebat</span>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-[10px] font-light text-slate-600">
                             <div className="w-2.5 h-2.5 rounded-full border-[3px] border-red-400"></div>100 - 150 mm
                           </div>
                           <span className="text-[9px] font-light text-slate-500">Sangat Lebat</span>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-[10px] font-light text-slate-600">
                             <div className="w-2.5 h-2.5 rounded-full border-[3px] border-purple-400"></div>&gt; 150 mm
                           </div>
                           <span className="text-[9px] font-light text-slate-500">Ekstrem</span>
                         </div>
-
                       </div>
                     </div>
                 )}
@@ -253,31 +238,29 @@ export default function LayerControl({
                   </div>
                 )}
                 
-                {/* 👉 PERINGATAN DINI */}
+                {/* ✅ PERBAIKAN: PERINGATAN DINI MENGGUNAKAN DATA ARCGIS */}
                 <LayerItem icon={<AlertTriangle size={16} />} label="Peringatan Dini" active={showWarning} onClick={() => setShowWarning(!showWarning)} />
                 {showWarning && (
                   <div className="mt-1 mb-2 bg-slate-50/80 border border-slate-100 rounded-xl p-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                    {!capData ? (
+                    {!nowcastData ? (
                       <div className="flex items-center gap-2 py-1 bg-white px-3 rounded-lg border border-slate-100 shadow-sm w-fit">
                         <Loader2 size={12} className="animate-spin text-slate-400" />
                         <span className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">Sinkronisasi...</span>
                       </div>
-                    ) : !capData.active ? (
+                    ) : nowcastData.features?.length === 0 ? (
                       <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100 shadow-sm w-fit">
                         <ShieldCheck size={14} />
-                        <span className="text-[10px] font-medium uppercase tracking-tight">Kondisi Aman</span>
+                        <span className="text-[10px] font-medium uppercase tracking-tight">Aman Terkendali</span>
                       </div>
                     ) : (
                       <div className="space-y-2 bg-white p-2.5 rounded-lg border border-slate-100 shadow-sm">
                         <div className="flex items-center gap-1.5">
-                          <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${capData.severity === 'Severe' ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]' : capData.severity === 'Extreme' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]'}`} />
-                          <span className="text-[10px] font-bold text-slate-800 leading-tight uppercase">{capData.event}</span>
+                          <div className={`w-2.5 h-2.5 rounded-full animate-pulse bg-[#fdaf15] shadow-[0_0_8px_rgba(253,175,21,0.5)]`} />
+                          <span className="text-[10px] font-bold text-slate-800 leading-tight uppercase">Peringatan Aktif</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-light leading-snug line-clamp-2">"{capData.headline}"</p>
-                        <div className="pt-2 mt-1 border-t border-slate-100 flex justify-between items-center">
-                          <span className="text-[8px] font-medium text-slate-400 uppercase">BMKG CAP</span>
-                          {capData.web && <a href={capData.web} target="_blank" rel="noopener noreferrer" className="text-[9px] font-semibold text-blue-500 hover:text-blue-600 transition-colors">DETAIL ↗</a>}
-                        </div>
+                        <p className="text-[10px] text-slate-500 font-medium leading-snug line-clamp-2">
+                          Terpantau potensi hujan sedang-lebat di <strong className="text-slate-700">{nowcastData.features.length} titik kecamatan</strong>.
+                        </p>
                       </div>
                     )}
                   </div>

@@ -1,144 +1,132 @@
 "use client";
 
-import { MapContainer, TileLayer, Polygon, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
 
 // HELPER AUTO ZOOM
-const AutoZoom = ({ polygons }: { polygons: [number, number][][] }) => {
+const AutoZoom = ({ geoData }: { geoData: any }) => {
   const map = useMap();
-
   useEffect(() => {
-    if (polygons.length > 0) {
+    if (geoData && geoData.features?.length > 0) {
       try {
-        const allPoints = polygons.flat();
-        const bounds = L.latLngBounds(allPoints);
-        map.fitBounds(bounds, { padding: [30, 30] });
-      } catch (e) {
-        console.error("Gagal auto zoom peta", e);
-      }
+        const geoJsonLayer = L.geoJSON(geoData);
+        map.fitBounds(geoJsonLayer.getBounds(), { padding: [40, 40] });
+      } catch (e) { console.error("Auto zoom map error", e); }
     }
-  }, [polygons, map]);
-
+  }, [geoData, map]);
   return null;
 };
 
-// HELPER WARNA BERDASARKAN SEVERITY 
-const getSeverityColor = (severity: string) => {
-  const level = severity?.toLowerCase() || "";
-  
-  if (level.includes("extreme")) return "#ef4444";
-  if (level.includes("severe")) return "#f97316";
-  return "#eab308";
+// HELPER WARNA BERDASARKAN TIPE AREA
+const getWarningStyle = (tipeArea: string) => {
+  const isMeluas = String(tipeArea || "").toLowerCase().includes("meluas");
+  if (isMeluas) return { fill: "#fdfc14", label: "Area Meluas" };
+  return { fill: "#fdaf15", label: "Area Terjadi" }; // Default: Terjadi
 };
 
-interface WarningMapProps {
-  data: {
-    polygons: [number, number][][];
-    severity: string;
-    event?: string;
-    headline?: string;
-    areaDesc?: string;
+export default function WarningMap({ data }: { data: any }) {
+  const [hoveredData, setHoveredData] = useState<any | null>(null);
+
+  // Styling Poligon
+  const onStyle = (feature: any) => {
+    const style = getWarningStyle(feature.properties.tipearea);
+    return { 
+      color: "#000000", 
+      fillColor: style.fill, 
+      fillOpacity: 0.65, 
+      weight: 0.3, 
+      opacity: 0.6 
+    };
   };
-}
 
-export default function WarningMap({ data }: WarningMapProps) {
-  const activeColor = getSeverityColor(data.severity);
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  // Bind Event & Popup ke masing-masing Poligon
+  const onEachFeature = (feature: any, layer: any) => {
+    const style = getWarningStyle(feature.properties.tipearea);
+    
+    // 1. Buat Balon Popup HTML saat area diklik
+    const popupContent = `
+      <div style="text-align: center; font-family: sans-serif; min-width: 120px;">
+        <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: bold; color: #1e293b;">Kec. ${feature.properties.namakecamatan}</h4>
+        <p style="margin: 0 0 8px 0; font-size: 11px; color: #64748b;">${feature.properties.namakotakab}</p>
+        <div style="display: inline-block; padding: 4px 8px; background: ${style.fill}; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; font-size: 10px; font-weight: bold; color: #1e293b;">
+          ${style.label}
+        </div>
+      </div>
+    `;
+    layer.bindPopup(popupContent);
 
-  // Info Card State
-  const activeInfo = hoveredIdx !== null ? {
-      title: "Info Peringatan",
-      name: data.event || "Peringatan Dini Cuaca",
-      extra: data.areaDesc || "Wilayah Kalimantan Timur",
-      color: activeColor
-  } : null;
+    // 2. Pasang Sensor Interaksi
+    layer.on({
+      mouseover: (e: any) => {
+        e.target.setStyle({ fillOpacity: 0.9, weight: 2, opacity: 1 });
+        setHoveredData(feature.properties);
+      },
+      mouseout: (e: any) => {
+        e.target.setStyle({ fillOpacity: 0.65, weight: 1, opacity: 0.6 });
+        setHoveredData(null);
+      },
+      click: (e: any) => {
+        // Saat diklik, peta otomatis Zoom & Fokus ke kecamatan tersebut
+        const map = e.target._map;
+        map.fitBounds(e.target.getBounds(), { padding: [50, 50], maxZoom: 10 });
+      }
+    });
+  };
 
   return (
-    <div className="relative h-[400px] md:h-[600px] w-full rounded-2xl overflow-hidden shadow-sm border border-gray-200">
-      
-      {/* MAP CONTAINER */}
-      <MapContainer 
-        center={[-0.5, 117]} 
-        zoom={6} 
-        style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom={false}
-      >
+    <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+      <MapContainer center={[0.5, 116.4]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
-        
-        <AutoZoom polygons={data.polygons} />
-
-        {data.polygons.map((poly, idx) => (
-          <Polygon 
-            key={idx} 
-            positions={poly}
-            pathOptions={{ 
-                color: activeColor, 
-                fillColor: activeColor, 
-                fillOpacity: 0.4, 
-                weight: 1,
-            }}
-            eventHandlers={{
-                mouseover: () => setHoveredIdx(idx),
-                mouseout: () => setHoveredIdx(null)
-            }}
-          >
-            <Tooltip sticky direction="top" offset={[0, -10]} opacity={1}>
-              <span className="font-bold text-xs">{data.areaDesc || "Area Terdampak"}</span>
-            </Tooltip>
-          </Polygon>
-        ))}
+        {data?.features?.length > 0 && (
+          <>
+            <AutoZoom geoData={data} />
+            <GeoJSON 
+              data={data} 
+              style={onStyle}
+              onEachFeature={onEachFeature} 
+            />
+          </>
+        )}
       </MapContainer>
 
-      {/* FLOATING INFO CARD*/}
-      <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/50 transition-all duration-300">
-        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-             {activeInfo ? activeInfo.title : "Info Peringatan"}
-        </h4>
-        
-        {activeInfo ? (
+      {/* Floating Info Hover */}
+      <div className="absolute top-4 right-4 z-[1000] w-64 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/50 pointer-events-none transition-all duration-300">
+        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target Area</h4>
+        {hoveredData ? (
           <div>
-            <div className="text-blue-900 font-bold leading-tight text-sm mb-2">
-                {activeInfo.name}
-            </div>
-            
-            <div className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
-               <span className="text-gray-500">Status:</span>
-               <span className="font-bold px-2 py-0.5 rounded text-white" style={{ backgroundColor: activeInfo.color }}>
-                 {data.severity}
+            <div className="text-slate-800 font-bold leading-tight text-sm mb-2">Kec. {hoveredData.namakecamatan}</div>
+            <div className="flex items-center justify-between text-xs bg-slate-50 p-2 rounded-lg border border-slate-100">
+               <span className="text-slate-500">Tipe Area:</span>
+               <span className="font-bold px-2 py-0.5 rounded text-slate-800 shadow-sm border border-black/10" style={{ backgroundColor: getWarningStyle(hoveredData.tipearea).fill }}>
+                 {getWarningStyle(hoveredData.tipearea).label}
                </span>
             </div>
-            <div className="mt-2 text-xs text-center text-gray-500 bg-gray-50 rounded border border-gray-100 py-1">
-                {activeInfo.extra}
+            <div className="mt-2 text-[10px] text-center font-bold text-slate-500 bg-slate-50 rounded border border-slate-100 py-1">
+                {hoveredData.namakotakab}
             </div>
           </div>
         ) : (
-          <div className="text-gray-400 text-xs italic">
-            Arahkan kursor pada area berwarna di peta untuk melihat detail wilayah terdampak.
-          </div>
+          <div className="text-slate-400 text-xs italic">Arahkan kursor ke area berwarna di peta.</div>
         )}
       </div>
 
-      {/* LEGEND  */}
-      <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/20 text-xs">
-          <span className="font-bold text-gray-500 uppercase tracking-wider text-[10px] block mb-2">Keterangan Level:</span>
-          <div className="space-y-1">
-            <div className={`flex items-center gap-2 ${data.severity === 'Moderate' ? 'opacity-100 font-bold' : 'opacity-50 grayscale'}`}>
-              <span className="w-3 h-3 rounded-full bg-yellow-500 ring-2 ring-yellow-200"></span> Waspada
+      {/* Legend Map */}
+      <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/20 text-xs pointer-events-none">
+          <span className="font-bold text-slate-500 uppercase tracking-wider text-[10px] block mb-2">Keterangan:</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-slate-700 font-medium">
+              <span className="w-4 h-4 rounded border border-black/80" style={{ backgroundColor: "#fdaf15" }}></span> Area Terjadi
             </div>
-            <div className={`flex items-center gap-2 ${data.severity === 'Severe' ? 'opacity-100 font-bold' : 'opacity-50 grayscale'}`}>
-              <span className="w-3 h-3 rounded-full bg-orange-500 ring-2 ring-orange-200"></span> Siaga
-            </div>
-            <div className={`flex items-center gap-2 ${data.severity === 'Extreme' ? 'opacity-100 font-bold' : 'opacity-50 grayscale'}`}>
-              <span className="w-3 h-3 rounded-full bg-red-500 ring-2 ring-red-200"></span> Awas
+            <div className="flex items-center gap-2 text-slate-700 font-medium">
+              <span className="w-4 h-4 rounded border border-black/80" style={{ backgroundColor: "#fdfc14" }}></span> Area Meluas
             </div>
           </div>
       </div>
-
     </div>
   );
 }

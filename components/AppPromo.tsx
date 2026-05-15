@@ -61,7 +61,7 @@ export default function AppPromo() {
           <div className="md:w-1/2 flex justify-center relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
             
-            <div className="relative w-[240px] h-[480px] bg-slate-900 rounded-[2.5rem] border-[6px] border-slate-800 shadow-2xl overflow-hidden z-10 transform rotate-[-6deg] hover:rotate-0 transition-transform duration-500 group">
+            <div className="relative w-[240px] h-[500px] bg-slate-900 rounded-[2.5rem] border-[6px] border-slate-800 shadow-2xl overflow-hidden z-10 transform rotate-[-6deg] hover:rotate-0 transition-transform duration-500 group">
                {/* Notch */}
                <div className="absolute top-0 inset-x-0 h-6 bg-slate-900 flex justify-center z-20">
                    <div className="w-24 h-4 bg-slate-800 rounded-b-xl"></div>
@@ -70,7 +70,7 @@ export default function AppPromo() {
             
                <div className="relative w-full h-full bg-white">
                     <Image 
-                        src="https://placehold.co/240x480/1e3a8a/ffffff?text=Info+BMKG+App+Screen" 
+                        src="/info_bmkg.png"
                         alt="Info BMKG App Screenshot" 
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -78,7 +78,7 @@ export default function AppPromo() {
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent"></div>
                     
                     <div className="absolute bottom-8 left-0 w-full text-center text-white p-4">
-                        <Image src="/logo-bmkg.png" alt="Logo" width={40} height={40} className="mx-auto mb-2 drop-shadow-md" />
+                        <Image src="/logo-bmkg2.png" alt="Logo" width={40} height={40} className="mx-auto mb-2 drop-shadow-md" />
                         <h3 className="font-bold text-lg drop-shadow-md">Info BMKG</h3>
                         <p className="text-xs text-blue-100">Cuaca, Iklim, & Gempa Bumi</p>
                     </div>

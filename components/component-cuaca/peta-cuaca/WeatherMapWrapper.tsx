@@ -12,7 +12,7 @@ import { WeatherStationData } from "@/lib/api-cuaca";
 const WeatherMap = dynamic(() => import("./WeatherMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-[500px] w-full bg-slate-100 animate-pulse rounded-[2rem] flex items-center justify-center border border-slate-200 shadow-sm">
+    <div className="h-[500px] w-full bg-slate-100 animate-pulse rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm">
       <span className="text-slate-400 font-bold tracking-widest uppercase text-sm">Memuat Peta Observasi...</span>
     </div>
   ),

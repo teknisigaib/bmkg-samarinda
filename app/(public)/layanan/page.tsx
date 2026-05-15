@@ -80,7 +80,6 @@ export default function PricingLayananPage() {
         <Breadcrumb 
             items={[
               { label: "Beranda", href: "/" },
-              { label: "Layanan" }, 
               { label: "Tarif & Layanan Data" } 
             ]} 
         />

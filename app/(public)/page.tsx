@@ -7,7 +7,6 @@ import prisma from "@/lib/prisma";
 import { ArrowRight } from "lucide-react";
 
 // KOMPONEN UI
-import ServiceSection from "@/components/ServiceSection";
 import AppPromo from "@/components/AppPromo";
 import NewsBulletinSection from "@/components/NewsBulletinSection";
 import FlyerSection from "@/components/FlyerSection";

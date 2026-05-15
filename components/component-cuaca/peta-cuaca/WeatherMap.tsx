@@ -1,18 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Polygon, Tooltip, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Polygon, GeoJSON } from "react-leaflet";
 import L from "leaflet";
 
 import { WeatherStationData } from "@/lib/api-cuaca"; 
 import { HotspotData } from "@/lib/data-karhutla"; 
-import { Info, MapPin, Clock, X, BarChart3, Sun, CheckCircle2, Thermometer, Droplets, Wind, Gauge, SunMedium, Maximize, Minimize, ArrowLeft, LocateFixed, Loader2, Flame } from "lucide-react";
+import { Info, MapPin, Clock, X, BarChart3, Sun, CheckCircle2, Thermometer, Wind, Gauge, SunMedium, Maximize, Minimize, ArrowLeft, Flame } from "lucide-react";
 
 import HourlyRainChart from "./HourlyRainChart";
 import RadarLayer from "@/components/component-cuaca/penerbangan/Radarlayer"; 
 import HimawariLayer from "@/components/component-cuaca/penerbangan/HimawariLayer"; 
 import LayerControl from "./LayerControl";
 import WindLayer from "./WindLayer"; 
+
+// 🔥 IMPORT KOMPONEN GPS BARU
+import GpsControl from "./GpsControl"; 
 
 function MapInteraction({ onMapClick }: { onMapClick: () => void }) {
   useMapEvents({ click: () => onMapClick() });
@@ -29,15 +32,11 @@ function MapFlyToController({ targetPos, zoom = 9, trigger }: { targetPos: [numb
   return null;
 }
 
-
-// --- HELPER: IKON STASIUN CUACA ---
 const createCustomIcon = (rainTotal: number, isSelected: boolean, isOffline: boolean, type: string) => {
   let pulseColor = "";
-  // 👉 ATURAN BAKU: Inti ikon HANYA Biru (Online) atau Abu-abu (Offline)
   const coreColor = isOffline ? "bg-slate-400" : "bg-blue-500"; 
   
   if (rainTotal >= 0.2 && !isOffline) {
-    // 👉 Skala Warna Pastel HANYA untuk efek denyutan (pulse) di latar belakang
     if (rainTotal <= 5) pulseColor = "bg-blue-300";
     else if (rainTotal <= 20) pulseColor = "bg-green-300";
     else if (rainTotal <= 50) pulseColor = "bg-yellow-300";
@@ -60,7 +59,6 @@ const createCustomIcon = (rainTotal: number, isSelected: boolean, isOffline: boo
   return L.divIcon({ html: html, className: "", iconSize: [32, 32], iconAnchor: [16, 16] });
 };
 
-// --- HELPER: IKON LOKASI GPS ---
 const userLocationIcon = L.divIcon({
   html: `
     <div class="relative flex items-center justify-center w-10 h-10 -mt-2">
@@ -74,7 +72,6 @@ const userLocationIcon = L.divIcon({
   className: "", iconSize: [40, 40], iconAnchor: [20, 38] 
 });
 
-// --- HELPER: IKON API HOTSPOT (SKALA 1-10) ---
 const createHotspotIcon = (conf: number, isSelected: boolean) => {
   let colorClass = "text-yellow-500"; 
   if (conf >= 9) colorClass = "text-red-500"; 
@@ -104,7 +101,6 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
   const [mapStyle, setMapStyle] = useState('light');
 
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
-  const [isLocating, setIsLocating] = useState(false);
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
   const [flyZoom, setFlyZoom] = useState(7);
   const [flyTrigger, setFlyTrigger] = useState(0);
@@ -113,7 +109,7 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
   const [hotspotData, setHotspotData] = useState<HotspotData[]>([]);
   const [isLoadingHotspot, setIsLoadingHotspot] = useState(false);
 
-  const [capData, setCapData] = useState<any>(null);
+  const [nowcastData, setNowcastData] = useState<any>(null);
 
   const [showWind, setShowWind] = useState(false);
   const [windData, setWindData] = useState<any>(null);
@@ -168,13 +164,13 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
   }, [showHotspot, hotspotData.length]);
 
   useEffect(() => {
-    if (showWarning && !capData) {
-      fetch('/api/warnings')
+    if (showWarning && !nowcastData) {
+      fetch('/api/nowcast')
         .then(res => res.json())
-        .then(d => setCapData(d))
-        .catch(err => console.error("Gagal fetch CAP:", err));
+        .then(d => setNowcastData(d))
+        .catch(err => console.error("Gagal fetch Nowcasting:", err));
     }
-  }, [showWarning, capData]);
+  }, [showWarning, nowcastData]);
 
   useEffect(() => {
     if (showWind && !windData) {
@@ -228,38 +224,11 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
     return () => { clearTimeout(timer); document.body.style.overflow = "auto"; };
   }, [isFullscreen]);
 
-  const handleLocateMe = () => {
-    if (userPos) {
-      setUserPos(null); 
-      setFlyTarget(defaultCenter); 
-      setFlyZoom(7); 
-      setFlyTrigger(Date.now());
-      return;
-    }
-    setIsLocating(true);
-    const fallbackToIP = async () => {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const d = await res.json();
-        if (d.latitude && d.longitude) {
-          setUserPos([parseFloat(d.latitude), parseFloat(d.longitude)]);
-          setFlyTarget([parseFloat(d.latitude), parseFloat(d.longitude)]);
-          setFlyZoom(10); setFlyTrigger(Date.now()); setIsLocating(false);
-        } else throw new Error("Gagal parsing IP");
-      } catch (err) {
-        alert("Gagal melacak lokasi."); setIsLocating(false);
-      }
-    };
-    if (!navigator.geolocation) return fallbackToIP();
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserPos([pos.coords.latitude, pos.coords.longitude]);
-        setFlyTarget([pos.coords.latitude, pos.coords.longitude]);
-        setFlyZoom(12); setFlyTrigger(Date.now()); setIsLocating(false);
-      },
-      (err) => fallbackToIP(),
-      { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 } 
-    );
+  // ✅ FUNGSI FLYTO BARU UNTUK GPS COMPONENT
+  const handleFlyTo = (pos: [number, number], zoom: number) => {
+    setFlyTarget(pos);
+    setFlyZoom(zoom);
+    setFlyTrigger(Date.now());
   };
 
   const formatTime = (isoString: string) => {
@@ -303,20 +272,14 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
     attribution = '&copy; <a href="https://www.esri.com/">Esri</a>';
   }
 
-  const getSeverityColor = (s: string) => {
-    const l = s?.toLowerCase() || "";
-    return l.includes("extreme") ? "#ef4444" : l.includes("severe") ? "#f97316" : "#eab308";
-  };
-
   return (
-    // 👉 REVISI DI SINI: Kembali ke h-[500px] md:h-[600px], dan gunakan h-[100dvh] untuk Fullscreen!
     <div className={`transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-[9999] w-screen h-[100dvh] bg-slate-100 rounded-none m-0" : "h-[500px] md:h-[600px] w-full relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-slate-200"}`}>
       
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-150%); } } 
         .animate-marquee { display: inline-block; white-space: nowrap; animation-name: marquee; animation-timing-function: linear; animation-iteration-count: infinite; padding-left: 100%; }
         
-        /* 🚨 GHOST MODE: Sembunyikan kotak asli plugin leaflet-velocity 🚨 */
+        /* 🚨 GHOST MODE */
         .leaflet-control-velocity {
           opacity: 0 !important;
           position: absolute !important;
@@ -344,9 +307,14 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         <button onClick={() => setIsFullscreen(!isFullscreen)} className="pointer-events-auto bg-white/95 backdrop-blur-md p-2.5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-slate-200/60 text-slate-600 hover:text-blue-500 hover:bg-white transition-all">
           {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
         </button>
-        <button onClick={handleLocateMe} disabled={isLocating} className={`pointer-events-auto bg-white/95 backdrop-blur-md p-2.5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] transition-all border ${isLocating ? 'text-blue-500 border-slate-200/60' : userPos ? 'text-blue-600 border-blue-200 bg-blue-50' : 'text-slate-600 border-slate-200/60 hover:text-blue-500 hover:bg-white'}`}>
-          {isLocating ? <Loader2 size={20} className="animate-spin" /> : <LocateFixed size={20} />}
-        </button>
+        
+        {/* 🔥 KOMPONEN GPS BARU DIPANGGIL DI SINI */}
+        <GpsControl 
+          userPos={userPos} 
+          setUserPos={setUserPos} 
+          onFlyTo={handleFlyTo} 
+          defaultCenter={defaultCenter} 
+        />
       </div>
 
       <LayerControl 
@@ -356,7 +324,7 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         showWarning={showWarning} setShowWarning={setShowWarning}
         showStations={showStations} setShowStations={setShowStations}
         mapStyle={mapStyle} setMapStyle={setMapStyle} 
-        capData={capData}
+        nowcastData={nowcastData}
         isLoadingHotspot={isLoadingHotspot}
         showWind={showWind} setShowWind={setShowWind}
         isLoadingWind={isLoadingWind} windTime={windTime}
@@ -404,20 +372,35 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
             />
           )}
 
-          {showWarning && capData?.active && capData.polygons.map((poly: any, idx: number) => (
-            <Polygon 
-              key={`cap-${idx}`}
-              positions={poly}
-              pathOptions={{ color: getSeverityColor(capData.severity), fillColor: getSeverityColor(capData.severity), fillOpacity: 0.35, weight: 1 }}
-            >
-              <Tooltip sticky>
-                <div className="p-1">
-                  <p className="font-bold text-xs text-red-600">{capData.event}</p>
-                  <p className="text-[10px] text-slate-600">{capData.areaDesc}</p>
-                </div>
-              </Tooltip>
-            </Polygon>
-          ))}
+          {/* RENDER POLYGON NOWCASTING DARI ARCGIS */}
+          {showWarning && nowcastData && (
+            <GeoJSON 
+              key={nowcastData.features?.length || 'nowcast-layer'}
+              data={nowcastData}
+              style={(feature: any) => {
+                const isMeluas = String(feature?.properties?.tipearea || "").toLowerCase().includes("meluas");
+                return {
+                  fillColor: isMeluas ? "#fdfc14" : "#fdaf15",
+                  weight: 0.3,
+                  opacity: 1,
+                  color: "#000000",
+                  fillOpacity: 0.55,
+                };
+              }}
+              onEachFeature={(feature, layer) => {
+                layer.bindPopup(`
+                  <div class="p-1 font-sans">
+                    <p class="font-bold text-slate-800 text-sm mb-1">🚨 Peringatan Dini Aktif</p>
+                    <p class="font-bold text-slate-700">${feature.properties.namakotakab}</p>
+                    <p class="text-xs text-slate-600">${feature.properties.namakecamatan}</p>
+                    <p class="inline-block mt-1.5 px-2 py-0.5 rounded text-[10px] font-black uppercase text-white ${String(feature.properties.tipearea).toLowerCase().includes('meluas') ? 'bg-[#d4d404]' : 'bg-[#d9940b]'}">
+                      ${feature.properties.tipearea}
+                    </p>
+                  </div>
+                `);
+              }}
+            />
+          )}
 
           {showHotspot && hotspotData.map((hotspot) => {
             const isSelected = selectedHotspot?.id === hotspot.id;
@@ -448,7 +431,7 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         </MapContainer>
       </div>
 
-      {/* 🔴 CARD INFO ANGIN (TAILWIND RESPONSIVE MOBILE) 🔴 */}
+      {/* 🔴 CARD INFO ANGIN */}
       {showWind && (
         <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-[1000] w-48 sm:w-72 bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-xl sm:rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex flex-col overflow-hidden pointer-events-none transition-all duration-300 animate-in slide-in-from-right-4 fade-in">
           <div className="p-2 sm:p-3 flex items-start justify-between shrink-0 bg-white/50">
@@ -493,10 +476,10 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         </div>
       )}
 
-      {/* MASTER BOTTOM SHEET (Floating Card Stasiun) */}
+      {/* MASTER BOTTOM SHEET */}
       {(selectedStation || selectedHotspot) && (
         <div 
-          className={`fixed inset-x-0 bottom-0 z-[1000] bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] border-t border-slate-200/60 pb-8 sm:absolute sm:bottom-auto sm:top-4 sm:inset-x-auto sm:left-auto sm:right-16 sm:rounded-2xl sm:pb-0 pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden flex flex-col ${
+          className={`fixed inset-x-0 bottom-0 z-[1000] bg-white/50 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] border-t border-slate-200/60 pb-8 sm:absolute sm:bottom-auto sm:top-4 sm:inset-x-auto sm:left-auto sm:right-16 sm:rounded-2xl sm:pb-0 pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden flex flex-col ${
             isChartModalOpen ? 'sm:w-[480px]' : 'sm:w-72'
           }`}
           onTouchStart={!isChartModalOpen ? handleTouchStart : undefined}
@@ -504,7 +487,7 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
         >
           <div className="w-10 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1 sm:hidden shrink-0"></div>
 
-          {/* 🔴 TAMPILAN 1: INFO STASIUN / GRAFIK */}
+          {/* 🔴 TAMPILAN 1: INFO STASIUN */}
           {selectedStation && (
             <>
               <div className="p-3 flex items-start justify-between shrink-0">
@@ -566,7 +549,7 @@ export default function WeatherMap({ data }: { data: WeatherStationData[] }) {
             </>
           )}
 
-          {/* 🔴 TAMPILAN 2: INFO HOTSPOT (TITIK API) */}
+          {/* 🔴 TAMPILAN 2: INFO HOTSPOT */}
           {selectedHotspot && (
             <div className="flex flex-col h-full animate-in fade-in duration-300">
               <div className="p-3 flex items-start justify-between shrink-0">

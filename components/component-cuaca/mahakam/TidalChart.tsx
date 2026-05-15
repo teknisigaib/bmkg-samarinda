@@ -141,7 +141,7 @@ export default function TidalChart({ data, locationName = "Terminal Peti Kemas P
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-1">
                 Prakiraan Pasang Surut
             </h3>
-            <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">
+            <h2 className="text-xl font-black text-slate-900 leading-none">
                 {locationName}
             </h2>
             <div className="flex items-center gap-1 text-[10px] text-blue-600 font-bold mt-2 uppercase tracking-widest px-3 py-1 bg-blue-50 rounded-full border border-blue-100/50">

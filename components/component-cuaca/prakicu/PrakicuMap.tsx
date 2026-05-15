@@ -18,34 +18,27 @@ export interface WeatherDataPoint {
 
 interface PrakicuMapProps {
   data: WeatherDataPoint[];
-  activeLayer: "icon" | "temp" | "wind";
+  activeLayer: "icon" | "temp" | "wind"; // ✅ Hanya layer dasar
+  showNowcast: boolean; // ✅ Prop penentu nyala/mati polygon
   onZoomChange: (zoom: number) => void;
   resetTrigger: number;
   onMarkerClick: (locationId: string, locationName: string, type?: string) => void; 
   activeLocationId?: string;
   flyToTarget?: { lat: number; lon: number; zoom: number; ts: number } | null;
-  // BARU: Koordinat asli GPS pengguna
   userCoords?: { lat: number; lon: number } | null; 
+  geoData?: any; 
 }
 
 export default function PrakicuMap({ 
-  data, 
-  activeLayer, 
-  onZoomChange, 
-  resetTrigger,
-  onMarkerClick,
-  activeLocationId,
-  flyToTarget,
-  userCoords
+  data, activeLayer, showNowcast, onZoomChange, resetTrigger, onMarkerClick, activeLocationId, flyToTarget, userCoords, geoData
 }: PrakicuMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
+  const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
 
-  // 1. INISIALISASI PETA DASAR
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
-
     const map = L.map(mapRef.current, { zoomControl: false }).setView([0.5, 116.5], 6);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -66,7 +59,6 @@ export default function PrakicuMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 2. KONTROL RESET KAMERA & TERBANG KE GPS
   useEffect(() => {
     if (mapInstanceRef.current && resetTrigger > 0) {
       mapInstanceRef.current.flyTo([0.5, 116.5], 6, { duration: 1.5, easeLinearity: 0.25 });
@@ -79,15 +71,48 @@ export default function PrakicuMap({
     }
   }, [flyToTarget]);
 
-  // 3. PLOT DATA KE PETA (DENGAN CLICK-TO-ZOOM)
+  // PLOT DATA DASAR & OVERLAY NOWCASTING
   useEffect(() => {
     if (!mapInstanceRef.current || !layerGroupRef.current) return;
+    
     layerGroupRef.current.clearLayers();
 
+    // 1️⃣ LOGIKA POLYGON OVERLAY NOWCASTING
+    if (geoJsonLayerRef.current) {
+      mapInstanceRef.current.removeLayer(geoJsonLayerRef.current);
+    }
+
+    if (showNowcast && geoData) {
+      geoJsonLayerRef.current = L.geoJSON(geoData, {
+        style: (feature) => {
+          const isMeluas = String(feature?.properties?.tipearea || "").toLowerCase().includes("meluas");
+          return {
+            fillColor: isMeluas ? "#fdfc14" : "#fdaf15",
+            weight: 0.3,
+            opacity: 1,
+            color: "#000000",
+            fillOpacity: 0.55,
+          };
+        },
+        onEachFeature: (feature, layer) => {
+          layer.bindPopup(`
+            <div class="p-1 font-sans">
+              <p class="font-bold text-slate-800 text-sm mb-1">🚨 Peringatan Dini Aktif</p>
+              <p class="font-bold text-slate-700">${feature.properties.namakotakab}</p>
+              <p class="text-xs text-slate-600">${feature.properties.namakecamatan}</p>
+              <p class="inline-block mt-1.5 px-2 py-0.5 rounded text-[10px] font-black uppercase text-white ${String(feature.properties.tipearea).toLowerCase().includes('meluas') ? 'bg-[#d4d404]' : 'bg-[#d9940b]'}">
+                ${feature.properties.tipearea}
+              </p>
+            </div>
+          `);
+        }
+      }).addTo(mapInstanceRef.current);
+    }
+
+    // 2️⃣ LOGIKA MARKER DATA DASAR (Bisa jalan bersamaan)
     data.forEach((point) => {
       let htmlString = "";
       let iconSize: [number, number] = [32, 32];
-
       const isActiveMarker = point.id === activeLocationId;
       const highlightRing = isActiveMarker ? "ring-4 ring-blue-500/50 ring-offset-2 scale-110" : "transition-transform group-hover:scale-110";
       const tooltipStyle = "absolute top-12 text-[10px] font-bold text-slate-700 bg-white/95 border border-slate-200 px-2 py-0.5 rounded-md shadow-sm backdrop-blur-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none";
@@ -115,37 +140,24 @@ export default function PrakicuMap({
       
       marker.on("click", () => {
         onMarkerClick(point.id, point.name, point.type);
-        
-        // AUTO-FLY SAAT KLIK LOKASI
         if (mapInstanceRef.current) {
           const currentMapZoom = mapInstanceRef.current.getZoom();
           let targetZoom = currentMapZoom;
           if (point.type === "kota" && currentMapZoom < 9) targetZoom = 10;
           else if (point.type === "kecamatan" && currentMapZoom < 12) targetZoom = 13;
-          
           mapInstanceRef.current.flyTo([point.lat, point.lon], targetZoom, { duration: 1.2, easeLinearity: 0.25 });
         }
       });
 
       marker.addTo(layerGroupRef.current!);
     });
+
     if (userCoords) {
-      const userHtml = `
-        <div class="relative flex items-center justify-center w-6 h-6">
-          <div class="absolute w-full h-full bg-blue-500 rounded-full animate-ping opacity-60"></div>
-          <div class="relative w-3.5 h-3.5 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
-        </div>
-      `;
-      const userIcon = L.divIcon({
-        className: "bg-transparent",
-        html: userHtml,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      });
-      // zIndexOffset 1000 agar titik user selalu berada di atas ikon BMKG
+      const userHtml = `<div class="relative flex items-center justify-center w-6 h-6"><div class="absolute w-full h-full bg-blue-500 rounded-full animate-ping opacity-60"></div><div class="relative w-3.5 h-3.5 bg-blue-600 rounded-full border-2 border-white shadow-md"></div></div>`;
+      const userIcon = L.divIcon({ className: "bg-transparent", html: userHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
       L.marker([userCoords.lat, userCoords.lon], { icon: userIcon, zIndexOffset: 1000 }).addTo(layerGroupRef.current!);
     }
-  }, [data, activeLayer, activeLocationId, onMarkerClick]);
+  }, [data, activeLayer, showNowcast, activeLocationId, onMarkerClick, geoData, userCoords]);
 
   return <div ref={mapRef} className="w-full h-full z-0" style={{ background: "#f8fafc" }}></div>;
 }

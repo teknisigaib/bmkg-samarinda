@@ -128,6 +128,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.6,
     },
+    {
+      url: `${baseUrl}/layanan`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
   ];
 
   // 3. Ambil Data Berita/Artikel dari Database (Dinamis)

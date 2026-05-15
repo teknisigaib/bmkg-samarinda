@@ -99,7 +99,7 @@ export default function MahakamDashboard({ data, tideData }: Props) {
            </p>
 
            {/* Symmetrical Status Bar (Unified Capsule) */}
-           <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-full shadow-sm p-1">
+           <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm p-1">
               
               {/* Info Titik Pantau */}
               <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
@@ -126,7 +126,7 @@ export default function MahakamDashboard({ data, tideData }: Props) {
 
 
          {/* --- 1. PETA VISUALISASI --- */}
-        <section className="relative w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-200/50 bg-slate-900">
+        <section className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl bg-slate-900">
            <RiverMap initialData={data} />
         </section>
 

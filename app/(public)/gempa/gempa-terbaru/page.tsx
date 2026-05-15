@@ -3,99 +3,22 @@ import SectionDivider from "@/components/ui/SectionDivider";
 import { Activity, MapPin, Clock, Layers, AlertTriangle, Calendar, Radio } from "lucide-react";
 import { Metadata } from "next";
 
-// IMPORT DARI 1 FILE CLIENT SAJA
+// IMPORT DARI FILE CLIENT
 import { ClickableMainMap, ShakemapButton } from "@/components/component-gempa/ClientGempaInteractions";
+
+// 🔥 HUBUNGKAN KE LIB YANG SUDAH DIPERBAIKI
+import { getGempaTerbaru, getGempaDirasakanList } from "@/lib/bmkg/gempa";
 
 export const metadata: Metadata = {
   title: "Gempa Bumi Terbaru & Dirasakan | BMKG APT Pranoto Samarinda",
   description: "Informasi gempa bumi terbaru dan daftar gempa bumi yang dirasakan di wilayah Indonesia.",
 };
 
-interface GempaTerbaru {
-  Tanggal: string;
-  Jam: string;
-  DateTime: string;
-  Coordinates: string;
-  Lintang: string;
-  Bujur: string;
-  Magnitude: string;
-  Kedalaman: string;
-  Wilayah: string;
-  Potensi: string;
-  Dirasakan: string;
-  Shakemap: string;
-}
-
-interface GempaDirasakan {
-  Tanggal: string;
-  Jam: string;
-  DateTime: string;
-  Coordinates: string;
-  Lintang: string;
-  Bujur: string;
-  Magnitude: string;
-  Kedalaman: string;
-  Wilayah: string;
-  Dirasakan: string;
-}
-
-// 🚨 HEADER SAKTI: Mencegah server Vercel/VPS diblokir oleh API BMKG
-const BMKG_HEADERS = {
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  "Accept": "application/json",
-};
-
-function generateShakemapUrl(dateTimeUtc: string) {
-  if (!dateTimeUtc) return "";
-  try {
-    const d = new Date(dateTimeUtc);
-    d.setHours(d.getHours() + 7);
-    const yyyy = d.getUTCFullYear();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    const hh = String(d.getUTCHours()).padStart(2, '0');
-    const min = String(d.getUTCMinutes()).padStart(2, '0');
-    const ss = String(d.getUTCSeconds()).padStart(2, '0');
-    return `https://data.bmkg.go.id/DataMKG/TEWS/${yyyy}${mm}${dd}${hh}${min}${ss}.mmi.jpg`;
-  } catch (e) {
-    return "";
-  }
-}
-
-async function getLatestEarthquake(): Promise<GempaTerbaru | null> {
-  try {
-    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json", { 
-      headers: BMKG_HEADERS, // 👈 Pasang topeng di sini
-      next: { revalidate: 60 } 
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.Infogempa.gempa;
-  } catch (error) { 
-    console.error("Gagal fetch gempa terbaru:", error);
-    return null; 
-  }
-}
-
-async function getFeltEarthquakes(): Promise<GempaDirasakan[]> {
-  try {
-    const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json", { 
-      headers: BMKG_HEADERS, // 👈 Pasang topeng di sini
-      next: { revalidate: 60 } 
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.Infogempa.gempa || [];
-  } catch (error) { 
-    console.error("Gagal fetch gempa dirasakan:", error);
-    return []; 
-  }
-}
-
 export default async function GempaTerbaruPage() {
+  // 🔥 AMBIL DATA DARI LIB SUPER STABIL
   const [gempaTerbaru, listGempaDirasakan] = await Promise.all([
-    getLatestEarthquake(),
-    getFeltEarthquakes()
+    getGempaTerbaru(),
+    getGempaDirasakanList()
   ]);
 
   return (
@@ -105,7 +28,11 @@ export default async function GempaTerbaruPage() {
         {/* BREADCRUMB */}
         <Breadcrumb 
           className="mb-8" 
-          items={[{ label: "Beranda", href: "/" }, { label: "Gempa", href: "/gempa" }, { label: "Gempa Bumi Terbaru" }]} 
+          items={[
+            { label: "Beranda", href: "/" }, 
+            { label: "Gempa", href: "/gempa" }, 
+            { label: "Gempa Bumi Terbaru" }
+          ]} 
         />
 
         {/* HEADER UTAMA */}
@@ -125,7 +52,8 @@ export default async function GempaTerbaruPage() {
             {/* KOLOM KIRI: SHAKEMAP PETA UTAMA */}
             <div className="lg:col-span-4 flex flex-col">
               <div className="bg-white rounded-2xl p-2.5 border border-slate-200 shadow-sm h-full flex flex-col">
-                <ClickableMainMap shakemapUrl={`https://data.bmkg.go.id/DataMKG/TEWS/${gempaTerbaru.Shakemap}`} />
+                {/* Menggunakan ShakemapUrl yang sudah disiapkan oleh Lib */}
+                <ClickableMainMap shakemapUrl={gempaTerbaru.ShakemapUrl || ""} />
               </div>
             </div>
 
@@ -185,7 +113,7 @@ export default async function GempaTerbaruPage() {
                       <p className="text-base font-bold text-slate-900">{gempaTerbaru.Potensi}</p>
                     </div>
                   </div>
-                  {gempaTerbaru.Dirasakan !== "-" && (
+                  {gempaTerbaru.Dirasakan && gempaTerbaru.Dirasakan !== "-" && (
                     <div className="flex gap-4">
                       <div className="mt-0.5 shrink-0 text-blue-400"><Activity size={20} /></div>
                       <div>
@@ -200,68 +128,61 @@ export default async function GempaTerbaruPage() {
             </div>
             
           </div>
-        ) : null}
+        ) : (
+          <div className="mb-16 bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+             <p className="text-slate-500 font-semibold italic">Data gempa bumi terbaru sedang tidak tersedia.</p>
+          </div>
+        )}
 
         {/* --- SECTION 2: DAFTAR GEMPA DIRASAKAN --- */}
         {listGempaDirasakan.length > 0 && (
           <section className="max-w-5xl mx-auto">
-            
             <SectionDivider title="Daftar Gempa Dirasakan" className="mb-6" />
 
-            {/* Stack List Vertikal */}
             <div className="flex flex-col gap-5">
-              {listGempaDirasakan.map((gempa, index) => {
-                const shakemapUrl = generateShakemapUrl(gempa.DateTime);
-
-                return (
-                  <div key={index} className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row overflow-hidden hover:shadow-md transition-shadow">
-                    
-                    {/* KOLOM KIRI */}
-                    <div className="w-full md:w-40 flex md:flex-col items-center justify-around md:justify-center p-4 md:py-8 border-b md:border-b-0 md:border-r border-slate-100 shrink-0">
-                      <div className="text-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Magnitudo</p>
-                        <p className="text-3xl font-black text-orange-600 leading-none">{gempa.Magnitude}</p>
-                      </div>
-                      <div className="w-px h-10 md:w-8 md:h-px bg-slate-100 my-0 md:my-5"></div>
-                      <div className="text-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Kedalaman</p>
-                        <p className="text-base font-bold text-slate-800 leading-none">{gempa.Kedalaman}</p>
-                      </div>
+              {listGempaDirasakan.map((gempa, index) => (
+                <div key={index} className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row overflow-hidden hover:shadow-md transition-shadow">
+                  
+                  {/* KOLOM KIRI: MAGNITUDO */}
+                  <div className="w-full md:w-40 flex md:flex-col items-center justify-around md:justify-center p-4 md:py-8 border-b md:border-b-0 md:border-r border-slate-100 shrink-0">
+                    <div className="text-center">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Magnitudo</p>
+                      <p className="text-3xl font-black text-orange-600 leading-none">{gempa.Magnitude}</p>
                     </div>
-
-                    {/* KOLOM KANAN */}
-                    <div className="flex-1 p-5 md:p-6 lg:px-8 flex flex-col justify-center gap-3">
-                      
-                      {/* Baris Atas: Waktu & Tombol Shakemap */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 font-medium">
-                          <div className="flex items-center gap-1.5"><Calendar size={16} className="text-slate-400" /><span>{gempa.Tanggal}</span></div>
-                          <div className="flex items-center gap-1.5"><Clock size={16} className="text-slate-400" /><span>{gempa.Jam}</span></div>
-                        </div>
-
-                        <ShakemapButton shakemapUrl={shakemapUrl} wilayah={gempa.Wilayah} />
-                      </div>
-
-                      {/* Wilayah & Kordinat */}
-                      <h3 className="text-lg font-bold text-slate-900 leading-snug">{gempa.Wilayah}</h3>
-                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
-                        <MapPin size={16} className="text-blue-500" /><span>{gempa.Lintang}, {gempa.Bujur}</span>
-                      </div>
-
-                      {/* Kotak MMI */}
-                      {gempa.Dirasakan && gempa.Dirasakan !== "-" && (
-                        <div className="mt-2 bg-slate-50/80 border border-slate-100 rounded-lg p-4">
-                          <div className="flex items-center gap-2 text-xs font-bold text-orange-600 uppercase tracking-widest mb-2">
-                            <Radio size={14} /><span>Dirasakan (MMI)</span>
-                          </div>
-                          <p className="text-sm text-slate-700 leading-relaxed font-medium">{gempa.Dirasakan}</p>
-                        </div>
-                      )}
-
+                    <div className="w-px h-10 md:w-8 md:h-px bg-slate-100 my-0 md:my-5"></div>
+                    <div className="text-center">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Kedalaman</p>
+                      <p className="text-base font-bold text-slate-800 leading-none">{gempa.Kedalaman}</p>
                     </div>
                   </div>
-                );
-              })}
+
+                  {/* KOLOM KANAN: DETAIL */}
+                  <div className="flex-1 p-5 md:p-6 lg:px-8 flex flex-col justify-center gap-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 font-medium">
+                        <div className="flex items-center gap-1.5"><Calendar size={16} className="text-slate-400" /><span>{gempa.Tanggal}</span></div>
+                        <div className="flex items-center gap-1.5"><Clock size={16} className="text-slate-400" /><span>{gempa.Jam}</span></div>
+                      </div>
+                      {/* 🔥 SEKARANG INI AMAN! Karena ShakemapUrl sudah dirakit di Lib */}
+                      <ShakemapButton shakemapUrl={gempa.ShakemapUrl || ""} wilayah={gempa.Wilayah} />
+                    </div>
+
+                    <h3 className="text-lg font-bold text-slate-900 leading-snug">{gempa.Wilayah}</h3>
+                    <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                      <MapPin size={16} className="text-blue-500" /><span>{gempa.Lintang}, {gempa.Bujur}</span>
+                    </div>
+
+                    {gempa.Dirasakan && gempa.Dirasakan !== "-" && (
+                      <div className="mt-2 bg-slate-50/80 border border-slate-100 rounded-lg p-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-orange-600 uppercase tracking-widest mb-2">
+                          <Radio size={14} /><span>Dirasakan (MMI)</span>
+                        </div>
+                        <p className="text-sm text-slate-700 leading-relaxed font-medium">{gempa.Dirasakan}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         )}

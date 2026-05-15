@@ -86,17 +86,24 @@ export default function ClimateProductsSection({ data }: { data: ClimateItem[] }
               key={item.id}
               className="min-w-[300px] md:min-w-[360px] snap-start bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group/card hover:border-blue-400 hover:shadow-xl transition-all duration-500 flex flex-col"
             >
-              {/* GAMBAR */}
-              <div className="relative aspect-[4/3] w-full bg-slate-100 overflow-hidden">
-                <Image 
-                  src={item.imageUrl} 
-                  alt={item.title} 
-                  fill 
-                  className="object-cover transition-transform duration-700 group-hover/card:scale-105" 
-                  unoptimized
-                />
+              {/* GAMBAR - DIPERBAIKI (MENGGUNAKAN CONTAIN DAN PADDING) */}
+              {/* bg-slate-50 memberi efek kanvas elegan, p-4 membuat gambar tidak mentok ke pinggir */}
+              <div className="relative aspect-[4/3] w-full bg-slate-50 border-b border-slate-100 overflow-hidden p-4 md:p-6 flex items-center justify-center">
                 
-                <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex items-center justify-center">
+                {/* Dibungkus div relatif tambahan agar image fill bisa bekerja di dalam padding */}
+                <div className="relative w-full h-full">
+                  <Image 
+                    src={item.imageUrl} 
+                    alt={item.title} 
+                    fill 
+                    // Perubahan utama: object-contain menjaga proporsi peta agar tidak terpotong
+                    className="object-contain transition-transform duration-700 group-hover/card:scale-105 drop-shadow-sm" 
+                    unoptimized
+                  />
+                </div>
+                
+                {/* Overlay Hitam Transparan saat Hover */}
+                <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex items-center justify-center z-10">
                     <button 
                       onClick={(e) => {
                         e.preventDefault();
@@ -113,7 +120,6 @@ export default function ClimateProductsSection({ data }: { data: ClimateItem[] }
               {/* ISI CARD */}
               <Link href={item.slug} className="p-5 flex flex-col flex-1 hover:bg-slate-50/50 transition-colors">
   
-                {/* PERBAIKAN: Spasi dan Layout Kategori */}
                 <div className="flex items-center flex-wrap gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-wider mb-3">
                   <div className="flex items-center gap-1.5">
                     <Layout className="w-3 h-3" />
@@ -130,21 +136,20 @@ export default function ClimateProductsSection({ data }: { data: ClimateItem[] }
               )}
                 </div>
 
-  <h4 className="font-bold text-slate-800 text-base leading-snug line-clamp-2 min-h-[44px] group-hover/card:text-blue-600 transition-colors mb-4">
-    {item.title}
-  </h4>
+                <h4 className="font-bold text-slate-800 text-base leading-snug line-clamp-2 min-h-[44px] group-hover/card:text-blue-600 transition-colors mb-4">
+                  {item.title}
+                </h4>
 
-  {/* Footer tetap sama */}
-  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
-    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase">
-      <Calendar className="w-3 h-3 text-slate-300" />
-      {item.date}
-    </div>
-    <div className="flex items-center text-[10px] font-bold text-blue-600 uppercase tracking-widest gap-1">
-      Detail <ChevronRight className="w-3 h-3 transform group-hover/card:translate-x-1 transition-transform" />
-    </div>
-  </div>
-</Link>
+                <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase">
+                    <Calendar className="w-3 h-3 text-slate-300" />
+                    {item.date}
+                  </div>
+                  <div className="flex items-center text-[10px] font-bold text-blue-600 uppercase tracking-widest gap-1">
+                    Detail <ChevronRight className="w-3 h-3 transform group-hover/card:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
             </div>
           ))}
         </div>
