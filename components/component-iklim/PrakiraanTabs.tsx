@@ -70,10 +70,10 @@ export default function PrakiraanTabs({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       
       {/* TAB NAVIGATION (Disesuaikan jadi 5 kolom responsif) */}
-      <div className="grid grid-cols-2 lg:flex lg:flex-wrap gap-2 p-1.5 bg-gray-100/80 rounded-2xl border border-gray-200">
+      <div className="grid grid-cols-2 lg:flex lg:flex-wrap gap-2 pt-0 bg-gray-100/80 rounded-2xl border border-gray-200">
         <TabButton 
             isActive={activeTab === "dasarian"} 
             onClick={() => setActiveTab("dasarian")}

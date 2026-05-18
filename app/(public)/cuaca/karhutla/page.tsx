@@ -28,11 +28,10 @@ export default async function KarhutlaPage() {
 
   return (
     <div className="min-h-screen">
-       <div className="w-full mx-auto pt-6 pb-10 sm:px-4 lg:px-6">
+       <div className="w-full mx-auto pt-0 pb-4 sm:px-4 lg:px-6">
           
           {/* --- BREADCRUMB --- */}
-          <Breadcrumb 
-             className="mb-10" 
+          <Breadcrumb className="mb-2" 
              items={[
                { label: "Beranda", href: "/" },
                { label: "Cuaca" }, 

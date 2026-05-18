@@ -86,11 +86,11 @@ export default function MahakamDashboard({ data, tideData }: Props) {
     <div className="space-y-8 pb-20">
          
          {/* --- 2. HEADER SECTION: REFINED SYMMETRICAL LIGHT --- */}
-        <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
+        <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-0">
            
            {/* Judul Utama */}
            <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
-              Prakiraan Cuaca Sungai Mahakam
+              Cuaca Sungai Mahakam
            </h1>
            
            {/* Deskripsi */}

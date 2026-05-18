@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function SatelitPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
-      <div className="w-full mx-auto pt-6 lg:px-8 max-w-7xl space-y-6">
+      <div className="w-full mx-auto pt-0 lg:px-8 w-full space-y-6">
         
         {/* --- BREADCRUMB --- */}
         <Breadcrumb 
@@ -24,7 +24,7 @@ export default function SatelitPage() {
         />
 
         {/* --- HEADER SECTION --- */}
-        <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
+        <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-0">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
            </div>
@@ -37,7 +37,7 @@ export default function SatelitPage() {
               Pemantauan tutupan awan dan sebaran potensi hujan waktu nyata (*real-time*) menggunakan instrumen satelit Himawari-9.
            </p>
 
-           <div className="relative z-10 flex flex-wrap justify-center items-center bg-white border border-slate-200 rounded-2xl shadow-sm p-1">
+           <div className="relative z-10 flex flex-wrap justify-center items-center bg-white border border-slate-200 rounded-xl shadow-sm p-1">
               <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                  <Satellite className="w-4 h-4 text-blue-500" />
                  <span className="text-xs font-semibold text-slate-700">Satelit Himawari-9</span>

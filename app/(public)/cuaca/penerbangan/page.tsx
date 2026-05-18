@@ -32,11 +32,11 @@ export default async function AviationPage() {
 
   return (
     <div className="min-h-screen">
-       <div className="w-full mx-auto pt-6 pb-10 sm:px-4 lg:px-6">
+       <div className="w-full mx-auto pt-0 pb-10 sm:px-4 lg:px-6">
            
            {/* --- 1. BREADCRUMB NAVIGATION --- */}
            <Breadcrumb 
-             className="mb-10" 
+             className="mb-2" 
              items={[
                { label: "Beranda", href: "/" },
                { label: "Cuaca" }, 
@@ -45,7 +45,7 @@ export default async function AviationPage() {
            />
 
            {/* --- 2. HEADER SECTION --- */}
-           <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
+           <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-0">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
                  <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
               </div>

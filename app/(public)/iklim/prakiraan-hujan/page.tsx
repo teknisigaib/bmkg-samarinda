@@ -49,7 +49,7 @@ export default async function PrakiraanHujanPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
-      <div className="w-full mx-auto pt-6 space-y-8">
+      <div className="w-full mx-auto pt-0 space-y-6">
         
         {/* --- BREADCRUMB --- */}
         <Breadcrumb 
@@ -61,7 +61,7 @@ export default async function PrakiraanHujanPage() {
         />
 
         {/* --- HEADER SECTION --- */}
-        <section className="relative flex flex-col items-center justify-center text-center mb-12 mx-auto pt-2">
+        <section className="relative flex flex-col items-center justify-center text-center mb-4 mx-auto pt-0">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-green-500/10 rounded-full blur-3xl"></div>
            </div>

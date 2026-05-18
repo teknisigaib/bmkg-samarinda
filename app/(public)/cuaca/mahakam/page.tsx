@@ -21,11 +21,11 @@ export default async function Page() {
 
   return (
     <div className="min-h-screen">
-       <div className="w-full mx-auto pt-6 pb-10 sm:px-4 lg:px-6">
+       <div className="w-full mx-auto pt-0 pb-4 sm:px-4 lg:px-6">
            
            {/* --- 1. BREADCRUMB NAVIGATION --- */}
            <Breadcrumb 
-             className="mb-10" 
+             className="mb-2" 
              items={[
                { label: "Beranda", href: "/" },
                { label: "Cuaca" }, 

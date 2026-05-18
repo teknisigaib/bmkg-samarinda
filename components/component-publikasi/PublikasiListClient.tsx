@@ -92,7 +92,7 @@ export default function PublikasiListClient({ initialData }: PublikasiListProps)
         </div>
 
         {/* List Data */}
-        <div className="space-y-5 max-w-4xl mx-auto">
+        <div className="space-y-5 max-w-6xl mx-auto">
           {currentData.length > 0 ? (
             currentData.map((item, index) => (
               <motion.div

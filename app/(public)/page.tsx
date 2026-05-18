@@ -73,9 +73,11 @@ export default async function HomePage() {
           <RunningTextWrapper />
       </Suspense>
 
+     
       {/* 2. HERO SECTION */}
       {heroPost && (
-        <section className="relative w-full flex items-center overflow-hidden bg-slate-900 pt-20 pb-40 md:pt-28 md:pb-48 mt-0">
+        // 🔥 PERBAIKAN: Padding dikurangi (pt-12 pb-32 md:pt-16 md:pb-36) agar gambar tidak terlalu tinggi
+        <section className="relative w-full flex items-center overflow-hidden bg-slate-900 pt-12 pb-32 md:pt-20 md:pb-40 mt-0">
           <div className="absolute inset-0 z-0">
              <Image 
                src={heroPost.imageUrl || "/placeholder.jpg"} 
@@ -89,13 +91,15 @@ export default async function HomePage() {
 
           <div className="relative z-10 w-full px-4 sm:px-6 lg:px-12">
              <div className="max-w-5xl">
-                <span className="inline-block bg-yellow-400 text-slate-900 font-bold px-3 py-1 rounded text-xs uppercase tracking-widest mb-4">Berita Utama</span>
+                <span className="inline-block bg-yellow-400 text-slate-900 font-bold px-3 py-1 rounded text-xs uppercase tracking-widest mb-4 shadow-sm">Berita Utama</span>
                 
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-6 tracking-tight drop-shadow-md">
+                {/* Judul sedikit disesuaikan margin bawahnya (mb-4) agar lebih rapat */}
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight drop-shadow-md">
                     {heroPost.title}
                 </h1>
                 
-                <p className="text-slate-200 text-base md:text-lg mb-8 max-w-3xl line-clamp-3 drop-shadow">
+                {/* Teks deskripsi juga dirapatkan (mb-6) */}
+                <p className="text-slate-200 text-base md:text-lg mb-6 max-w-3xl line-clamp-3 drop-shadow">
                     {heroPost.excerpt}
                 </p>
                 

@@ -152,7 +152,7 @@ export default function MaritimeDashboard({ initialData, geoJsonData }: Dashboar
           </p>
 
           {/* Symmetrical Status Bar (Unified Capsule) */}
-          <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-full shadow-sm p-1">
+          <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-md shadow-sm p-1">
              <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                 <Map className="w-4 h-4 text-emerald-500" />
                 <span className="text-xs font-semibold text-slate-700">{totalPoints} Area Terpantau</span>

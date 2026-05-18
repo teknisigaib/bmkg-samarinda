@@ -89,7 +89,7 @@ export default function HotspotMapWrapper({ data, lastUpdateString }: { data: Ho
     <div className="space-y-8 w-full max-w-full overflow-hidden pb-10"> 
 
       {/* --- 1. HEADER SECTION --- */}
-      <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-2">
+      <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-0">
          
          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl"></div>

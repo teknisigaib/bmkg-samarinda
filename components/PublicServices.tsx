@@ -30,8 +30,8 @@ const SERVICES = [
     isExternal: true
   },
   {
-    title: "Peta Penerbangan",
-    desc: "Visualisasi peta cuaca jalur penerbangan dan kondisi bandara secara spasial.",
+    title: "Cuaca Penerbangan",
+    desc: "Visualisasi prakiraan cuaca jalur penerbangan dan kondisi bandara secara spasial.",
     icon: Plane,
     link: "/cuaca/penerbangan",
     isExternal: false

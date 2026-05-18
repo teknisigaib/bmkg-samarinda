@@ -13,26 +13,26 @@ export default function PrakicuPage() {
   return (
     <div className="min-h-screen pb-24 bg-slate-50/50">
       {/* Container utama tanpa batas lebar (W-FULL) agar seragam dengan Pantauan Cuaca */}
-      <div className="w-full mx-auto pt-6">
+      <div className="w-full mx-auto pt-0">
         
         {/* BREADCRUMB */}
         <Breadcrumb 
-          className="mb-8" 
+          className="mb-2" 
           items={[
             { label: "Beranda", href: "/" },
-            { label: "Cuaca", href: "/cuaca" }, 
+            { label: "Cuaca" }, 
             { label: "Prakiraan Cuaca" } 
           ]} 
         />
 
         {/* HERO SECTION - Mengikuti style PantauanCuacaPage */}
-        <section className="relative flex flex-col items-center justify-center text-center mb-10 mx-auto pt-2 max-w-3xl">
+        <section className="relative flex flex-col items-center justify-center text-center mb-10 mx-auto pt-0 max-w-3xl">
            {/* Efek Glow Latar Belakang (Warna Blue untuk membedakan dengan Cyan di Pantauan) */}
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
            </div>
            
-           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+           <h1 className="relative z-10 text-2xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
              Prakiraan Cuaca
            </h1>
            <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4">

@@ -23,25 +23,25 @@ export default async function GempaTerbaruPage() {
 
   return (
     <div className="min-h-screen pb-24 bg-slate-50/50">
-      <div className="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto pt-0 px-4 sm:px-6 lg:px-8">
         
         {/* BREADCRUMB */}
         <Breadcrumb 
           className="mb-8" 
           items={[
             { label: "Beranda", href: "/" }, 
-            { label: "Gempa", href: "/gempa" }, 
+            { label: "Gempa" }, 
             { label: "Gempa Bumi Terbaru" }
           ]} 
         />
 
         {/* HEADER UTAMA */}
         <section className="mb-12 max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-slate-900">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
             Gempa Bumi Terbaru
           </h1>
           <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">
-            Parameter gempa bumi terkini (M &ge; 5.0) di wilayah Indonesia. Data diperbarui otomatis dari BMKG.
+            Parameter gempa bumi terkini dan dirasakan di wilayah Indonesia. Data diperbarui otomatis dari BMKG.
           </p>
         </section>
 

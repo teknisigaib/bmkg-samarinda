@@ -4,7 +4,7 @@ export default function CuacaLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-slate-50 pt-8 pb-20">
       
       {/* Container Full Width */}
-      <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[1800px] mx-auto px-2 sm:px-6 lg:px-8">
 
         {/* --- CONTENT WRAPPER --- */}
         <div className="flex flex-col md:flex-row gap-8 lg:gap-10">

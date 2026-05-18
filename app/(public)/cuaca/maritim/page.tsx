@@ -39,11 +39,11 @@ export default async function MaritimePage() {
 
   return (
     <div className="min-h-screen">
-       <div className="w-full mx-auto pt-6 pb-10 sm:px-4 lg:px-6">
+       <div className="w-full mx-auto pt-0 pb-10 sm:px-4 lg:px-6">
            
            {/* 2. Tambahkan BREADCRUMB di sini */}
            <Breadcrumb 
-             className="mb-10" 
+             className="mb-4" 
              items={[
                { label: "Beranda", href: "/" },
                { label: "Cuaca" }, 
