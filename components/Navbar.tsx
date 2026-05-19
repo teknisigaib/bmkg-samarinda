@@ -315,10 +315,10 @@ export default function Navbar() {
                 })}
 
                 <Link 
-                  href="/ptsp" 
+                  href="/layanan" 
                   onClick={handleCloseMobileMenu} 
                   className={`py-3.5 text-[17px] font-semibold transition-colors ${
-                    pathname.startsWith("/ptsp") ? "text-blue-600" : "text-slate-700"
+                    pathname.startsWith("/layanan") ? "text-blue-600" : "text-slate-700"
                   }`}
                 >
                   Layanan

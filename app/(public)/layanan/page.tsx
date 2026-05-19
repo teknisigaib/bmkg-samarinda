@@ -7,7 +7,7 @@ import {
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Tarif & Layanan Data | BMKG Samarinda",
+  title: "Layanan Data | BMKG Samarinda",
   description: "Informasi biaya layanan PNBP dan alur permintaan data di Stasiun Meteorologi APT Pranoto Samarinda.",
 };
 
@@ -85,7 +85,7 @@ export default function PricingLayananPage() {
         <Breadcrumb 
             items={[
               { label: "Beranda", href: "/" },
-              { label: "Tarif & Layanan Data" } 
+              { label: "Layanan Data" } 
             ]} 
         />
 
@@ -96,7 +96,7 @@ export default function PricingLayananPage() {
            </div>
            
            <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
-              Tarif & Layanan Data
+              Layanan Data
            </h1>
            
            <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
