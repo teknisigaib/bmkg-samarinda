@@ -87,5 +87,7 @@ export const config = {
     '/gempa/:path*',
     '/iklim/:path*',
     '/publikasi/:path*',
+    '/layanan',
+    '/contact',
   ],
 }
