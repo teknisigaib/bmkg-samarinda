@@ -132,7 +132,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/layanan`,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 0.8,
+      priority: 0.9,
     },
   ];
 
@@ -154,7 +154,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/publikasi/berita-kegiatan/${post.slug}`, 
     lastModified: post.updatedAt,
     changeFrequency: 'daily',
-    priority: 0.7,
+    priority: 0.8,
   }));
 
   // 5. Gabungkan Statis dan Dinamis

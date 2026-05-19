@@ -99,7 +99,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                     <span className="text-6xl sm:text-7xl font-black text-slate-800 tracking-tighter drop-shadow-sm">
                       {currentVal}
                     </span>
-                    <span className="text-[10px] sm:text-xs font-bold text-slate-500 tracking-widest mt-2 uppercase border border-slate-100 bg-slate-50 px-3 py-1 rounded-lg">
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-500 tracking-widest mt-2 border border-slate-100 bg-slate-50 px-3 py-1 rounded-lg">
                       µg/m³
                     </span>
                   </div>
@@ -134,7 +134,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                  {(!data.history || data.history.length === 0) ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
                         <TrendingUp className="w-10 h-10 mb-3 opacity-20" />
-                        <span className="text-xs font-bold uppercase tracking-widest">Belum ada riwayat tersedia</span>
+                        <span className="text-xs font-bold tracking-widest">Belum ada riwayat tersedia</span>
                     </div>
                  ) : (
                     <ResponsiveContainer width="100%" height="100%">
@@ -178,7 +178,7 @@ export default function AirQualityView({ initialData }: { initialData: any }) {
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-100 pb-1">Pukul {label}</p>
                                         <div className="flex items-center gap-2.5">
                                             <div className="w-3 h-3 rounded-full shadow-sm" style={{background: color}}></div>
-                                            <span className="font-black text-lg text-slate-800">{val} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest ml-0.5">µg/m³</span></span>
+                                            <span className="font-black text-lg text-slate-800">{val} <span className="text-[10px] text-slate-400 font-bold  tracking-widest ml-0.5">µg/m³</span></span>
                                         </div>
                                     </div>
                                 );

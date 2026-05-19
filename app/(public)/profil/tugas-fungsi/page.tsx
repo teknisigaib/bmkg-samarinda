@@ -30,7 +30,7 @@ const PENGELOLAAN_TASKS = [
 export default function TugasFungsiPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
-      <div className="w-full mx-auto pt-6 space-y-8">
+      <div className="w-full mx-auto pt-0 space-y-8">
         
         {/* --- BREADCRUMB --- */}
         <Breadcrumb 
@@ -42,7 +42,7 @@ export default function TugasFungsiPage() {
         />
 
         {/* --- HEADER SECTION --- */}
-        <section className="relative flex flex-col items-center justify-center text-center mb-10 mx-auto pt-2">
+        <section className="relative flex flex-col items-center justify-center text-center mb-6 mx-auto pt-0">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
            </div>

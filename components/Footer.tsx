@@ -14,7 +14,7 @@ export default function Footer() {
                 <Image src="/logo-bmkg.png" alt="Logo BMKG" width={40} height={40} />
                 <div>
                     <h3 className="text-white font-bold text-lg leading-tight">BMKG</h3>
-                    <p className="text-xs text-slate-400">Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto - Samarinda</p>
+                    <p className="text-xs text-slate-400">Stasiun Meteorologi Kelas II Aji Pangeran Tumenggung Pranoto - Samarinda</p>
                 </div>
             </div>
             <p className="leading-relaxed text-slate-400">
@@ -49,15 +49,20 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Tautan Cepat */}
+          {/* Tautan BMKG */}
           <div className="space-y-4">
-            <h4 className="text-white font-bold text-base mb-2">Tautan Cepat</h4>
+            <h4 className="text-white font-bold text-base mb-2">Link Terkait</h4>
             <ul className="space-y-2">
-                <li><Link href="/profil/visi-misi" className="hover:text-blue-400 transition">Visi & Misi</Link></li>
-                <li><Link href="/cuaca/prakiraan" className="hover:text-blue-400 transition">Prakiraan Cuaca</Link></li>
-                <li><Link href="/publikasi/berita-kegiatan" className="hover:text-blue-400 transition">Berita Terkini</Link></li>
-                <li><Link href="/publikasi/buletin" className="hover:text-blue-400 transition">Unduh Buletin</Link></li>
-                <li><Link href="/contact" className="hover:text-blue-400 transition">Hubungi Kami</Link></li>
+                <li><Link href="https://www.bmkg.go.id/" className="hover:text-blue-400 transition">BMKG Pusat</Link></li>
+                <li><Link href="https://inasiam.bmkg.go.id/" className="hover:text-blue-400 transition">INA SIAM</Link></li>
+                <li><Link href="https://maritim.bmkg.go.id/inawis" className="hover:text-blue-400 transition">INA WIS</Link></li>
+                <li><Link href="https://signature.bmkg.go.id/dwt/" className="hover:text-blue-400 transition">DWT</Link></li>
+                <li><Link href="https://inatews.bmkg.go.id/" className="hover:text-blue-400 transition">INA TEWS</Link></li>
+                <li><Link href="https://web-aviation.bmkg.go.id/" className="hover:text-blue-400 transition">Aviation BMKG</Link></li>
+                <li><Link href="https://maritim.bmkg.go.id/" className="hover:text-blue-400 transition">Maritim BMKG</Link></li>
+                <li><Link href="https://iklim.bmkg.go.id/id/" className="hover:text-blue-400 transition">Iklim BMKG</Link></li>
+
+                
             </ul>
           </div>
 

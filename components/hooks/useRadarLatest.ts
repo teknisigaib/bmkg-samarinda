@@ -84,8 +84,16 @@ export function useRadarLatest(site: string = "BAL") {
   useEffect(() => {
     fetchRadarData();
 
-    // Pembersihan RAM otomatis jika komponen Peta dimatikan (Unmount)
-    return () => cleanupBlobs();
+    const interval = setInterval(() => {
+      fetchRadarData();
+    }, 60 * 1000); // 1 menit
+
+    // Pembersihan RAM otomatis dan hapus interval
+    return () => {
+      cleanupBlobs();
+      clearInterval(interval);
+    };
+
   }, [fetchRadarData, cleanupBlobs]);
 
   return { radarUrl, radarTime, radarBounds, radarFrames, isLoading, isOffline, refresh: fetchRadarData };

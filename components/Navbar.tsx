@@ -92,19 +92,19 @@ export default function Navbar() {
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 z-50 group shrink-0">
             <Image 
-              src="/logo-bmkg.png" 
+              src="/logo-bmkg2.png" 
               alt="Logo BMKG" 
               width={44} 
               height={44} 
               priority 
-              className="w-9 h-9 sm:w-11 sm:h-11 transition-transform duration-300 group-hover:scale-105"
+              className="w-8 h-9 sm:w-10 sm:h-12 transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="flex flex-col justify-center">
-              <span className="text-gray-900 font-bold text-[12px] sm:text-xs md:text-sm tracking-tight leading-tight">
-                BMKG
+            <div className="flex flex-col justify-center space-y-0.5">
+              <span className="text-gray-700 font-bold text-[12px] sm:text-xs md:text-sm leading-tight">
+                Stasiun Meteorologi Kelas II
               </span>
-              <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 font-medium leading-tight">
-                Stasiun Meteorologi APT Pranoto
+              <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 font-medium tracking-tight leading-tight">
+                Aji Pangeran Tumenggung Pranoto, Samarinda
               </span>
             </div>
           </Link>
@@ -201,9 +201,9 @@ export default function Navbar() {
           <div className="flex items-center gap-3 z-50 shrink-0">
             <Link 
                href="/contact" 
-               className="hidden md:flex items-center justify-center text-sm font-semibold px-5 py-2.5 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap"
+               className="hidden md:flex items-center justify-center text-sm font-semibold px-5 py-2.5 rounded-lg bg-white text-slate-700 hover:bg-slate-200 transition-colors border border-slate-300 whitespace-nowrap"
             >
-               Hubungi Kami
+               Kontak Kami
             </Link>
             
             <button 
@@ -230,7 +230,7 @@ export default function Navbar() {
             {/* Header Mobile Menu */}
             <div className="flex justify-between items-center px-4 sm:px-6 h-[64px] border-b border-slate-200 shrink-0">
               <div className="flex items-center gap-2">
-                <Image src="/logo-bmkg.png" alt="BMKG" width={28} height={28} className="w-7 h-7" />
+                <Image src="/logo-bmkg2.png" alt="BMKG" width={26} height={28} className="w-7 h-7" />
                 <span className="font-semibold text-slate-800 text-sm tracking-tight">Menu Navigasi</span>
               </div>
               <button 
@@ -334,7 +334,7 @@ export default function Navbar() {
                 onClick={handleCloseMobileMenu} 
                 className="flex items-center justify-center w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow-lg shadow-slate-900/10 active:scale-[0.98] transition-all"
               >
-                Hubungi Kami
+                Kontak Kami
               </Link>
             </div>
           </motion.div>

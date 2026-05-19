@@ -1,14 +1,19 @@
-"use client";
-
 import React from 'react';
+import type { Metadata } from "next";
 import { 
   GraduationCap, ShieldCheck, Ship, Anchor, BarChart3, 
-  MessageSquareText, Check, FileText, Info, Database, Receipt
+  MessageSquareText, Check, FileText, Info, Globe
 } from 'lucide-react';
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
+export const metadata: Metadata = {
+  title: "Tarif & Layanan Data | BMKG Samarinda",
+  description: "Informasi biaya layanan PNBP dan alur permintaan data di Stasiun Meteorologi APT Pranoto Samarinda.",
+};
+
 export default function PricingLayananPage() {
   
+  // Data statis, tinggal kamu edit aja di sini kalau ada perubahan harga/link
   const services = [
     {
       id: 1,
@@ -97,8 +102,6 @@ export default function PricingLayananPage() {
            <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">
               Transparansi biaya PNBP untuk setiap kebutuhan data Anda. Pilih layanan yang sesuai, mulai dari keperluan akademik hingga operasional industri.
            </p>
-
-           
         </section>
 
         {/* --- GRID LAYANAN --- */}

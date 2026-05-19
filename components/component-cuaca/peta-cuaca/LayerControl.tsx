@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Layers, Radar, Satellite, Flame, AlertTriangle, X, Map, MapPin, Wind, Loader2, ShieldCheck, Info } from "lucide-react";
+import { Layers, Radar, Satellite, Flame, AlertTriangle, X, Map, MapPin, Wind, Loader2, ShieldCheck, Info, RefreshCw } from "lucide-react";
 
 import { useRadarLatest } from "@/components/hooks/useRadarLatest";
 import { useHimawariData } from "@/components/hooks/useHimawariData";
@@ -13,27 +13,32 @@ interface LayerControlProps {
   showWarning: boolean; setShowWarning: (val: boolean) => void;
   showStations: boolean; setShowStations: (val: boolean) => void;
   mapStyle: string; setMapStyle: (val: string) => void;
-  nowcastData?: any; // ✅ Terima data Nowcast
+  nowcastData?: any; 
   isLoadingHotspot: boolean; 
   showWind: boolean; setShowWind: (val: boolean) => void;
   isLoadingWind: boolean; windTime: string | null;
+  refreshHotspot?: () => void;
+  refreshWarning?: () => void;
+  refreshStations?: () => void;
+  refreshWind?: () => void;
 }
 
 export default function LayerControl({
   showRadar, setShowRadar, showSatellite, setShowSatellite,
   showHotspot, setShowHotspot, showWarning, setShowWarning,
   showStations, setShowStations, mapStyle, setMapStyle,
-  nowcastData, isLoadingHotspot, showWind, setShowWind, isLoadingWind, windTime
+  nowcastData, isLoadingHotspot, showWind, setShowWind, isLoadingWind, windTime,
+  refreshHotspot, refreshWarning, refreshStations, refreshWind
 }: LayerControlProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   // DATA RADAR
-  const { isOffline: balOffline, radarFrames: balFrames } = useRadarLatest("BAL");
-  const { isOffline: mtwOffline, radarFrames: mtwFrames } = useRadarLatest("MTW");
-  const { isOffline: trkOffline, radarFrames: trkFrames } = useRadarLatest("TRK");
+  const { isOffline: balOffline, radarFrames: balFrames, refresh: balRefresh, isLoading: balLoading } = useRadarLatest("BAL");
+  const { isOffline: mtwOffline, radarFrames: mtwFrames, refresh: mtwRefresh, isLoading: mtwLoading } = useRadarLatest("MTW");
+  const { isOffline: trkOffline, radarFrames: trkFrames, refresh: trkRefresh, isLoading: trkLoading } = useRadarLatest("TRK");
 
   // DATA SATELIT HIMAWARI
-  const { latest: satLatest } = useHimawariData();
+  const { latest: satLatest, refresh: satRefresh, isLoading: satLoading } = useHimawariData();
 
   const getLatestTime = (frames: any[]) => {
     if (!frames || frames.length === 0) return null;
@@ -49,20 +54,50 @@ export default function LayerControl({
   const balTime = getLatestTime(balFrames); const mtwTime = getLatestTime(mtwFrames); const trkTime = getLatestTime(trkFrames);
   const satTime = satLatest ? new Date(satLatest.timeUTC).toLocaleTimeString("id-ID", { timeZone: "Asia/Makassar", hour: "2-digit", minute: "2-digit" }) : null;
 
+  // Fungsi untuk refresh semua radar sekaligus
+  const handleRefreshRadar = () => {
+    balRefresh();
+    mtwRefresh();
+    trkRefresh();
+  };
+  const isRadarLoading = balLoading || mtwLoading || trkLoading;
+
   const ToggleSwitch = ({ checked }: { checked: boolean }) => (
     <div className={`w-8 h-4.5 flex items-center rounded-full p-0.5 transition-colors duration-300 ease-in-out ${checked ? 'bg-blue-500' : 'bg-slate-300'}`}>
       <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-300 ease-in-out ${checked ? 'translate-x-[14px]' : 'translate-x-0'}`} />
     </div>
   );
 
-  const LayerItem = ({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) => (
-    <button onClick={onClick} className="w-full flex items-center justify-between py-2.5 group focus:outline-none">
-      <div className="flex items-center gap-3">
+  // 👉 KOMPONEN LAYER ITEM YANG SUDAH DI-UPDATE
+  const LayerItem = ({ icon, label, active, onClick, onRefresh, isLoading }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void, onRefresh?: () => void, isLoading?: boolean }) => (
+    <div className="w-full flex items-center justify-between py-2 group">
+      {/* Area Kiri: Teks dan Ikon (Klik untuk Toggle) */}
+      <button onClick={onClick} className="flex flex-1 items-center gap-3 focus:outline-none text-left">
         <div className={`${active ? "text-blue-500" : "text-slate-400 group-hover:text-slate-600"} transition-colors`}>{icon}</div>
         <span className={`text-[11px] tracking-wide transition-colors ${active ? "text-slate-800 font-semibold" : "text-slate-600 font-medium group-hover:text-slate-800"}`}>{label}</span>
+      </button>
+      
+      {/* Area Kanan: Tombol Refresh + Toggle */}
+      <div className="flex items-center gap-2">
+        {/* 👉 HANYA MUNCUL JIKA onRefresh ADA && active = TRUE */}
+        {onRefresh && active && (
+          <button 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onRefresh(); 
+            }}
+            disabled={isLoading}
+            className={`p-1 rounded-md transition-colors focus:outline-none ${isLoading ? 'text-blue-500' : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50 animate-in fade-in zoom-in duration-200'}`}
+            title={`Refresh ${label}`}
+          >
+            <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} />
+          </button>
+        )}
+        <button onClick={onClick} className="focus:outline-none ml-1">
+          <ToggleSwitch checked={active} />
+        </button>
       </div>
-      <ToggleSwitch checked={active} />
-    </button>
+    </div>
   );
 
   return (
@@ -110,14 +145,14 @@ export default function LayerControl({
               <div className="flex flex-col">
                 
                 {/* 👉 SATELIT HIMAWARI */}
-                <LayerItem icon={<Satellite size={16} />} label="Satelit Himawari" active={showSatellite} onClick={() => setShowSatellite(!showSatellite)} />
+                <LayerItem icon={<Satellite size={16} />} label="Satelit Himawari" active={showSatellite} onClick={() => setShowSatellite(!showSatellite)} onRefresh={satRefresh} isLoading={satLoading} />
                 {showSatellite && (
                   <div className="mt-1 mb-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5 flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">
                       <span className="text-[10px] font-medium text-slate-700">Citra Satelit</span>
                       <div className="flex items-center gap-1.5 text-[9px]">
                         <span className="text-slate-500 font-normal">{satTime ? `${satTime} WITA` : '--:--'}</span>
-                        {!satTime ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin" /> Memuat</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
+                        {!satTime || satLoading ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin" /> Memuat</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
                       </div>
                     </div>
                     <div>
@@ -138,7 +173,7 @@ export default function LayerControl({
                 )}
 
                 {/* 👉 RADAR CUACA */}
-                <LayerItem icon={<Radar size={16} />} label="Radar Cuaca" active={showRadar} onClick={() => setShowRadar(!showRadar)} />
+                <LayerItem icon={<Radar size={16} />} label="Radar Cuaca" active={showRadar} onClick={() => setShowRadar(!showRadar)} onRefresh={handleRefreshRadar} isLoading={isRadarLoading} />
                 {showRadar && (
                   <div className="mt-1 mb-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5 flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="space-y-1.5">
@@ -146,21 +181,21 @@ export default function LayerControl({
                         <span className="text-[10px] font-medium text-slate-700">Balikpapan</span>
                         <div className="flex items-center gap-1.5 text-[9px]">
                           <span className="text-slate-500 font-normal">{balTime ? `${balTime} WITA` : '--:--'}</span>
-                          {!balTime && !balOffline ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : balOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
+                          {balLoading ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : balOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
                         </div>
                       </div>
                       <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">
                         <span className="text-[10px] font-medium text-slate-700">Muara Teweh</span>
                         <div className="flex items-center gap-1.5 text-[9px]">
                           <span className="text-slate-500 font-normal">{mtwTime ? `${mtwTime} WITA` : '--:--'}</span>
-                          {!mtwTime && !mtwOffline ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : mtwOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
+                          {mtwLoading ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : mtwOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
                         </div>
                       </div>
                       <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">
                         <span className="text-[10px] font-medium text-slate-700">Tarakan</span>
                         <div className="flex items-center gap-1.5 text-[9px]">
                           <span className="text-slate-500 font-normal">{trkTime ? `${trkTime} WITA` : '--:--'}</span>
-                          {!trkTime && !trkOffline ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : trkOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
+                          {trkLoading ? <span className="text-blue-500 flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Memuat</span> : trkOffline ? <span className="text-slate-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Off</span> : <span className="text-emerald-600 flex items-center gap-1 font-medium"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif</span>}
                         </div>
                       </div>
                     </div>
@@ -182,11 +217,11 @@ export default function LayerControl({
                 )}
 
                 {/* 👉 STASIUN CUACA (ARG/AWS) */}
-                <LayerItem icon={<MapPin size={16} />} label="ARG & AWS" active={showStations} onClick={() => setShowStations(!showStations)} />
+                <LayerItem icon={<MapPin size={16} />} label="ARG & AWS" active={showStations} onClick={() => setShowStations(!showStations)} onRefresh={refreshStations} />
                 {showStations && (
                   <div>
-                      <p className="text-[9px] font-medium uppercase tracking-widest text-slate-400 mb-2">Intensitas Hujan (mm)</p>
-                      <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded-lg border border-slate-100 shadow-sm">
+                      <p className="text-[9px] font-medium uppercase tracking-widest text-slate-400 mb-2 mt-2">Intensitas Hujan (mm)</p>
+                      <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded-lg border border-slate-100 shadow-sm mb-2">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2 text-[10px] font-light text-slate-600">
                             <div className="w-2.5 h-2.5 rounded-full border-[3px] border-blue-400"></div>0.2 - 5 mm
@@ -224,11 +259,11 @@ export default function LayerControl({
                           <span className="text-[9px] font-light text-slate-500">Ekstrem</span>
                         </div>
                       </div>
-                    </div>
+                  </div>
                 )}
 
                 {/* 👉 TITIK PANAS (HOTSPOT) */}
-                <LayerItem icon={<Flame size={16} />} label="Titik Panas (Hotspot)" active={showHotspot} onClick={() => setShowHotspot(!showHotspot)} />
+                <LayerItem icon={<Flame size={16} />} label="Titik Panas (Hotspot)" active={showHotspot} onClick={() => setShowHotspot(!showHotspot)} onRefresh={refreshHotspot} isLoading={isLoadingHotspot} />
                 {showHotspot && (
                   <div className="mt-1 mb-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between text-[9px] font-normal text-slate-600 animate-in fade-in slide-in-from-top-1 duration-200">
                     <span className="flex items-center gap-1 text-slate-500 font-medium">Data Hotspot</span>
@@ -238,8 +273,8 @@ export default function LayerControl({
                   </div>
                 )}
                 
-                {/* ✅ PERBAIKAN: PERINGATAN DINI MENGGUNAKAN DATA ARCGIS */}
-                <LayerItem icon={<AlertTriangle size={16} />} label="Peringatan Dini" active={showWarning} onClick={() => setShowWarning(!showWarning)} />
+                {/* 👉 PERINGATAN DINI MENGGUNAKAN DATA ARCGIS */}
+                <LayerItem icon={<AlertTriangle size={16} />} label="Peringatan Dini" active={showWarning} onClick={() => setShowWarning(!showWarning)} onRefresh={refreshWarning} />
                 {showWarning && (
                   <div className="mt-1 mb-2 bg-slate-50/80 border border-slate-100 rounded-xl p-3 animate-in fade-in slide-in-from-top-1 duration-200">
                     {!nowcastData ? (
@@ -267,7 +302,7 @@ export default function LayerControl({
                 )}
 
                 {/* 👉 ANGIN 10M */}
-                <LayerItem icon={<Wind size={16} />} label="Angin 10m" active={showWind} onClick={() => setShowWind(!showWind)} />
+                <LayerItem icon={<Wind size={16} />} label="Angin 10m" active={showWind} onClick={() => setShowWind(!showWind)} onRefresh={refreshWind} isLoading={isLoadingWind} />
                 {showWind && (
                   <div className="mt-1 mb-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm text-[9px]">

@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation"; 
 import { CloudRain, MapPin, RefreshCw } from "lucide-react";
 
-// 👉 PERBAIKAN: Jalur impor diarahkan ke lib/api-cuaca
 import { WeatherStationData } from "@/lib/api-cuaca"; 
 
 // Load Peta tanpa SSR
@@ -20,30 +19,26 @@ const WeatherMap = dynamic(() => import("./WeatherMap"), {
 
 export default function WeatherMapWrapper({ data }: { data: WeatherStationData[] }) {
   const [isMounted, setIsMounted] = useState(false);
-  const router = useRouter(); // INISIALISASI ROUTER
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
 
-    // --- FITUR AUTO REFRESH SILENT (POLLING) ---
-    // Meminta server mengambil data baru setiap 60 detik (60000 ms)
+    // Auto Refresh setiap 60 detik
     const interval = setInterval(() => {
       router.refresh(); 
     }, 60000);
 
-    return () => clearInterval(interval); // Bersihkan interval saat komponen ditutup
+    return () => clearInterval(interval);
   }, [router]);
 
-  // 1. Urutkan Data: Yang sedang hujan ditaruh di Paling Atas
   const sortedData = useMemo(() => {
     return [...data].sort((a, b) => b.rain_total - a.rain_total);
   }, [data]);
 
-  // 2. Hitung Statistik Singkat
   const totalStations = data.length;
   const rainingStations = data.filter(d => d.is_raining && !d.is_offline).length;
 
-  // 3. Ambil Waktu Update Terakhir dari seluruh data
   const latestTimeStr = useMemo(() => {
     if (!data || data.length === 0) return null;
     const latest = data.reduce((latest, current) => {
@@ -73,15 +68,14 @@ export default function WeatherMapWrapper({ data }: { data: WeatherStationData[]
                 <span className="text-xs font-bold text-slate-700">{rainingStations} Lokasi Hujan</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-1.5">
-                {/* Animasi spin ringan pada ikon refresh agar terlihat hidup */}
                 <RefreshCw className="w-4 h-4 text-blue-500 hover:animate-spin cursor-pointer" onClick={() => router.refresh()} />
                 <span className="text-xs font-medium text-slate-500">Sync: {formattedSyncTime}</span>
             </div>
         </div>
       </div>
 
-      {/* --- PETA OBSERVASI --- */}
-      <WeatherMap data={data} />
+      {/* --- PETA OBSERVASI (Lempar fungsi onRefreshStations) --- */}
+      <WeatherMap data={data} onRefreshStations={() => router.refresh()} />
 
     </div>
   );

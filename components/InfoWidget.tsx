@@ -173,7 +173,7 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
               
               <div className={`flex flex-col items-center justify-center bg-white border ${pm25Theme.border} rounded-2xl w-[84px] h-[84px] flex-shrink-0 shadow-sm transition-colors`}>
                 <span className={`text-[34px] font-black tracking-tighter leading-none mb-0.5 ${pm25Theme.color}`}>{pm25Value}</span>
-                <span className={`text-[9px] font-extrabold uppercase tracking-widest ${pm25Theme.color} opacity-80`}>µg/m³</span>
+                <span className={`text-[9px] font-extrabold  tracking-widest ${pm25Theme.color} opacity-80`}>µg/m³</span>
               </div>
 
               <div className="flex flex-col gap-1.5 flex-1 max-w-[200px]">
