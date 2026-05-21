@@ -13,8 +13,8 @@ const poppins = Poppins({
 // METADATA UTAMA 
 export const metadata: Metadata = {
   metadataBase: new URL('https://stamet-samarinda.bmkg.go.id'), 
-  title: 'Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto',
-  description: "Website Resmi Stasiun Meteorologi Kelas III Aji Pangeran Tumenggung Pranoto. Menyediakan informasi cuaca, iklim, dan penerbangan untuk wilayah Samarinda dan Kalimantan Timur.",
+  title: 'Stasiun Meteorologi Kelas II Aji Pangeran Tumenggung Pranoto',
+  description: "Website Resmi Stasiun Meteorologi Kelas II Aji Pangeran Tumenggung Pranoto. Menyediakan informasi cuaca, iklim, dan penerbangan untuk wilayah Samarinda dan Kalimantan Timur.",
   verification: {
     google: "Ou2gyh8a7aDifDNw3zpQnyIYZDTlzfOQTLYJVB6fGq4",
   },
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   
   openGraph: {
     title: 'Stasiun Meteorologi APT Pranoto Samarinda',
-    description: 'Pantau kondisi cuaca, suhu, visibilitas penerbangan, dan peringatan dini di wilayah Samarinda secara real-time.',
+    description: 'Website Resmi Stasiun Meteorologi Kelas II Aji Pangeran Tumenggung Pranoto. Menyediakan informasi cuaca, iklim, dan penerbangan untuk wilayah Samarinda dan Kalimantan Timur',
     url: '/', 
     siteName: 'Stasiun Meteorologi APT Pranoto', // PENTING: Sinyal kedua
     locale: 'id_ID',
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Stasiun Meteorologi APT Pranoto Samarinda',
-    description: 'Informasi cuaca dan penerbangan resmi Stasiun Meteorologi APT Pranoto Samarinda.',
+    description: 'Website Resmi Stasiun Meteorologi Kelas II Aji Pangeran Tumenggung Pranoto. Menyediakan informasi cuaca, iklim, dan penerbangan untuk wilayah Samarinda dan Kalimantan Timur.',
     images: ['/og-image.png'],
     creator: '@infoBMKG',
   },

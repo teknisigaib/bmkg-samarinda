@@ -90,7 +90,7 @@ export default function WeatherMap({ data, onRefreshStations }: { data: WeatherS
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showRadar, setShowRadar] = useState(false);
+  const [showRadar, setShowRadar] = useState(true);
   const [showSatellite, setShowSatellite] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [showStations, setShowStations] = useState(true);

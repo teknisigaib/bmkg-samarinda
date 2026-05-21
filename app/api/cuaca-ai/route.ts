@@ -17,7 +17,6 @@ export async function POST(req: Request) {
     // KUNCI TARGET: Menggunakan model 3.1 Flash Lite Preview
     // ==============================================================
     const targetModel = "gemini-3.1-flash-lite-preview";
-    console.log("🤖 [AI SYSTEM] Mengeksekusi Model:", targetModel);
     
     const model = genAI.getGenerativeModel({ model: targetModel });
 
