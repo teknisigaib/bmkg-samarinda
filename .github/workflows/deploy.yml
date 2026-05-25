@@ -57,6 +57,7 @@ jobs:
           docker run -d \
             -p 3000:3000 \
             --name ${{ env.CONTAINER_NAME }} \
+            -v stamet_nginx_logs:/www/wwwlogs:ro \
             --restart always \
             --env-file ${{ env.ENV_PATH }} \
             ${{ env.IMAGE_NAME }}
