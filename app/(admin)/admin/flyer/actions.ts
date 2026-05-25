@@ -53,4 +53,3 @@ export async function toggleFlyerStatus(id: string, currentStatus: boolean) {
   }
 }
 
-// Catatan: Fungsi deleteFlyer dihapus karena sudah digantikan oleh global-delete.ts
