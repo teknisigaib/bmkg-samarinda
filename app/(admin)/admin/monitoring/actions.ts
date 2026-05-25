@@ -172,30 +172,39 @@ export async function getServerMetrics() {
     // ===================================================
     // 📊 5. LOG PARSER ENGINE MURNI (LOG CONSOLE MODE)
     // ===================================================
+    // ===================================================
+    // 📊 5. LOG PARSER ENGINE MURNI (BYPASS PATH VIA SHELL)
+    // ===================================================
     let webStats = { total_views: 0, unique_visitors: 0, top_pages: [] as any[], logError: null as string | null };
     
     if (process.platform !== 'win32') {
       const logPath = "/www/wwwlogs/stamet-samarinda.bmkg.go.id.log"; 
       
       try {
-        // Cek apakah Next.js punya izin baca file log Nginx aaPanel
-        await fs.access(logPath, fs.constants.R_OK);
-
         // Format tanggal Nginx (Contoh: 25/May/2026)
         const formatNamaBulan = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         const hariIni = new Date();
         const tglStr = `${String(hariIni.getDate()).padStart(2, '0')}/${formatNamaBulan[hariIni.getMonth()]}/${hariIni.getFullYear()}`;
+        
+        // Saring ekstensi statis agar murni menghitung klik halaman warga
         const filterExclude = "ico|css|js|jpg|jpeg|png|gif|svg|woff|woff2|webp|_next|/api/";
 
-        // A. Total Klik Halaman
+        // 🚀 BYPASS LANGSUNG: Biarkan shell Linux yang mengecek eksistensi file secara independen
+        try {
+          await execAsync(`test -f ${logPath}`);
+        } catch {
+          throw new Error(`Shell Linux juga tidak melihat file di ${logPath}. Kemungkinan Next.js dikurung di dalam Sandbox aaPanel.`);
+        }
+
+        // A. Total Klik Halaman Hari Ini
         const { stdout: totalHits } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | wc -l`);
         webStats.total_views = parseInt(totalHits.trim(), 10) || 0;
 
-        // B. Pengunjung Unik
+        // B. Pengunjung Unik Hari Ini (IP Unik Warga Kaltim)
         const { stdout: uniqueIPs } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $1}' | sort -u | wc -l`);
         webStats.unique_visitors = parseInt(uniqueIPs.trim(), 10) || 0;
 
-        // C. 5 Halaman Terpopuler
+        // C. 5 Halaman Paling Viral Hari Ini
         const { stdout: topPathRaw } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr | head -n 5`);
         
         if (topPathRaw.trim()) {
@@ -208,10 +217,8 @@ export async function getServerMetrics() {
           });
         }
       } catch (e: any) {
-        // Cetak di terminal server pusat (PM2 Logs)
-        console.error("❌ [LOG PARSER SERVER ERROR]:", e.message || e);
-        // Lempar pesan eror ke browser console secara elegan
-        webStats.logError = `Ubuntu Linux Error (${e.code || 'UNKNOWN'}): ${e.message || 'Permission Denied / File Missing'}`;
+        // Tangkap pesan error mendalam dari shell (stderr) jika ada pembatasan hak akses
+        webStats.logError = `Diagnosis Masalah Server: ${e.stderr || e.message || 'Akses Ditolak Sistem OS'}`;
       }
     } else {
       // DATA DUMMY TESTING WINDOWS LOKAL
