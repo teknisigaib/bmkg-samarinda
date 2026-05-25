@@ -65,7 +65,7 @@ export default function AdminMonitoringPage() {
           <p className="text-sm text-slate-500 mt-1">Pemantauan Terintegrasi Server Fisik Pusat, Cluster Database, & Endpoint Jaringan.</p>
         </div>
         <button onClick={fetchMetrics} disabled={isLoading} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all border border-blue-700">
-          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} /> {isLoading ? "Menyinkronkan..." : "Segarkan Monitoring"}
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} /> {isLoading ? "Menyinkronkan..." : "Refresh Monitoring"}
         </button>
       </div>
 
