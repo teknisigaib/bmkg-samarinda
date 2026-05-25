@@ -130,6 +130,7 @@ export async function getServerMetrics() {
     const cpuLoad = (sysData.cpuRealUsed || 0).toFixed(2);
     const cpuCores = sysData.cpuNum || 4;
     const cpuPercentage = Math.min(Math.round(sysData.cpuRealUsed || 0), 100);
+    const appMemMB = (process.memoryUsage().rss / 1024 / 1024).toFixed(1);
 
     // --- 2. PROSES DATA BANDWIDTH ---
     const rxBytes = netData.downTotal || 0; 
@@ -150,7 +151,7 @@ export async function getServerMetrics() {
       disk.percentage = Math.round(((totalDiskBytes - (stats.bfree * stats.bsize)) / totalDiskBytes) * 100);
     } catch (e) {}
 
-    // --- 4. DATA GRAFIK & PROSES (MOCKUP/DUMMY FOR AAPANEL) ---
+    // --- 4. DATA GRAFIK & PROSES ---
     const mockChartData = [
       { time: "11:00", cpu: 1.2, load: 0.4 },
       { time: "11:15", cpu: 2.5, load: 0.8 },
@@ -166,39 +167,36 @@ export async function getServerMetrics() {
     ];
 
     // ===================================================
-    // 📊 5. LOG PARSER ENGINE UTUH (BMKG SAMARINDA ADAPTATION)
+    // 📊 5. LOG PARSER ENGINE + LIVE DIAGNOSTIC DETECTOR
     // ===================================================
-    let webStats = { total_views: 0, unique_visitors: 0, top_pages: [] as any[] };
+    // ===================================================
+    // 📊 5. LOG PARSER ENGINE MURNI (LOG CONSOLE MODE)
+    // ===================================================
+    let webStats = { total_views: 0, unique_visitors: 0, top_pages: [] as any[], logError: null as string | null };
     
     if (process.platform !== 'win32') {
+      const logPath = "/www/wwwlogs/stamet-samarinda.bmkg.go.id.log"; 
+      
       try {
-        // Menggunakan nama file log asli yang lu bisikin tadi, cuy!
-        const logPath = "/www/wwwlogs/stamet-samarinda.bmkg.go.id.log"; 
-        
-        // Format tanggal dinamis mengikuti log Nginx (Contoh: 25/May/2026)
+        // Cek apakah Next.js punya izin baca file log Nginx aaPanel
+        await fs.access(logPath, fs.constants.R_OK);
+
+        // Format tanggal Nginx (Contoh: 25/May/2026)
         const formatNamaBulan = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         const hariIni = new Date();
         const tglStr = `${String(hariIni.getDate()).padStart(2, '0')}/${formatNamaBulan[hariIni.getMonth()]}/${hariIni.getFullYear()}`;
+        const filterExclude = "ico|css|js|jpg|jpeg|png|gif|svg|woff|woff2|webp|_next|/api/";
 
-        // JURUS FILTER INDUSTRI: Singkirkan gambar radar, folder _next, api internal, dan file statis lainnya
-        const filterExclude = "\\.(jpg|jpeg|png|gif|css|js|ico|woff|svg|webp) *| */_next/ *| */api/";
-
-        // A. Hitung Murni Total Klik Halaman Hari Ini
-        const { stdout: totalHits } = await execAsync(
-          `grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | wc -l || echo "0"`
-        );
+        // A. Total Klik Halaman
+        const { stdout: totalHits } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | wc -l`);
         webStats.total_views = parseInt(totalHits.trim(), 10) || 0;
 
-        // B. Hitung Murni Pengunjung Unik Warga Kaltim (Berdasarkan IP Unik)
-        const { stdout: uniqueIPs } = await execAsync(
-          `grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $1}' | sort -u | wc -l || echo "0"`
-        );
+        // B. Pengunjung Unik
+        const { stdout: uniqueIPs } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $1}' | sort -u | wc -l`);
         webStats.unique_visitors = parseInt(uniqueIPs.trim(), 10) || 0;
 
-        // C. Ekstrak 5 Halaman Paling Viral Hari Ini (Query Next.js ?_rsc= dikupas sampai bersih!)
-        const { stdout: topPathRaw } = await execAsync(
-          `grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr | head -n 5 || echo ""`
-        );
+        // C. 5 Halaman Terpopuler
+        const { stdout: topPathRaw } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr | head -n 5`);
         
         if (topPathRaw.trim()) {
           webStats.top_pages = topPathRaw.trim().split("\n").map((line) => {
@@ -209,19 +207,19 @@ export async function getServerMetrics() {
             };
           });
         }
-      } catch (e) {
-        console.error("❌ Gagal membaca log statistik asli BMKG:", e);
+      } catch (e: any) {
+        // Cetak di terminal server pusat (PM2 Logs)
+        console.error("❌ [LOG PARSER SERVER ERROR]:", e.message || e);
+        // Lempar pesan eror ke browser console secara elegan
+        webStats.logError = `Ubuntu Linux Error (${e.code || 'UNKNOWN'}): ${e.message || 'Permission Denied / File Missing'}`;
       }
     } else {
-      // MODE SIMULASI: Otomatis menyala saat koding di laptop Windows lokal lu
+      // DATA DUMMY TESTING WINDOWS LOKAL
       webStats = {
-        total_views: 4820, unique_visitors: 1150,
+        total_views: 4820, unique_visitors: 1150, logError: null,
         top_pages: [
           { path: "/", hits: 2100 },
-          { path: "/cuaca/peta-cuaca", hits: 1450 },
-          { path: "/cuaca/maritim", hits: 820 },
-          { path: "/gempa/gempa-terbaru", hits: 350 },
-          { path: "/profil/visi-misi", hits: 100 },
+          { path: "/cuaca/peta-cuaca", hits: 1450 }
         ]
       };
     }
@@ -233,11 +231,7 @@ export async function getServerMetrics() {
       cpu: { load: cpuLoad, cores: cpuCores, percentage: cpuPercentage },
       disk,
       uptime: sysData.time || "13 Day(s)",
-      appMemMB: (process.memoryUsage().heapUsed / (1024 * 1024)).toFixed(1),
-      activeSockets,
-      network,
-      chartData: mockChartData,
-      processes: processRanking,
+      appMemMB, activeSockets, network, chartData: mockChartData, processes: processRanking,
       systemInfo: {
         os: sysData.system || "Ubuntu 24.04 LTS",
         kernel: `aaPanel v${sysData.version || "7.0.30"}`,
@@ -251,15 +245,12 @@ export async function getServerMetrics() {
     console.error("💥 [NOC EXCEPTION]:", err.message);
     return {
       success: false,
-      ram: { used: "0.0", total: "8.0", percentage: 0 },
-      swap: { used: "0.0", total: "2.0", percentage: 0 },
-      cpu: { load: "0.00", cores: 4, percentage: 0 },
-      disk: { used: "0.0", total: "100.0", percentage: 0 },
-      uptime: "Error Sync aaPanel", appMemMB: "0", activeSockets: 0,
-      network: { rxGB: "0.00", txGB: "0.00" },
+      ram: { used: "0.0", total: "8.0", percentage: 0 }, swap: { used: "0.0", total: "2.0", percentage: 0 },
+      cpu: { load: "0.00", cores: 4, percentage: 0 }, disk: { used: "0.0", total: "100.0", percentage: 0 },
+      uptime: "Error Sync aaPanel", appMemMB: "0", activeSockets: 0, network: { rxGB: "0.00", txGB: "0.00" },
       chartData: [], processes: [],
       systemInfo: { os: "Windows Local Dev", kernel: "Local Node", nodeVersion: process.version, cpuModel: "Unknown Host" },
-      webStats: { total_views: 0, unique_visitors: 0, top_pages: [] }
+      webStats: { total_views: 0, unique_visitors: 0, top_pages: [], diagnosticError: err.message }
     };
   }
 }

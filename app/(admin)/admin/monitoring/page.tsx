@@ -42,8 +42,17 @@ export default function AdminMonitoringPage() {
     
     setDbMetric(dbResult);
     setApiMetrics(apiResult);
+    
     if (serverResult) {
       setServerMetric(serverResult as any);
+      
+      // 🚀 SEKARANG DI SINI: Langsung cetak ke Console Browser (F12) buat debugging senyap
+      console.log("📊 [NOC LOG DEBUG]:", {
+        success: serverResult.success,
+        uptime: serverResult.uptime,
+        webStats: serverResult.webStats, // Cek traffic & error log aaPanel di dalam sini, cuy!
+        rawSystem: serverResult.systemInfo
+      });
     }
 
     const now = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
