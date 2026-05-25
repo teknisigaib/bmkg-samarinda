@@ -175,53 +175,79 @@ export async function getServerMetrics() {
     // ===================================================
     // 📊 5. LOG PARSER ENGINE MURNI (BYPASS PATH VIA SHELL)
     // ===================================================
+    // ===================================================
+    // 📊 5. DOCKER-NATIVE STREAM LOG PARSER ENGINE (ANTI-OOM CRASH)
+    // ===================================================
     let webStats = { total_views: 0, unique_visitors: 0, top_pages: [] as any[], logError: null as string | null };
     
     if (process.platform !== 'win32') {
       const logPath = "/www/wwwlogs/stamet-samarinda.bmkg.go.id.log"; 
       
       try {
+        // Impor modul internal Node.js yang dibutuhkan secara dinamis
+        const fsNative = require('fs');
+        const readline = require('readline');
+
         // Format tanggal Nginx (Contoh: 25/May/2026)
         const formatNamaBulan = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         const hariIni = new Date();
         const tglStr = `${String(hariIni.getDate()).padStart(2, '0')}/${formatNamaBulan[hariIni.getMonth()]}/${hariIni.getFullYear()}`;
         
-        // Saring ekstensi statis agar murni menghitung klik halaman warga
-        const filterExclude = "ico|css|js|jpg|jpeg|png|gif|svg|woff|woff2|webp|_next|/api/";
+        // Pola eliminasi aset statis agar murni menghitung klik halaman riil dari warga
+        const filterExclude = /\.(ico|css|js|jpg|jpeg|png|gif|svg|woff|woff2|webp)|_next|\/api\//i;
 
-        // 🚀 BYPASS LANGSUNG: Biarkan shell Linux yang mengecek eksistensi file secara independen
-        try {
-          await execAsync(`test -f ${logPath}`);
-        } catch {
-          throw new Error(`Shell Linux juga tidak melihat file di ${logPath}. Kemungkinan Next.js dikurung di dalam Sandbox aaPanel.`);
+        // Inisialisasi counter internal
+        let totalViews = 0;
+        const uniqueIPMap = new Set<string>();
+        const pathFrequency: { [key: string]: number } = {};
+
+        // Membuat aliran baca (Stream) baris demi baris untuk menghemat RAM kontainer Docker
+        const fileStream = fsNative.createReadStream(logPath);
+        const rl = readline.createInterface({
+          input: fileStream,
+          crlfDelay: Infinity
+        });
+
+        for await (const line of rl) {
+          // Hanya proses baris yang berisi data transaksi hari ini
+          if (line.includes(tglStr)) {
+            // Skrining awal: Singkirkan file aset statis gambar radar, css, dll
+            if (filterExclude.test(line)) continue;
+
+            // Pecah baris log berdasarkan spasi standar Nginx
+            const parts = line.split(" ");
+            const ipAddress = parts[0];
+            let requestPath = parts[6] || "/";
+
+            // Bersihkan kotoran parameter query dari Next.js seperti ?_rsc= atau ?path=
+            if (requestPath.includes("?")) {
+              requestPath = requestPath.split("?")[0];
+            }
+
+            if (ipAddress && requestPath) {
+              totalViews++;
+              uniqueIPMap.add(ipAddress);
+              pathFrequency[requestPath] = (pathFrequency[requestPath] || 0) + 1;
+            }
+          }
         }
 
-        // A. Total Klik Halaman Hari Ini
-        const { stdout: totalHits } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | wc -l`);
-        webStats.total_views = parseInt(totalHits.trim(), 10) || 0;
+        // Mapping 5 halaman terpopuler dari objek frekuensi
+        const sortedPages = Object.keys(pathFrequency)
+          .map(path => ({ path, hits: pathFrequency[path] }))
+          .sort((a, b) => b.hits - a.hits)
+          .slice(0, 5);
 
-        // B. Pengunjung Unik Hari Ini (IP Unik Warga Kaltim)
-        const { stdout: uniqueIPs } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $1}' | sort -u | wc -l`);
-        webStats.unique_visitors = parseInt(uniqueIPs.trim(), 10) || 0;
+        webStats.total_views = totalViews;
+        webStats.unique_visitors = uniqueIPMap.size;
+        webStats.top_pages = sortedPages;
 
-        // C. 5 Halaman Paling Viral Hari Ini
-        const { stdout: topPathRaw } = await execAsync(`grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr | head -n 5`);
-        
-        if (topPathRaw.trim()) {
-          webStats.top_pages = topPathRaw.trim().split("\n").map((line) => {
-            const parts = line.trim().split(/\s+/);
-            return {
-              hits: parseInt(parts[0], 10),
-              path: parts[1] || "/"
-            };
-          });
-        }
       } catch (e: any) {
-        // Tangkap pesan error mendalam dari shell (stderr) jika ada pembatasan hak akses
-        webStats.logError = `Diagnosis Masalah Server: ${e.stderr || e.message || 'Akses Ditolak Sistem OS'}`;
+        // Melempar pesan diagnosis akurat ke console F12 browser lu jika volume mapping gagal
+        webStats.logError = `Docker File Isolation Error (${e.code || 'UNKNOWN'}): ${e.message}. Pastikan volume mapping di docker-compose / aaPanel sudah terpasang, cuy!`;
       }
     } else {
-      // DATA DUMMY TESTING WINDOWS LOKAL
+      // MODE SIMULASI DI LAPTOP WINDOWS LOKAL
       webStats = {
         total_views: 4820, unique_visitors: 1150, logError: null,
         top_pages: [
