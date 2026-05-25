@@ -93,16 +93,14 @@ export async function getServerMetrics() {
     const apiUrl = process.env.AAPANEL_API_URL;
     const apiToken = process.env.AAPANEL_API_TOKEN;
 
-    if (!apiUrl || !apiToken) {
-      throw new Error("Konfigurasi API aaPanel di file .env belum lengkap / kosong, cuy!");
-    }
+    if (!apiUrl || !apiToken) throw new Error("Environment API aaPanel belum lengkap");
 
-    // Algoritma Otentikasi MD5 Signature Resmi bawaan aaPanel API
+    // Enkripsi MD5 Signature khas aaPanel
     const requestTime = Math.floor(Date.now() / 1000);
     const tokenMd5 = crypto.createHash('md5').update(apiToken).digest('hex');
     const requestToken = crypto.createHash('md5').update(requestTime + tokenMd5).digest('hex');
 
-    // Tembak 2 Endpoint aaPanel sekaligus secara paralel (System Info + Real Network Info)
+    // Tembak API aaPanel (System + Network)
     const [sysResponse, netResponse] = await Promise.all([
       fetch(`${apiUrl}/system?action=GetSystemTotal`, {
         method: 'POST',
@@ -118,51 +116,41 @@ export async function getServerMetrics() {
       })
     ]);
 
-    if (!sysResponse.ok || !netResponse.ok) throw new Error("Salah satu gerbang API aaPanel menolak koneksi");
+    if (!sysResponse.ok || !netResponse.ok) throw new Error("Salah satu API aaPanel gagal merespon");
 
     const sysData = await sysResponse.json();
     const netData = await netResponse.json();
 
-    if ((sysData && sysData.status === false) || (netData && netData.status === false)) {
-      throw new Error(sysData.msg || netData.msg || "Ditolak oleh enkripsi keamanan aaPanel");
-    }
-
-    // A. Pemetaan Data RAM (Data flat kiriman log asli lu)
+    // --- 1. PROSES DATA MEMORI & CPU ---
     const totalRamMB = sysData.memTotal || 7941;
     const freeRamMB = sysData.memFree || 3007;
     const usedRamMB = totalRamMB - freeRamMB;
     const ramPercentage = Math.round((usedRamMB / totalRamMB) * 100);
 
-    // B. Pemetaan Data CPU Load
     const cpuLoad = (sysData.cpuRealUsed || 0).toFixed(2);
     const cpuCores = sysData.cpuNum || 4;
     const cpuPercentage = Math.min(Math.round(sysData.cpuRealUsed || 0), 100);
-    const appMemMB = (process.memoryUsage().heapUsed / (1024 * 1024)).toFixed(1);
 
-    // C. Pemetaan Kapasitas SSD Lokal via Modul Kernel fs Node.js
-    let disk = { total: "100.0", used: "20.0", percentage: 20 };
-    try {
-      const stats = await fs.statfs('/');
-      const totalDiskBytes = stats.blocks * stats.bsize;
-      const freeDiskBytes = stats.bfree * stats.bsize;
-      const usedDiskBytes = totalDiskBytes - freeDiskBytes;
-      disk.total = (totalDiskBytes / (1024 ** 3)).toFixed(1);
-      disk.used = (usedDiskBytes / (1024 ** 3)).toFixed(1);
-      disk.percentage = Math.round((usedDiskBytes / totalDiskBytes) * 100);
-    } catch (e) {}
-
-    // D. Pengambilan Data Jaringan Bandwidth Riil dari GetNetWork aaPanel (Bytes -> GB)
+    // --- 2. PROSES DATA BANDWIDTH ---
     const rxBytes = netData.downTotal || 0; 
     const txBytes = netData.upTotal || 0;   
     const network = {
       rxGB: (rxBytes / (1024 ** 3)).toFixed(2),
       txGB: (txBytes / (1024 ** 3)).toFixed(2)
     };
+    const activeSockets = netData.连接数 || netData.connections || 0; 
 
-    // Jumlah total soket koneksi aktif yang menempel di firewall server saat ini
-    const activeSockets = netData.连接数 || netData.connections || 0;
+    // --- 3. PROSES DATA SSD ---
+    let disk = { total: "100.0", used: "20.0", percentage: 20 };
+    try {
+      const stats = await fs.statfs('/');
+      const totalDiskBytes = stats.blocks * stats.bsize;
+      disk.total = (totalDiskBytes / (1024 ** 3)).toFixed(1);
+      disk.used = ((totalDiskBytes - (stats.bfree * stats.bsize)) / (1024 ** 3)).toFixed(1);
+      disk.percentage = Math.round(((totalDiskBytes - (stats.bfree * stats.bsize)) / totalDiskBytes) * 100);
+    } catch (e) {}
 
-    // E. Konstruksi Data Koordinat Chart Histori Real-time
+    // --- 4. DATA GRAFIK & PROSES (MOCKUP/DUMMY FOR AAPANEL) ---
     const mockChartData = [
       { time: "11:00", cpu: 1.2, load: 0.4 },
       { time: "11:15", cpu: 2.5, load: 0.8 },
@@ -170,8 +158,6 @@ export async function getServerMetrics() {
       { time: "11:45", cpu: 1.9, load: 0.5 },
       { time: "12:00", cpu: cpuPercentage || 0.7, load: parseFloat(cpuLoad) * 0.4 },
     ];
-
-    // F. Konstruksi Data Proses Paling Rakus Mengonsumsi CPU
     const processRanking = [
       { pid: 385254, name: "next-server (v24)", cpu: `${(sysData.cpuRealUsed || 7.01).toFixed(2)}%`, user: "www" },
       { pid: 1, name: "systemd", cpu: "0.32%", user: "root" },
@@ -179,34 +165,40 @@ export async function getServerMetrics() {
       { pid: 1589, name: "postgresql cluster", cpu: "0.12%", user: "postgres" },
     ];
 
-    // G. Pengambilan Data Ringkasan Statistik Klik Pengunjung dari Supabase RPC
     // ===================================================
-    // G. SEKARANG AMAN & TANPA DATABASE (Membaca Log Nginx aaPanel)
+    // 📊 5. LOG PARSER ENGINE UTUH (BMKG SAMARINDA ADAPTATION)
     // ===================================================
     let webStats = { total_views: 0, unique_visitors: 0, top_pages: [] as any[] };
     
     if (process.platform !== 'win32') {
       try {
-        // Tentukan lokasi file log website lu di aaPanel. 
-        // Secara bawaan aaPanel ditaruh di /www/wwwlogs/access.log
-        // Jika lu sudah pasang domain, ganti 'access.log' menjadi 'nama_domain_lu.log'
+        // Menggunakan nama file log asli yang lu bisikin tadi, cuy!
         const logPath = "/www/wwwlogs/stamet-samarinda.bmkg.go.id.log"; 
         
-        // Ambil format tanggal hari ini versi log Nginx (Contoh: 25/May/2026)
+        // Format tanggal dinamis mengikuti log Nginx (Contoh: 25/May/2026)
         const formatNamaBulan = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         const hariIni = new Date();
         const tglStr = `${String(hariIni.getDate()).padStart(2, '0')}/${formatNamaBulan[hariIni.getMonth()]}/${hariIni.getFullYear()}`;
 
-        // 1. Hitung Total Klik (Hits) Hari Ini via Linux Command
-        const { stdout: totalHits } = await execAsync(`grep -c "${tglStr}" ${logPath} || echo "0"`);
+        // JURUS FILTER INDUSTRI: Singkirkan gambar radar, folder _next, api internal, dan file statis lainnya
+        const filterExclude = "\\.(jpg|jpeg|png|gif|css|js|ico|woff|svg|webp) *| */_next/ *| */api/";
+
+        // A. Hitung Murni Total Klik Halaman Hari Ini
+        const { stdout: totalHits } = await execAsync(
+          `grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | wc -l || echo "0"`
+        );
         webStats.total_views = parseInt(totalHits.trim(), 10) || 0;
 
-        // 2. Hitung Pengunjung Unik (Berdasarkan keunikan IP Warga) Hari Ini
-        const { stdout: uniqueIPs } = await execAsync(`grep "${tglStr}" ${logPath} | awk '{print $1}' | sort -u | wc -l || echo "0"`);
+        // B. Hitung Murni Pengunjung Unik Warga Kaltim (Berdasarkan IP Unik)
+        const { stdout: uniqueIPs } = await execAsync(
+          `grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $1}' | sort -u | wc -l || echo "0"`
+        );
         webStats.unique_visitors = parseInt(uniqueIPs.trim(), 10) || 0;
 
-        // 3. Ambil 5 Halaman Terpopuler yang di-klik hari ini
-        const { stdout: topPathRaw } = await execAsync(`grep "${tglStr}" ${logPath} | awk '{print $7}' | grep -v -E '\\.(jpg|jpeg|png|gif|css|js|ico|woff|svg)' | sort | uniq -c | sort -nr | head -n 5 || echo ""`);
+        // C. Ekstrak 5 Halaman Paling Viral Hari Ini (Query Next.js ?_rsc= dikupas sampai bersih!)
+        const { stdout: topPathRaw } = await execAsync(
+          `grep "${tglStr}" ${logPath} | grep -v -E "${filterExclude}" | awk '{print $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr | head -n 5 || echo ""`
+        );
         
         if (topPathRaw.trim()) {
           webStats.top_pages = topPathRaw.trim().split("\n").map((line) => {
@@ -218,20 +210,19 @@ export async function getServerMetrics() {
           });
         }
       } catch (e) {
-        console.error("Gagal membaca log statistik aaPanel:", e);
+        console.error("❌ Gagal membaca log statistik asli BMKG:", e);
       }
     } else {
-      // Data simulasi otomatis saat lu buka/testing di laptop Windows (Lokal)
+      // MODE SIMULASI: Otomatis menyala saat koding di laptop Windows lokal lu
       webStats = {
-        total_views: 1250,
-        unique_visitors: 420,
+        total_views: 4820, unique_visitors: 1150,
         top_pages: [
-          { path: "/", hits: 600 },
-          { path: "/cuaca/samarinda", hits: 350 },
-          { path: "/infogempa", hits: 180 },
-          { path: "/berita/peringatan-dini", hits: 90 },
-          { path: "/profil", hits: 30 },
-        ] as any[]
+          { path: "/", hits: 2100 },
+          { path: "/cuaca/peta-cuaca", hits: 1450 },
+          { path: "/cuaca/maritim", hits: 820 },
+          { path: "/gempa/gempa-terbaru", hits: 350 },
+          { path: "/profil/visi-misi", hits: 100 },
+        ]
       };
     }
 
@@ -242,7 +233,7 @@ export async function getServerMetrics() {
       cpu: { load: cpuLoad, cores: cpuCores, percentage: cpuPercentage },
       disk,
       uptime: sysData.time || "13 Day(s)",
-      appMemMB,
+      appMemMB: (process.memoryUsage().heapUsed / (1024 * 1024)).toFixed(1),
       activeSockets,
       network,
       chartData: mockChartData,
@@ -257,18 +248,17 @@ export async function getServerMetrics() {
     };
 
   } catch (err: any) {
-    console.error("💥 [NOC EXCEPTION GERMETRICS]:", err.message);
-    // FALLBACK SAFETY NET (Penyelamat darurat biar laptop lokal Windows lu bebas crash!)
+    console.error("💥 [NOC EXCEPTION]:", err.message);
     return {
       success: false,
       ram: { used: "0.0", total: "8.0", percentage: 0 },
       swap: { used: "0.0", total: "2.0", percentage: 0 },
       cpu: { load: "0.00", cores: 4, percentage: 0 },
       disk: { used: "0.0", total: "100.0", percentage: 0 },
-      uptime: "Gagal Sinkronisasi aaPanel", appMemMB: "0", activeSockets: 0,
+      uptime: "Error Sync aaPanel", appMemMB: "0", activeSockets: 0,
       network: { rxGB: "0.00", txGB: "0.00" },
       chartData: [], processes: [],
-      systemInfo: { os: "Windows Local Mode", kernel: "Local Dev", nodeVersion: process.version, cpuModel: "Unknown Processor" },
+      systemInfo: { os: "Windows Local Dev", kernel: "Local Node", nodeVersion: process.version, cpuModel: "Unknown Host" },
       webStats: { total_views: 0, unique_visitors: 0, top_pages: [] }
     };
   }
