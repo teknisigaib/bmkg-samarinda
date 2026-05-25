@@ -10,13 +10,21 @@ import { checkDatabaseHealth, checkExternalAPIs, getServerMetrics } from "./acti
 export default function AdminMonitoringPage() {
   const [dbMetric, setDbMetric] = useState({
     status: "Memuat...", responseTime: 0, activeConnections: 0, 
-    dbSizeMB: 0, cacheHitRatio: 0, success: true, error: null as string | null
+    dbSizeMB: 0,
+    cacheHitRatio: 0,
+    success: true,
+    error: null as string | null
   });
   const [apiMetrics, setApiMetrics] = useState<any[]>([]);
   const [serverMetric, setServerMetric] = useState({
     ram: { used: "0", total: "0", percentage: 0 },
     cpu: { load: "0.00", cores: 1, percentage: 0 },
-    uptime: "Memuat...", success: true
+    uptime: "Memuat...", 
+    appMemMB: "0", 
+    disk: { total: "0", used: "0", percentage: 0 },
+    swap: { used: "0", total: "0", percentage: 0 }, // 👈 PASTIKAN INI ADA
+    activeSockets: 0,                               // 👈 PASTIKAN INI ADA
+    success: true
   });
   
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +55,7 @@ export default function AdminMonitoringPage() {
   }, []);
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto flex flex-col gap-8 min-h-screen font-sans">
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto flex flex-col gap-8 min-h-screen">
       
       {/* SECTION HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
@@ -63,44 +71,96 @@ export default function AdminMonitoringPage() {
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-all border border-blue-700"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} /> 
-          {isLoading ? "Sinkronisasi..." : "Segarkan Data"}
+          {isLoading ? "Sinkronisasi..." : "Refresh Data"}
         </button>
       </div>
 
       {/* SECTION 1: UBUNTU RESOURCE */}
       <div>
-        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">1. Pemantauan Hardware OS (Ubuntu v24 Local Host)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card RAM */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Utilisasi Memori RAM Server</span>
-            <h3 className="text-2xl font-black text-slate-800 mt-1">{serverMetric.ram.used} <span className="text-sm text-slate-400">/ {serverMetric.ram.total} GB</span></h3>
-            <div className="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${serverMetric.ram.percentage > 80 ? 'bg-rose-500' : 'bg-indigo-600'}`} style={{ width: `${serverMetric.ram.percentage}%` }}></div>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-2 font-medium">Terpakai: {serverMetric.ram.percentage}% dari total kapasitas hardware.</p>
-          </div>
-
-          {/* Card CPU */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Beban Kerja Prosesor (CPU Load)</span>
-            <h3 className="text-2xl font-black text-slate-800 mt-1">{serverMetric.cpu.load} <span className="text-xs text-slate-400 font-bold">Avg (1m)</span></h3>
-            <div className="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${serverMetric.cpu.percentage > 75 ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${serverMetric.cpu.percentage}%` }}></div>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-2 font-medium">Kapasitas: {serverMetric.cpu.cores} Core inti aktif terdeteksi.</p>
-          </div>
-
-          {/* Card Uptime */}
+        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">1. Pemantauan Hardware OS & Network (Ubuntu v24 Local Host)</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Card 1: RAM & App Heap */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Durasi Aktif Sistem (Uptime)</span>
-              <h3 className="text-xl font-black text-slate-800 mt-1 truncate">{serverMetric.uptime}</h3>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Utilisasi RAM OS</span>
+              <h3 className="text-2xl font-black text-slate-800 mt-1">{serverMetric.ram.used} <span className="text-sm text-slate-400">/ {serverMetric.ram.total} GB</span></h3>
+              <div className="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-500 ${serverMetric.ram.percentage > 85 ? 'bg-rose-500' : 'bg-indigo-600'}`} style={{ width: `${serverMetric.ram.percentage}%` }}></div>
+              </div>
             </div>
-            <div className="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-100 p-2 rounded-xl mt-2 flex justify-between">
-              <span>Status OS:</span> <span className="text-emerald-600 font-mono">STABIL (POSIX)</span>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium bg-slate-50 p-2 rounded-lg border border-slate-100 flex justify-between">
+              <span>Next.js App Memory:</span> <strong className="text-indigo-600">{serverMetric.appMemMB} MB</strong>
+            </p>
+          </div>
+
+          {/* Card 2: SWAP Memory (RAM Cadangan) */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alokasi Virtual SWAP Linux</span>
+              <h3 className="text-2xl font-black text-slate-800 mt-1">{serverMetric.swap.used} <span className="text-sm text-slate-400">/ {serverMetric.swap.total} GB</span></h3>
+              <div className="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-500 ${serverMetric.swap.percentage > 50 ? 'bg-orange-500' : 'bg-amber-500'}`} style={{ width: `${serverMetric.swap.percentage}%` }}></div>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-2 font-medium">
+              {serverMetric.swap.percentage > 0 ? `⚠️ Sistem menggunakan ${serverMetric.swap.percentage}% RAM Cadangan SSD!` : "✅ Penggunaan SWAP: 0% (Kondisi Ideal)"}
+            </p>
+          </div>
+
+          {/* Card 3: CPU Load */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Beban CPU (Load Avg)</span>
+              <h3 className="text-2xl font-black text-slate-800 mt-1">{serverMetric.cpu.load} <span className="text-xs text-slate-400 font-bold">Avg (1m)</span></h3>
+              <div className="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-500 ${serverMetric.cpu.percentage > 75 ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${serverMetric.cpu.percentage}%` }}></div>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium bg-slate-50 p-2 rounded-lg border border-slate-100">
+              Kapasitas: <strong className="text-slate-700">{serverMetric.cpu.cores} Core</strong> inti terdeteksi pada ACPI.
+            </p>
+          </div>
+
+          {/* Card 4: SSD Storage */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kapasitas SSD (Root /)</span>
+              <h3 className="text-2xl font-black text-slate-800 mt-1">{serverMetric.disk.used} <span className="text-sm text-slate-400">/ {serverMetric.disk.total} GB</span></h3>
+              <div className="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-500 ${serverMetric.disk.percentage > 90 ? 'bg-rose-500' : 'bg-blue-500'}`} style={{ width: `${serverMetric.disk.percentage}%` }}></div>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium bg-slate-50 p-2 rounded-lg border border-slate-100">
+              Sisa Ruang: <strong className={serverMetric.disk.percentage > 90 ? "text-rose-600" : "text-blue-600"}>{100 - serverMetric.disk.percentage}% Free</strong>
+            </p>
+          </div>
+
+          {/* Card 5: Jaringan Sockets (Traffic Monitor) */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Koneksi TCP Jaringan (HTTP/S)</span>
+              <h3 className="text-2xl font-black text-slate-800 mt-1">
+                {serverMetric.activeSockets} <span className="text-sm font-bold text-slate-400">Koneksi Aktif</span>
+              </h3>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium bg-slate-50 p-2 rounded-lg border border-slate-100">
+              Membaca port operasional Linux via subsistem <code className="bg-slate-200 px-1 rounded font-mono">ss</code> CLI.
+            </p>
+          </div>
+
+          {/* Card 6: Uptime */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Server Uptime</span>
+              <h3 className="text-xl font-black text-slate-800 mt-1">{serverMetric.uptime}</h3>
+            </div>
+            <div className="text-[10px] font-bold text-slate-500 bg-emerald-50 border border-emerald-100 p-2 rounded-xl mt-3 flex justify-between items-center">
+              <span>Status OS:</span> 
+              <span className="text-emerald-700 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> ONLINE</span>
             </div>
           </div>
+
         </div>
       </div>
 
