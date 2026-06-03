@@ -1,5 +1,5 @@
 import MaritimeDashboard from "@/components/component-cuaca/cuaca-maritim/MaritimeDashboard";
-import { KALTIM_AREAS, createSlug, combineForecasts, getWilmetosGeoJson } from "@/lib/bmkg/maritim"; // Import getWilmetosGeoJson
+import { KALTIM_AREAS, createSlug, combineForecasts, getWilmetosGeoJson } from "@/lib/bmkg/maritim";
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
@@ -11,16 +11,31 @@ export const metadata: Metadata = {
 };
 
 export default async function MaritimePage() {
-  // 1. Fetch Data Cuaca (Batch)
+  // 1. Fetch Data Cuaca (Batch) dengan Penyamaran & Log Detektif
   const weatherPromises = KALTIM_AREAS.map(async (name) => {
     const slug = createSlug(name);
     try {
       const res = await fetch(`https://maritim.bmkg.go.id/api/perairan?slug=${slug}`, {
-        cache: 'no-store'
+        cache: 'no-store',
+        headers: {
+          // 🛡️ PENYAMARAN: Biar API BMKG pusat ngira ini browser Chrome asli, bukan bot server!
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/json",
+          "Referer": "https://maritim.bmkg.go.id/"
+        }
       });
+      
+      if (!res.ok) {
+        throw new Error(`API BMKG nolak cuy! Status: ${res.status}`);
+      }
+      
       const json = await res.json();
       return { slug, data: combineForecasts(json) };
-    } catch (e) { return null; }
+    } catch (e: any) { 
+      // 🚨 DETEKTIF: Cetak erornya ke terminal server biar kita gak nebak-nebak
+      console.error(`❌ [ERROR FETCH MARITIM] Gagal narik data untuk area ${name}:`, e.message);
+      return null; 
+    }
   });
 
   // 2. Fetch Data Peta (GeoJSON) - Di Server!
@@ -40,8 +55,6 @@ export default async function MaritimePage() {
   return (
     <div className="min-h-screen">
        <div className="w-full mx-auto pt-0 pb-10 sm:px-4 lg:px-6">
-           
-           {/* 2. Tambahkan BREADCRUMB di sini */}
            <Breadcrumb 
              className="mb-4" 
              items={[
@@ -50,7 +63,6 @@ export default async function MaritimePage() {
                { label: "Cuaca Maritim" } 
              ]} 
            />
-
            {/* Kirim geoJsonData ke Dashboard */}
            <MaritimeDashboard initialData={initialCache} geoJsonData={geoJsonData} />
        </div>
