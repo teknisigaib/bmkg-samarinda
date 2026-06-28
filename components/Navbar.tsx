@@ -36,7 +36,6 @@ const NAV_ITEMS: NavItem[] = [
       { name: "Peringatan Dini", desc: "Informasi cuaca ekstrem", href: "/cuaca/peringatan-dini" },
       { name: "Cuaca Penerbangan", desc: "Info cuaca untuk penerbangan", href: "/cuaca/penerbangan" },
       { name: "Cuaca Maritim", desc: "Info cuaca untuk pelayaran", href: "/cuaca/maritim" },
-      { name: "Cuaca Mahakam", desc: "Prakiraan cuaca sungai Mahakam", href: "/cuaca/mahakam" },
       { name: "Satelit Cuaca", desc: "Visualisasi citra satelit cuaca", href: "/cuaca/satelit" },
       { name: "Peringatan Karhutla", desc: "Kebakaran hutan dan lahan", href: "/cuaca/karhutla" },
       { name: "Peta Cuaca", desc: "Peta pantauan cuaca secara real-time", href: "/cuaca/peta-cuaca" },
