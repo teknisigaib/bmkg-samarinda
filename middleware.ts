@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
     // '/cuaca/maritim',     
     // '/cuaca/penerbangan',
     '/cuaca/mahakam',
-    //'/cuaca/peta-cuaca',
+    '/cuaca/peta-cuaca',
   ];
 
   const { pathname } = request.nextUrl;
