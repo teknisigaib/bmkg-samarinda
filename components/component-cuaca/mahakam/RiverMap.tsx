@@ -354,7 +354,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
             <LayerControl activeLayers={activeLayers} onToggleLayer={(l) => setActiveLayers(p => ({...p, [l]: !p[l]}))} mapStyle={mapStyle} setMapStyle={setMapStyle} layerOpacity={layerOpacity} onOpacityChange={(l, v) => setLayerOpacity(p => ({ ...p, [l]: v }))} />
             
             {timestamps.length > 0 && <ForecastControl timestamps={timestamps} selectedIndex={timeIndex} onSelect={setTimeIndex} />}
-            <MapInfoCard location={dynamicSelectedLoc} onClose={() => setSelectedLoc(null)} onShowMeteogram={setMeteogramLocation} />
+            <MapInfoCard location={dynamicSelectedLoc} onClose={() => setSelectedLoc(null)} onShowMeteogram={setMeteogramLocation} currentTimestamp={timestamps[timeIndex]} />
           </>
         )}
 

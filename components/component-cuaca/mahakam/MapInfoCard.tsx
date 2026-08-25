@@ -1,4 +1,3 @@
-// components/MapInfoCard.tsx
 import React from 'react';
 import { MahakamLocation } from '@/lib/mahakam-data';
 import { Info, X, Thermometer, Wind, Eye, Cloud, MapPin, BarChart2, Clock } from 'lucide-react';
@@ -6,19 +5,21 @@ import { Info, X, Thermometer, Wind, Eye, Cloud, MapPin, BarChart2, Clock } from
 interface MapInfoCardProps {
   location: MahakamLocation | null;
   onClose: () => void;
-  // Ubah nama prop agar lebih jelas tugasnya
   onShowMeteogram?: (loc: MahakamLocation) => void;
+  currentTimestamp?: string; // <--- PROPERTI BARU UNTUK SINKRONISASI JAM
 }
 
-export default function MapInfoCard({ location, onClose, onShowMeteogram }: MapInfoCardProps) {
+export default function MapInfoCard({ location, onClose, onShowMeteogram, currentTimestamp }: MapInfoCardProps) {
   if (!location) return null;
 
-  const updateTime = location.forecasts && location.forecasts[0] 
-    ? new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' }).format(new Date(location.forecasts[0].time))
+  // Cek apakah ada jam dari slider peta, kalau nggak ada baru pakai data bawaan pertama
+  const timeToUse = currentTimestamp || (location.forecasts && location.forecasts[0] ? location.forecasts[0].time : null);
+
+  const updateTime = timeToUse 
+    ? new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' }).format(new Date(timeToUse))
     : '-';
 
   const handleDetailClick = () => {
-    // SEKARANG: Langsung panggil callback, tanpa exit fullscreen
     if (onShowMeteogram) {
       onShowMeteogram(location);
     }
