@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, useMap, Marker, GeoJSON } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { MahakamLocation, getNavigationStatus } from '@/lib/mahakam-data'; 
-import { Wind, Thermometer, Cloud, Eye, Maximize, Minimize, Route, Navigation, Timer, Gauge, BarChart2, Radio, X } from 'lucide-react'; // <-- Tambah Radio & X
+import { Wind, Thermometer, Cloud, Eye, Maximize, Minimize, Route, Navigation, Timer, Gauge, BarChart2, Radio, X, Waves } from 'lucide-react'; 
 import * as turf from '@turf/turf';
 import ForecastControl from './ForecastControl';
 import LayerControl, { MapLayersState } from './LayerControl';
@@ -14,8 +14,9 @@ import MahakamSatellite from './MahakamSatellite';
 import MapInfoCard from './MapInfoCard';
 import MeteogramView from './MeteogramView';
 import RoutePlanner, { RouteNode, SimulationData } from './RoutePlanner';
-import AllStationsMeteogram from './AllStationsMeteogram';
-import MawsPalaranModal from './MawsPalaranModal'; 
+import AllStationsMeteogram from './AllStationsMeteogram'; 
+import MawsPalaranModal from './MawsPalaranModal';
+import BwsTmaModal from './BwsTmaModal'; 
 
 const KECAMATAN_TO_STATION_MAP: Record<string, string> = {
   "Anggana": "Anggana", "Sambutan": "Sambutan", "Samarinda Kota": "Samarinda Kota",
@@ -31,27 +32,55 @@ const KECAMATAN_TO_STATION_MAP: Record<string, string> = {
   "Long Bagun": "Long Bagun", "Long Pahangai": "Long Pahangai", "Long Apari": "Long Apari"
 };
 
+// --- DATA POS TMA (MAWS + 8 POS BWS) ---
+const TMA_STATIONS = [
+  { id: 'maws-palaran', name: 'MAWS Pelabuhan Palaran', lat: -0.5700, lng: 117.2060, type: 'MAWS' },
+  { id: 'bws-1', name: 'POS DUGA AIR KARANG MUMUS KP 3', lat: -0.50817, lng: 117.15670, type: 'BWS' },
+  { id: 'bws-2', name: 'POS DUGA AIR MAHAKAM TENGGARONG', lat: -0.42090, lng: 116.99255, type: 'BWS' },
+  { id: 'bws-3', name: 'POS DUGA AIR PELA SANGKULIMAN', lat: -0.23809, lng: 116.55520, type: 'BWS' },
+  { id: 'bws-4', name: 'POS DUGA AIR MAHAKAM PENYINGGAHAN ULU', lat: -0.37900, lng: 116.22247, type: 'BWS' },
+  { id: 'bws-5', name: 'POS DUGA AIR MAHAKAM LONG IRAM', lat: -0.01725, lng: 115.62550, type: 'BWS' },
+  { id: 'bws-6', name: 'POS DUGA AIR MAHAKAM LONG BAGUN', lat: 0.52281, lng: 115.24110, type: 'BWS' },
+  { id: 'bws-7', name: 'POS DUGA MAHAKAM AIR BATOQ KELO', lat: 0.76301, lng: 115.01789, type: 'BWS' },
+  { id: 'bws-8', name: 'POS DUGA AIR MAHAKAM LONG PAHANGAI', lat: 0.88731, lng: 114.69078, type: 'BWS' }
+];
+
 interface RiverMapProps {
   initialData: MahakamLocation[];
   onViewDetail?: (loc: MahakamLocation) => void;
 }
 
-type MarkerMode = 'weather' | 'temp' | 'wind' | 'visibility';
+type MarkerMode = 'weather' | 'temp' | 'wind' | 'visibility' | 'tma'; 
 
 const createCustomDynamicIcon = (loc: any, isActive: boolean, mode: MarkerMode) => {
   const activeClassContainer = isActive ? 'scale-110 z-[1000]' : 'z-[500]';
-  const isRouteHighlight = loc.isRouteNode ? 'ring-2 ring-blue-500 bg-blue-50 shadow-blue-500/30' : 'ring-1 ring-slate-200 bg-white';
-  const activeClassBox = isActive ? 'ring-2 ring-blue-500 bg-blue-50' : isRouteHighlight;
   
   let iconContent = '';
-  if (mode === 'weather') {
-    iconContent = loc.iconUrl ? `<img src="${loc.iconUrl}" class="w-8 h-8 object-contain" />` : `<div class="w-6 h-6 bg-slate-200 rounded-full"></div>`;
-  } else if (mode === 'temp') {
-    iconContent = `<span class="text-sm font-bold text-slate-700">${loc.temp !== undefined ? loc.temp : '-'}°</span>`;
-  } else if (mode === 'wind') {
-    iconContent = `<div class="flex flex-col items-center justify-center gap-0.5 mt-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(${loc.windDeg || 0}deg)"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg><span class="text-[9px] font-bold text-slate-700 leading-none">${loc.windSpeed !== undefined ? loc.windSpeed : '-'}</span></div>`;
-  } else if (mode === 'visibility') {
-    iconContent = `<div class="flex flex-col items-center justify-center mt-0.5 px-1"><span class="text-[10px] font-bold text-slate-700 leading-tight text-center">${loc.visibility_text || '-'}</span></div>`;
+  let activeClassBox = '';
+
+  if (mode === 'tma') {
+    // Mode TMA: Ikon dibedakan berdasarkan sumber MAWS (Biru Tua) vs BWS (Biru Muda/Sky)
+    if (loc.type === 'MAWS') {
+      activeClassBox = 'ring-2 ring-blue-500 bg-blue-50 shadow-md';
+      iconContent = `<div class="flex flex-col items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6v12c-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6z"></path></svg><span class="text-[8px] font-bold text-blue-600 leading-none mt-0.5">MAWS</span></div>`;
+    } else {
+      activeClassBox = 'ring-2 ring-sky-400 bg-sky-50 shadow-md';
+      iconContent = `<div class="flex flex-col items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6v12c-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6z"></path></svg><span class="text-[8px] font-bold text-sky-600 leading-none mt-0.5">BWS</span></div>`;
+    }
+  } else {
+    // Mode Normal BMKG
+    const isRouteHighlight = loc.isRouteNode ? 'ring-2 ring-blue-500 bg-blue-50 shadow-blue-500/30' : 'ring-1 ring-slate-200 bg-white';
+    activeClassBox = isActive ? 'ring-2 ring-blue-500 bg-blue-50' : isRouteHighlight;
+    
+    if (mode === 'weather') {
+      iconContent = loc.iconUrl ? `<img src="${loc.iconUrl}" class="w-8 h-8 object-contain" />` : `<div class="w-6 h-6 bg-slate-200 rounded-full"></div>`;
+    } else if (mode === 'temp') {
+      iconContent = `<span class="text-sm font-bold text-slate-700">${loc.temp !== undefined ? loc.temp : '-'}°</span>`;
+    } else if (mode === 'wind') {
+      iconContent = `<div class="flex flex-col items-center justify-center gap-0.5 mt-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(${loc.windDeg || 0}deg)"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg><span class="text-[9px] font-bold text-slate-700 leading-none">${loc.windSpeed !== undefined ? loc.windSpeed : '-'}</span></div>`;
+    } else if (mode === 'visibility') {
+      iconContent = `<div class="flex flex-col items-center justify-center mt-0.5 px-1"><span class="text-[10px] font-bold text-slate-700 leading-tight text-center">${loc.visibility_text || '-'}</span></div>`;
+    }
   }
 
   return L.divIcon({
@@ -116,8 +145,8 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
 
   const [showAllMeteogram, setShowAllMeteogram] = useState(false);
   
-  // STATE BARU UNTUK MODAL MAWS PALARAN
   const [showMawsPalaran, setShowMawsPalaran] = useState(false);
+  const [selectedBws, setSelectedBws] = useState<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -181,6 +210,21 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
   }, [visualGeoJson, activeRouteNodes]);
 
   const renderedMarkers = useMemo(() => {
+    if (markerMode === 'tma') {
+      return TMA_STATIONS.map((loc) => {
+        return (
+          <Marker 
+            key={loc.id} position={[loc.lat, loc.lng]} 
+            icon={createCustomDynamicIcon(loc, false, 'tma')} 
+            eventHandlers={{ click: () => {
+                if (loc.type === 'MAWS') setShowMawsPalaran(true);
+                if (loc.type === 'BWS') setSelectedBws(loc);
+            }}}
+          />
+        );
+      });
+    }
+
     return displayData.map((loc) => {
       const isActive = selectedLoc?.id === loc.id;
       return (
@@ -196,12 +240,12 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
   }, [displayData, selectedLoc, markerMode, isRoutePlannerActive]);
 
   useEffect(() => {
-    if (geoJsonRef.current && displayData.length > 0 && !activeRouteNodes) {
+    if (geoJsonRef.current && displayData.length > 0 && !activeRouteNodes && markerMode !== 'tma') {
       geoJsonRef.current.eachLayer((layer: any) => {
         const stationRef = KECAMATAN_TO_STATION_MAP[layer.feature.properties.nm_kecamatan];
         const weatherData = displayData.find(loc => loc.name === stationRef);
         
-        let segmentColor = '#3b82f6'; // Default Biru Aman
+        let segmentColor = '#3b82f6';
         
         if (weatherData && weatherData.forecasts && weatherData.forecasts[timeIndex]) {
           const forecast = weatherData.forecasts[timeIndex];
@@ -217,8 +261,12 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
 
         layer.setStyle({ color: segmentColor, weight: 4, opacity: 0.9, lineCap: 'round', lineJoin: 'round' });
       });
+    } else if (geoJsonRef.current && markerMode === 'tma') {
+       geoJsonRef.current.eachLayer((layer: any) => {
+         layer.setStyle({ color: '#cbd5e1', weight: 4, opacity: 0.9 });
+       });
     }
-  }, [displayData, visualGeoJson, activeRouteNodes, timeIndex]);
+  }, [displayData, visualGeoJson, activeRouteNodes, timeIndex, markerMode]);
 
   const getBasemapUrl = () => {
     if (mapStyle === 'dark') return "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png";
@@ -346,23 +394,24 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
 
         {!isRoutePlannerActive && (
           <>
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-1.5">
-              <button onClick={() => setMarkerMode('weather')} className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'weather' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Cloud className="w-4 h-4" /> <span className="hidden sm:inline">Cuaca</span></button>
-              <button onClick={() => setMarkerMode('temp')} className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'temp' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Thermometer className="w-4 h-4" /> <span className="hidden sm:inline">Suhu</span></button>
-              <button onClick={() => setMarkerMode('wind')} className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'wind' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Wind className="w-4 h-4" /> <span className="hidden sm:inline">Angin</span></button>
-              <button onClick={() => setMarkerMode('visibility')} className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'visibility' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Eye className="w-4 h-4" /> <span className="hidden sm:inline">Visibility</span></button>
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-1.5 overflow-x-auto max-w-[95%]">
+              <button onClick={() => setMarkerMode('weather')} className={`shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'weather' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Cloud className="w-4 h-4" /> <span className="hidden sm:inline">Cuaca</span></button>
+              <button onClick={() => setMarkerMode('temp')} className={`shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'temp' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Thermometer className="w-4 h-4" /> <span className="hidden sm:inline">Suhu</span></button>
+              <button onClick={() => setMarkerMode('wind')} className={`shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'wind' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Wind className="w-4 h-4" /> <span className="hidden sm:inline">Angin</span></button>
+              <button onClick={() => setMarkerMode('visibility')} className={`shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'visibility' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}><Eye className="w-4 h-4" /> <span className="hidden sm:inline">Visibility</span></button>
+              <div className="w-px h-6 bg-slate-200 mx-1 shrink-0 self-center"></div>
+              <button onClick={() => { setMarkerMode('tma'); setSelectedLoc(null); }} className={`shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${markerMode === 'tma' ? 'bg-emerald-500 text-white shadow-sm' : 'text-emerald-600 hover:bg-emerald-50'}`}><Waves className="w-4 h-4" /> <span className="hidden sm:inline">Muka Air</span></button>
             </div>
             
             <LayerControl activeLayers={activeLayers} onToggleLayer={(l) => setActiveLayers(p => ({...p, [l]: !p[l]}))} mapStyle={mapStyle} setMapStyle={setMapStyle} layerOpacity={layerOpacity} onOpacityChange={(l, v) => setLayerOpacity(p => ({ ...p, [l]: v }))} />
             
-            {timestamps.length > 0 && <ForecastControl timestamps={timestamps} selectedIndex={timeIndex} onSelect={setTimeIndex} />}
-            <MapInfoCard location={dynamicSelectedLoc} onClose={() => setSelectedLoc(null)} onShowMeteogram={setMeteogramLocation} currentTimestamp={timestamps[timeIndex]} />
+            {markerMode !== 'tma' && timestamps.length > 0 && <ForecastControl timestamps={timestamps} selectedIndex={timeIndex} onSelect={setTimeIndex} />}
+            {markerMode !== 'tma' && <MapInfoCard location={dynamicSelectedLoc} onClose={() => setSelectedLoc(null)} onShowMeteogram={setMeteogramLocation} currentTimestamp={timestamps[timeIndex]} />}
           </>
         )}
 
         {isSimulating && simData && boatStatus && (
            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[2000] w-[380px] bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-200 animate-in slide-in-from-bottom-8">
-              {/* Box Status Kapal - Biarkan seperti aslinya */}
               <div className="flex items-center justify-between mb-2">
                  <div className="flex items-center gap-1.5">
                     <span className="relative flex h-2 w-2">
@@ -415,7 +464,6 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
            </div>
         )}
 
-        {/* CONTAINER TOMBOL-TOMBOL KANAN ATAS */}
         <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
             <button onClick={toggleFullscreen} className="bg-white/95 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:scale-105 transition-all duration-200 group flex items-center justify-center">
                {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4 group-hover:scale-110 transition-transform" />}
@@ -428,27 +476,18 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
                  <button onClick={() => setShowAllMeteogram(true)} className="bg-blue-600/95 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-blue-500 text-white hover:bg-blue-700 hover:scale-105 transition-all duration-200 group flex items-center justify-center" title="Meteogram Seluruh Area">
                      <BarChart2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                  </button>
-                 
-                 {/* TOMBOL BARU MAWS PALARAN (LIVE DATA) */}
-                 <button 
-                    onClick={() => setShowMawsPalaran(true)} 
-                    className="relative bg-emerald-500/95 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-emerald-400 text-white hover:bg-emerald-600 hover:scale-105 transition-all duration-200 group flex items-center justify-center" 
-                    title="Live Data MAWS Palaran"
-                 >
-                     <span className="absolute top-0 right-0 flex h-2 w-2 -mt-0.5 -mr-0.5">
-                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
-                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-100"></span>
-                     </span>
-                     <Radio className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                 </button>
                </>
             )}
         </div>
 
-        {/* MODAL KOSONGAN UNTUK MAWS PALARAN */}
-        
+        {/* MODAL MAWS PALARAN (LIVE DATA) */}
         {showMawsPalaran && (
           <MawsPalaranModal onClose={() => setShowMawsPalaran(false)} />
+        )}
+
+        {/* MODAL BWS (SEDANG INTEGRASI) */}
+        {selectedBws && (
+          <BwsTmaModal station={selectedBws} onClose={() => setSelectedBws(null)} />
         )}
 
         {/* RENDER MODAL METEOGRAM SEMUA STASIUN */}

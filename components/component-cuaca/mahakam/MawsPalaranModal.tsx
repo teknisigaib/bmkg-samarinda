@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { X, ArrowLeft, Thermometer, Wind, Gauge, Sun, Activity, Droplets, Waves, MapPin, Clock, CloudRain, BarChart3 } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface MawsPalaranModalProps {
   onClose: () => void;
@@ -39,20 +40,16 @@ const StatCard = ({ label, value, unit, icon: Icon }: any) => (
 type MetricType = "water_level" | "salinity" | "ph";
 
 export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
-  // States untuk Latest Data
   const [latestData, setLatestData] = useState<any>(null);
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [isLoadingLatest, setIsLoadingLatest] = useState(true);
   
-  // States untuk History Data dengan Caching
   const [historyCache, setHistoryCache] = useState<Record<string, any[]>>({});
   const [activeMetric, setActiveMetric] = useState<MetricType>("water_level");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   
-  // State UI
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
-  // 1. FUNGSI FETCH LATEST (Bisa Background)
   const fetchLatestData = async (isBackground = false) => {
     if (!isBackground) setIsLoadingLatest(true);
     try {
@@ -73,9 +70,7 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
     }
   };
 
-  // 2. FUNGSI FETCH HISTORY (Dengan Caching)
   const fetchHistoryData = async (metric: MetricType) => {
-    // Kalau data sudah ada di cache, ga perlu loading, langsung pakai
     if (historyCache[metric]) return;
 
     setIsLoadingHistory(true);
@@ -85,18 +80,14 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
       
       if (json.status === "success" && json.series) {
         const formatted = json.series.map((item: any) => {
-          const dateObj = new Date(item.timestamp);
-          const timeLabel = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(dateObj).replace('.', ':');
-          
           let val = 0;
           if (metric === "water_level") val = item.water_level_m;
           if (metric === "salinity") val = item.salinity_psu;
           if (metric === "ph") val = item.ph;
 
-          return { time: timeLabel, value: val };
+          return { fullTimestamp: item.timestamp, value: val };
         });
         
-        // Simpan ke Cache
         setHistoryCache(prev => ({ ...prev, [metric]: formatted }));
       }
     } catch (err) {
@@ -106,11 +97,9 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
     }
   };
 
-  // Efek Pertama Kali Render (Ambil Latest + Set Interval Auto-Refresh 1 Menit)
   useEffect(() => {
-    fetchLatestData(); // Fetch pertama (ada loading)
+    fetchLatestData(); 
     
-    // Interval fetch setiap 1 Menit secara BACKGROUND (tanpa loading modal)
     const intervalId = setInterval(() => {
       fetchLatestData(true);
     }, 60000); 
@@ -118,12 +107,10 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Efek Trigger Fetch History tiap tab berubah
   useEffect(() => {
     fetchHistoryData(activeMetric);
   }, [activeMetric]);
 
-  // Data history yang sedang aktif dari Cache
   const currentHistoryData = historyCache[activeMetric] || [];
 
   const getMetricConfig = () => {
@@ -138,7 +125,7 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
     <div className="absolute inset-0 z-[2000] bg-slate-900/60 backdrop-blur-sm p-4 flex items-center justify-center animate-in fade-in duration-300">
       <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
       
-      <div className="relative w-full max-w-2xl mx-auto rounded-2xl overflow-hidden bg-white shadow-2xl z-10 flex flex-col animate-in zoom-in-95 duration-300 max-h-[95vh] border border-white">
+      <div className="relative w-full max-w-2xl mx-auto rounded-2xl overflow-hidden bg-white shadow-2xl z-10 flex flex-col animate-in zoom-in-95 duration-300 max-h-[90%] sm:max-h-[540px] border border-white">
         
         {/* HEADER MODAL */}
         <div className="p-3 sm:p-4 flex items-start justify-between shrink-0 bg-white">
@@ -148,10 +135,15 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
                 <ArrowLeft size={18} />
               </button>
             ) : (
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0 relative">
-                <Activity size={18} className={isLoadingLatest ? "animate-spin" : "animate-pulse"} />
-                {/* Indikator Titik Live Background */}
-                {!isLoadingLatest && <span className="absolute top-0 right-0 w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>}
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0 relative flex items-center justify-center">
+                <Image 
+                  src="/logo-bmkg2.png" // Pastikan nama file ini sesuai dgn yg ada di public folder lu 
+                  alt="BMKG" 
+                  width={22} 
+                  height={26} 
+                  className={`object-contain ${isLoadingLatest ? 'opacity-50 animate-pulse' : ''}`} 
+                />
+                {!isLoadingLatest && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-2 border-white bg-emerald-500 rounded-full animate-pulse"></span>}
               </div>
             )}
             <div>
@@ -171,7 +163,7 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
         <div className="px-4 shrink-0"><hr className="border-slate-100" /></div>
 
         {/* BODY MODAL */}
-        <div className="overflow-y-auto custom-scrollbar bg-white flex-1 min-h-[300px]">
+        <div className="overflow-y-auto custom-scrollbar bg-white flex-1 min-h-0">
           {!isChartModalOpen ? (
             
             /* === TAMPILAN INFO (GRID DATA) === */
@@ -247,7 +239,7 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
 
               <div className="px-4"><hr className="border-slate-100" /></div>
 
-              <div className="p-4 space-y-3">
+              <div className="p-4 space-y-3 mt-auto">
                 <div className="flex items-center gap-1.5"><MapPin size={12} className="text-slate-400" /><span className="text-[10px] font-bold text-slate-500 uppercase">Koordinat MAWS</span></div>
                 <div className="flex justify-between pl-5 text-[11px] font-medium text-slate-600"><p>Lat: -0.5700</p><p>Lon: 117.2060</p></div>
                 
@@ -260,10 +252,10 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
 
           ) : (
             
-            /* === TAMPILAN GRAFIK (CHART VIEW DENGAN CACHE) === */
-            <div className="p-4 w-full h-[400px] sm:h-[450px] flex flex-col animate-in fade-in zoom-in-95 duration-300">
+            /* === TAMPILAN GRAFIK === */
+            <div className="p-4 w-full h-[280px] sm:h-[320px] flex flex-col animate-in fade-in zoom-in-95 duration-300">
               
-              <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-200 mb-4 w-fit mx-auto">
+              <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-200 mb-4 w-fit mx-auto shrink-0">
                 <button onClick={() => setActiveMetric('water_level')} className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeMetric === 'water_level' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-800'}`}>Muka Air</button>
                 <button onClick={() => setActiveMetric('salinity')} className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeMetric === 'salinity' ? 'bg-white shadow-sm text-sky-600' : 'text-slate-500 hover:text-slate-800'}`}>Salinitas</button>
                 <button onClick={() => setActiveMetric('ph')} className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeMetric === 'ph' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}>pH</button>
@@ -276,24 +268,42 @@ export default function MawsPalaranModal({ onClose }: MawsPalaranModalProps) {
                    </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={currentHistoryData} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={getMetricConfig().color} stopOpacity={0.2}/>
-                          <stop offset="95%" stopColor={getMetricConfig().color} stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} tickMargin={10} axisLine={false} tickLine={false} minTickGap={40} />
+                    <LineChart data={currentHistoryData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" />
+                      
+                      <XAxis 
+                        dataKey="fullTimestamp" 
+                        tickFormatter={(tick) => {
+                           const d = new Date(tick);
+                           return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(d).replace('.', ':');
+                        }}
+                        tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} 
+                        tickMargin={10} axisLine={false} tickLine={false} minTickGap={40} 
+                      />
+                      
                       <YAxis tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
+                      
                       <Tooltip 
-                        contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', padding: '8px' }}
-                        labelStyle={{ fontWeight: 'bold', color: '#64748b', marginBottom: '2px', fontSize: '10px' }}
-                        itemStyle={{ fontSize: '13px', fontWeight: 'bold', color: '#0f172a' }}
+                        contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '10px' }}
+                        labelFormatter={(label) => {
+                           const d = new Date(label);
+                           return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(d).replace('.', ':');
+                        }}
+                        labelStyle={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px', fontSize: '10px' }}
+                        itemStyle={{ fontSize: '14px', fontWeight: 'bold', color: '#0f172a' }}
                         formatter={(value: any) => [`${value}`, getMetricConfig().label]}
                       />
-                      <Area type="monotone" dataKey="value" stroke={getMetricConfig().color} strokeWidth={2} fillOpacity={1} fill="url(#colorMetric)" activeDot={{ r: 4, strokeWidth: 0, fill: getMetricConfig().color }} />
-                    </AreaChart>
+                      
+                      <Line 
+                        name={getMetricConfig().label}
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke={getMetricConfig().color} 
+                        strokeWidth={2.5} 
+                        dot={{ r: 2.5, fill: getMetricConfig().color, strokeWidth: 0 }} 
+                        activeDot={{ r: 5, fill: '#fff', stroke: getMetricConfig().color, strokeWidth: 2 }} 
+                      />
+                    </LineChart>
                   </ResponsiveContainer>
                 )}
               </div>
