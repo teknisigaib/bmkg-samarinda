@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, useMap, Marker, GeoJSON } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { MahakamLocation, getNavigationStatus } from '@/lib/mahakam-data'; 
-import { Wind, Thermometer, Cloud, Eye, Maximize, Minimize, Route, Navigation, Timer, Gauge, BarChart2 } from 'lucide-react'; 
+import { Wind, Thermometer, Cloud, Eye, Maximize, Minimize, Route, Navigation, Timer, Gauge, BarChart2, Radio, X } from 'lucide-react'; // <-- Tambah Radio & X
 import * as turf from '@turf/turf';
 import ForecastControl from './ForecastControl';
 import LayerControl, { MapLayersState } from './LayerControl';
@@ -14,7 +14,8 @@ import MahakamSatellite from './MahakamSatellite';
 import MapInfoCard from './MapInfoCard';
 import MeteogramView from './MeteogramView';
 import RoutePlanner, { RouteNode, SimulationData } from './RoutePlanner';
-import AllStationsMeteogram from './AllStationsMeteogram'; 
+import AllStationsMeteogram from './AllStationsMeteogram';
+import MawsPalaranModal from './MawsPalaranModal'; 
 
 const KECAMATAN_TO_STATION_MAP: Record<string, string> = {
   "Anggana": "Anggana", "Sambutan": "Sambutan", "Samarinda Kota": "Samarinda Kota",
@@ -29,7 +30,6 @@ const KECAMATAN_TO_STATION_MAP: Record<string, string> = {
   "Long Iram": "Long Iram", "Laham": "Laham", "Long Hubung": "Long Hubung",
   "Long Bagun": "Long Bagun", "Long Pahangai": "Long Pahangai", "Long Apari": "Long Apari"
 };
-
 
 interface RiverMapProps {
   initialData: MahakamLocation[];
@@ -115,6 +115,9 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
   const [simData, setSimData] = useState<SimulationData | null>(null);
 
   const [showAllMeteogram, setShowAllMeteogram] = useState(false);
+  
+  // STATE BARU UNTUK MODAL MAWS PALARAN
+  const [showMawsPalaran, setShowMawsPalaran] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -185,7 +188,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
           key={loc.id} position={[loc.lat, loc.lng]} 
           icon={createCustomDynamicIcon(loc, isActive, markerMode)} 
           eventHandlers={{ click: () => {
-             if (!isRoutePlannerActive) setSelectedLoc(loc);
+              if (!isRoutePlannerActive) setSelectedLoc(loc);
           }}}
         />
       );
@@ -202,7 +205,6 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
         
         if (weatherData && weatherData.forecasts && weatherData.forecasts[timeIndex]) {
           const forecast = weatherData.forecasts[timeIndex];
-          // REFACTOR: Panggil getNavigationStatus tersentralisasi
           const status = getNavigationStatus(
             forecast.condition || '',
             forecast.windSpeed || 0,
@@ -360,6 +362,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
 
         {isSimulating && simData && boatStatus && (
            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[2000] w-[380px] bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-200 animate-in slide-in-from-bottom-8">
+              {/* Box Status Kapal - Biarkan seperti aslinya */}
               <div className="flex items-center justify-between mb-2">
                  <div className="flex items-center gap-1.5">
                     <span className="relative flex h-2 w-2">
@@ -412,6 +415,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
            </div>
         )}
 
+        {/* CONTAINER TOMBOL-TOMBOL KANAN ATAS */}
         <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
             <button onClick={toggleFullscreen} className="bg-white/95 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:scale-105 transition-all duration-200 group flex items-center justify-center">
                {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4 group-hover:scale-110 transition-transform" />}
@@ -421,13 +425,31 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
                  <button onClick={() => { setIsRoutePlannerActive(true); setSelectedLoc(null); }} className="bg-blue-600/95 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-blue-500 text-white hover:bg-blue-700 hover:scale-105 transition-all duration-200 group flex items-center justify-center" title="Route Planner">
                      <Route className="w-4 h-4 group-hover:scale-110 transition-transform" />
                  </button>
-                 {/* TOMBOL BARU UNTUK METEOGRAM SEMUA STASIUN */}
                  <button onClick={() => setShowAllMeteogram(true)} className="bg-blue-600/95 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-blue-500 text-white hover:bg-blue-700 hover:scale-105 transition-all duration-200 group flex items-center justify-center" title="Meteogram Seluruh Area">
                      <BarChart2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                 </button>
+                 
+                 {/* TOMBOL BARU MAWS PALARAN (LIVE DATA) */}
+                 <button 
+                    onClick={() => setShowMawsPalaran(true)} 
+                    className="relative bg-emerald-500/95 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-emerald-400 text-white hover:bg-emerald-600 hover:scale-105 transition-all duration-200 group flex items-center justify-center" 
+                    title="Live Data MAWS Palaran"
+                 >
+                     <span className="absolute top-0 right-0 flex h-2 w-2 -mt-0.5 -mr-0.5">
+                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-100"></span>
+                     </span>
+                     <Radio className="w-4 h-4 group-hover:scale-110 transition-transform" />
                  </button>
                </>
             )}
         </div>
+
+        {/* MODAL KOSONGAN UNTUK MAWS PALARAN */}
+        
+        {showMawsPalaran && (
+          <MawsPalaranModal onClose={() => setShowMawsPalaran(false)} />
+        )}
 
         {/* RENDER MODAL METEOGRAM SEMUA STASIUN */}
         {showAllMeteogram && (

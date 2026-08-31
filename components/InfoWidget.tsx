@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Activity, MapPin, Clock, Wind, Thermometer, AlertTriangle, Droplets, Cloud, Compass } from "lucide-react";
 
 interface WeatherData {
@@ -46,14 +47,17 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
   if (pm25Value > 250.4) pm25Theme = { text: "Berbahaya", color: "text-slate-800", border: "border-slate-300" };
 
   return (
-    <div className="w-full bg-white flex flex-col lg:flex-row">
+    <div className="w-full bg-white flex flex-col lg:flex-row overflow-hidden rounded-2xl">
       
       {/* ======================================= */}
       {/* KIRI: GEMPA TERBARU */}
       {/* ======================================= */}
-      <div className="w-full lg:w-1/3 p-4 sm:py-4 sm:px-5 flex flex-col justify-center relative">
+      <Link 
+        href="/gempa/gempa-terbaru"
+        className="w-full lg:w-1/3 p-4 sm:py-4 sm:px-5 flex flex-col justify-center relative hover:bg-slate-50 transition-colors group cursor-pointer"
+      >
         <div className="w-full flex justify-center items-center mb-4 relative">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
             <Activity className="w-5 h-5 text-red-500" />
             <h3 className="font-bold text-lg text-slate-800 tracking-tight">Gempa Terbaru</h3>
           </div>
@@ -68,7 +72,7 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
           <div className="flex flex-col items-center">
             <div className="flex gap-3 sm:gap-4 items-center justify-center w-full">
               {/* Box Magnitudo - WARNA MERAH */}
-              <div className="flex flex-col items-center justify-center bg-white border border-red-100 rounded-2xl w-[84px] h-[84px] flex-shrink-0 shadow-sm">
+              <div className="flex flex-col items-center justify-center bg-white border border-red-100 rounded-2xl w-[84px] h-[84px] flex-shrink-0 shadow-sm group-hover:border-red-300 transition-colors">
                 <span className="text-[34px] font-black text-red-600 tracking-tighter leading-none mb-0.5">{dataGempa.Magnitude}</span>
                 <span className="text-[9px] font-extrabold text-red-500 uppercase tracking-widest">Magnitudo</span>
               </div>
@@ -82,7 +86,7 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
                   <Clock className="w-3.5 h-3.5 text-red-500" />
                   <span>{dataGempa.Tanggal}, {dataGempa.Jam}</span>
                 </div>
-                <div className="mt-0.5 inline-flex w-fit items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                <div className="mt-0.5 inline-flex w-fit items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-white text-slate-600 border border-slate-200">
                   Kedalaman: {dataGempa.Kedalaman}
                 </div>
               </div>
@@ -90,29 +94,32 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
             <div className="h-1.5 mt-4 w-full invisible"></div>
           </div>
         ) : (
-          <div className="text-sm text-slate-400 py-4 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl">
+          <div className="text-sm text-slate-400 py-4 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl bg-white">
             <Activity className="w-4 h-4 text-red-500 opacity-50" /> Data gempa belum tersedia.
           </div>
         )}
-      </div>
+      </Link>
 
       <div className="w-full lg:w-px h-px lg:h-auto bg-slate-100 my-0 lg:my-4"></div>
 
       {/* ======================================= */}
       {/* TENGAH: CUACA */}
       {/* ======================================= */}
-      <div className="w-full lg:w-1/3 p-4 sm:py-4 sm:px-5 flex flex-col justify-center relative">
+      <Link 
+        href="/cuaca/prakicu"
+        className="w-full lg:w-1/3 p-4 sm:py-4 sm:px-5 flex flex-col justify-center relative hover:bg-slate-50 transition-colors group cursor-pointer"
+      >
         <div className="w-full flex justify-center items-center mb-4 relative">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
             <Thermometer className="w-5 h-5 text-blue-500" />
-            <h3 className="font-bold text-lg text-slate-800 tracking-tight">Ringkasan Cuaca</h3>
+            <h3 className="font-bold text-lg text-slate-800 tracking-tight">Prakiraan Cuaca</h3>
           </div>
         </div>
 
         {cuacaAktif ? (
           <div className="w-full flex flex-col items-center animate-in fade-in zoom-in duration-500" key={cuacaAktif.wilayah}>
             <div className="flex gap-3 sm:gap-4 items-center justify-center w-full">
-              <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-2xl min-w-[84px] px-2 h-[84px] flex-shrink-0 shadow-sm">
+              <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-2xl min-w-[84px] px-2 h-[84px] flex-shrink-0 shadow-sm group-hover:border-blue-300 transition-colors">
                 <div className="relative w-9 h-9 mb-0.5 drop-shadow-sm">
                   {cuacaAktif.iconUrl ? (
                     <Image src={cuacaAktif.iconUrl} alt={cuacaAktif.cuaca} fill className="object-contain" unoptimized />
@@ -135,8 +142,8 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
                   <div className="flex items-center gap-1"><Wind className="w-3.5 h-3.5 text-blue-500" /><span>{cuacaAktif.anginSpeedMin}-{cuacaAktif.anginSpeedMax} km/j</span></div>
                 </div>
                 <div className="mt-0.5 flex flex-wrap gap-1">
-                  <div className="inline-flex w-fit items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-50 text-slate-600 capitalize border border-slate-200">{cuacaAktif.cuaca}</div>
-                  <div className="inline-flex w-fit items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200"><Compass className="w-3 h-3 text-blue-500" /> {cuacaAktif.anginDir}</div>
+                  <div className="inline-flex w-fit items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white text-slate-600 capitalize border border-slate-200">{cuacaAktif.cuaca}</div>
+                  <div className="inline-flex w-fit items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white text-slate-600 border border-slate-200"><Compass className="w-3 h-3 text-blue-500" /> {cuacaAktif.anginDir}</div>
                 </div>
               </div>
             </div>
@@ -148,20 +155,23 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
             </div>
           </div>
         ) : (
-          <div className="text-sm text-slate-400 py-4 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl">
+          <div className="text-sm text-slate-400 py-4 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl bg-white">
             <Wind className="w-4 h-4 text-blue-500 opacity-50" /> Memuat data BMKG...
           </div>
         )}
-      </div>
+      </Link>
 
       <div className="w-full lg:w-px h-px lg:h-auto bg-slate-100 my-0 lg:my-4"></div>
 
       {/* ======================================= */}
       {/* KANAN: PM2.5 KUALITAS UDARA */}
       {/* ======================================= */}
-      <div className="w-full lg:w-1/3 p-4 sm:py-4 sm:px-5 flex flex-col justify-center relative">
+      <Link 
+        href="/iklim/kualitas-udara"
+        className="w-full lg:w-1/3 p-4 sm:py-4 sm:px-5 flex flex-col justify-center relative hover:bg-slate-50 transition-colors group cursor-pointer"
+      >
         <div className="w-full flex justify-center items-center mb-4 relative">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
             <Wind className="w-5 h-5 text-emerald-500" />
             <h3 className="font-bold text-lg text-slate-800 tracking-tight">Kualitas Udara</h3>
           </div>
@@ -171,7 +181,7 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
           <div className="flex flex-col items-center">
             <div className="flex gap-3 sm:gap-4 items-center justify-center w-full">
               
-              <div className={`flex flex-col items-center justify-center bg-white border ${pm25Theme.border} rounded-2xl w-[84px] h-[84px] flex-shrink-0 shadow-sm transition-colors`}>
+              <div className={`flex flex-col items-center justify-center bg-white border ${pm25Theme.border} rounded-2xl w-[84px] h-[84px] flex-shrink-0 shadow-sm transition-colors group-hover:shadow-md`}>
                 <span className={`text-[34px] font-black tracking-tighter leading-none mb-0.5 ${pm25Theme.color}`}>{pm25Value}</span>
                 <span className={`text-[9px] font-extrabold  tracking-widest ${pm25Theme.color} opacity-80`}>µg/m³</span>
               </div>
@@ -185,7 +195,7 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
                   <Clock className="w-3.5 h-3.5 text-emerald-500" />
                   <span className="line-clamp-1">{dataPm25.lastUpdate}</span>
                 </div>
-                <div className="mt-0.5 inline-flex w-fit items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                <div className="mt-0.5 inline-flex w-fit items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-white text-slate-600 border border-slate-200">
                   Status: <span className={`ml-1 font-black ${pm25Theme.color}`}>{pm25Theme.text}</span>
                 </div>
               </div>
@@ -194,11 +204,11 @@ export default function InfoWidget({ dataGempa, listCuaca, dataPm25 }: InfoWidge
             <div className="h-1.5 mt-4 w-full invisible"></div>
           </div>
         ) : (
-          <div className="text-sm text-slate-400 py-4 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl">
+          <div className="text-sm text-slate-400 py-4 flex items-center justify-center gap-2 border border-dashed border-slate-200 rounded-xl bg-white">
             <Wind className="w-4 h-4 text-emerald-500 opacity-50" /> Sensor PM2.5 offline.
           </div>
         )}
-      </div>
+      </Link>
 
     </div>
   );

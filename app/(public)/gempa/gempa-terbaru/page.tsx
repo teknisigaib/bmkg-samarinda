@@ -23,7 +23,7 @@ export default async function GempaTerbaruPage() {
 
   return (
     <div className="min-h-screen pb-24 bg-slate-50/50">
-      <div className="w-full mx-auto pt-0 px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto pt-0 ">
         
         {/* BREADCRUMB */}
         <Breadcrumb 

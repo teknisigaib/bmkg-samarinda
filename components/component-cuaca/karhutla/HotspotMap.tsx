@@ -35,8 +35,8 @@ const createHotspotIcon = (conf: number, isHovered: boolean) => {
 // Helper Status
 const getStatusInfo = (conf: number) => {
     if (conf >= 9) return { label: "Tinggi", color: "text-red-700", bg: "bg-red-50" };
-    if (conf >= 7) return { label: "Sedang", color: "text-orange-700", bg: "bg-orange-50" };
-    return { label: "Rendah", color: "text-yellow-700", bg: "bg-yellow-50" };
+    if (conf >= 7) return { label: "Sedang", color: "text-yellow-700", bg: "bg-yellow-50" };
+    return { label: "Rendah", color: "text-green-700", bg: "bg-green-50" };
 };
 
 // Auto Zoom
@@ -147,15 +147,15 @@ export default function HotspotMap({ data }: { data: HotspotData[] }) {
       <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-xs hidden md:block">
          <div className="space-y-2">
             <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-red-600 border border-white shadow-sm"></span>
+                <span className="h-3 w-3 rounded-full bg-red-700 border border-white shadow-sm"></span>
                 <span className="font-medium text-gray-700">Tinggi (9-10)</span>
             </div>
             <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-orange-500 border border-white shadow-sm"></span>
+                <span className="h-3 w-3 rounded-full bg-yellow-500 border border-white shadow-sm"></span>
                 <span className="font-medium text-gray-700">Sedang (7-8)</span>
             </div>
             <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-yellow-400 border border-white shadow-sm"></span>
+                <span className="h-3 w-3 rounded-full bg-green-700 border border-white shadow-sm"></span>
                 <span className="font-medium text-gray-700">Rendah (1-6)</span>
             </div>
          </div>
