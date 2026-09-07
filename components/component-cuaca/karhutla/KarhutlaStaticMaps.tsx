@@ -31,24 +31,35 @@ const MAP_TYPES = [
   }
 ];
 
-const getDayLabel = (offset: number) => {
-  if (offset === 0) return "Hari Ini (Observasi)";
-  if (offset === 1) return "Besok (Prakiraan H+1)";
-  
+// LOGIKA TANGGAL & LABEL (Index 0 = H-1/obs, Index 1 = H+0/00, Index 2 = H+1/01, dst)
+const getDayLabel = (index: number) => {
   const date = new Date();
-  date.setDate(date.getDate() + offset);
-  return date.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" });
+  const offset = index - 1; // index 0 jadi -1 (Kemarin), index 1 jadi 0 (Hari Ini), dst.
+  
+  date.setDate(date.getDate() + offset); 
+  
+  const dateString = date.toLocaleDateString("id-ID", { day: "numeric", month: "long" });
+  const fullDateString = date.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" });
+
+  if (offset === -1) return `Kemarin (${dateString}) - OBS`;
+  if (offset === 0) return `Hari Ini (${dateString}) - H+0`;
+  if (offset === 1) return `Besok (${dateString}) - H+1`;
+  
+  return `${fullDateString} - H+${offset}`;
 };
 
+// LOGIKA GENERATE KODE URL SESUAI ATURAN BMKG
 const getUrlCode = (index: number) => {
-  if (index === 0) return "obs";
-  return index.toString().padStart(2, "0");
+  if (index === 0) return "obs"; // H-1 (Kemarin)
+  const offset = index - 1; 
+  return offset.toString().padStart(2, "0"); // Index 1 -> "00", Index 2 -> "01", dst.
 };
 
 export default function KarhutlaStaticMaps() {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [previewImage, setPreviewImage] = useState<{src: string, title: string} | null>(null);
   
+  // Array 8 hari: H-1 (OBS) sampai H+6 (Kode 06)
   const days = Array.from({ length: 8 }, (_, i) => i);
 
   return (

@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { 
   Route, ArrowDownUp, Play, X, Navigation, AlertTriangle, 
   Cloud, Wind, Eye, ShieldCheck, ShieldAlert, Activity, 
@@ -613,11 +616,11 @@ export default function RoutePlanner({ locations, engineGeoJson, onClose, onRout
     <div className="absolute top-4 left-4 z-[1500] w-[390px] max-h-[calc(100%-2rem)] bg-slate-50/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-200/60 flex flex-col overflow-hidden animate-in fade-in slide-in-from-left-4 duration-300">
       <div className="bg-white px-4 py-3.5 border-b border-blue-100/80 flex justify-between items-center z-10 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 shadow-2xs">
-            <Compass className="w-4 h-4" />
+          <div className="p-1.5 bg-white rounded-lg border border-slate-100 shadow-sm flex items-center justify-center">
+            <Image src="/logo-bmkg2.png" alt="BMKG" width={24} height={28} className="object-contain" />
           </div>
           <div>
-            <h2 className="font-extrabold text-[14px] text-blue-950 tracking-tight leading-none">Voyage Planner</h2>
+            <h2 className="font-extrabold text-[14px] text-blue-950 tracking-tight leading-none">Route Planner</h2>
             <span className="text-[10px] text-blue-500 font-medium">Navigasi Cuaca Alur Mahakam</span>
           </div>
         </div>
