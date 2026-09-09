@@ -195,7 +195,7 @@ export default function HotspotControl({
                  <div className="relative flex items-center">
                    <AlertTriangle className="absolute left-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                    <select value={filterConf} onChange={(e) => setFilterConf(e.target.value as any)} className="modern-select w-full bg-white border border-slate-200 text-slate-600 text-[10px] font-medium rounded-lg py-2 pl-8 pr-8 outline-none focus:border-blue-400 transition-all shadow-sm cursor-pointer">
-                      <option value="ALL">Semua Tingkat Bahaya</option>
+                      <option value="ALL">Semua Tingkat</option>
                       <option value="TINGGI">Tinggi (&ge; 9)</option>
                       <option value="SEDANG">Sedang (7 - 8)</option>
                       <option value="RENDAH">Rendah (&lt; 7)</option>

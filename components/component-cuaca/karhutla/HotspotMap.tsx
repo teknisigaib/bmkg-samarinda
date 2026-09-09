@@ -118,9 +118,9 @@ export default function HotspotMap({ data, mapStyle, spartanDate, showFfmc, show
   }, []);
 
   const getBasemapUrl = () => {
-    if (mapStyle === 'dark') return "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png";
+    if (mapStyle === 'dark') return "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_32wf_1_a69d1812376e13fad46ef99a";
     if (mapStyle === 'satellite') return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-    return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"; 
+    return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?cb1_32wf_1_a69d1812376e13fad46ef99a"; 
   };
 
   const todayTime = useMemo(() => {
