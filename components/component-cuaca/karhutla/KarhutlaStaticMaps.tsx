@@ -108,7 +108,7 @@ export default function KarhutlaStaticMaps() {
                     <h4 className="font-bold text-gray-900 text-sm md:text-base leading-tight truncate pr-2">
                         {type.title.split('(')[0]}
                     </h4>
-                    <span className="text-[10px] text-gray-400 font-mono uppercase tracking-wider block mt-0.5">
+                    <span className="text-[10px] text-gray-400 uppercase tracking-wider block mt-0.5">
                         {type.title.split('(')[1]?.replace(')', '') || type.id.toUpperCase()}
                     </span>
                 </div>

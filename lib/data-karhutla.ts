@@ -26,7 +26,8 @@ export async function fetchBMKGHotspot(targetDate: Date): Promise<HotspotData[]>
   const url = `https://cews.bmkg.go.id/tempatirk/HOTSPOT/${dateStr}/hotspot_${dateStr}.txt`;
 
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } }); // Cache 1 jam
+    const res = await fetch(url, {  cache: 'no-store' }); // Cache 1 jam
+    
 
     if (!res.ok) {
         if (res.status === 404) return [];

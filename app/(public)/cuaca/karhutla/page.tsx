@@ -1,10 +1,8 @@
-// app/cuaca/karhutla/page.tsx
 export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
-import { getRawWeeklyHotspots, getHotspotTrend } from "@/lib/data-karhutla"; 
+import { getHotspotTrend } from "@/lib/data-karhutla"; 
 import HotspotMapWrapper from "@/components/component-cuaca/karhutla/HotspotMapWrapper";
 import KarhutlaStaticMaps from "@/components/component-cuaca/karhutla/KarhutlaStaticMaps"; 
-import KarhutlaStats from "@/components/component-cuaca/karhutla/KarhutlaStats"; 
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import SectionDivider from "@/components/ui/SectionDivider"; 
 
@@ -16,15 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default async function KarhutlaPage() {
-  const [weeklyHotspots, trendData] = await Promise.all([
-    getRawWeeklyHotspots(),
-    getHotspotTrend()
-  ]);
-
-  // Ambil tanggal update terakhir
-  const lastUpdateString = weeklyHotspots.length > 0 
-    ? weeklyHotspots[0].date.split(" ")[0] 
-    : new Date().toLocaleDateString("id-ID");
+  // Hanya fetch data Rekap Tren & Statistik saja
+  // Map sudah super mandiri mengambil data ribuan titik langsung via Client-side
+  const trendData = await getHotspotTrend();
 
   return (
     <div className="min-h-screen">
@@ -41,21 +33,12 @@ export default async function KarhutlaPage() {
 
           <div className="space-y-12 w-full mb-20">
             
-            {/* 1. MAP UTAMA */}
+            {/* 1. MAP UTAMA (Otomatis Fetch API di Client) */}
             <section>
-              <HotspotMapWrapper 
-                  data={weeklyHotspots} 
-                  lastUpdateString={lastUpdateString} 
-              />
+              <HotspotMapWrapper />
             </section>
 
-            {/* 2. STATISTIK & HIMBAUAN */}
-            <section className="mt-24 scroll-mt-20">
-              <SectionDivider title="Statistik & Tren Karhutla" className="mb-8" />
-              <KarhutlaStats trend={trendData} />
-            </section>
-
-            {/* 3. PETA ANALISIS SPASIAL */}
+            {/* 3. PETA ANALISIS SPASIAL STATIC */}
             <section className="mt-24 scroll-mt-20">
               <SectionDivider title="Analisis & Prakiraan Spasial" className="mb-8" />
               <KarhutlaStaticMaps />
