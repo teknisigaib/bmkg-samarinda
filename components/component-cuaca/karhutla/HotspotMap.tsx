@@ -23,13 +23,13 @@ interface HotspotMapProps {
 
 const getStatusInfo = (conf: number) => {
   if (conf >= 9) return { label: "Tinggi", color: "#f00707", bg: "bg-red-50", text: "text-red-700" };
-  if (conf >= 7) return { label: "Sedang", color: "#f3e309", bg: "bg-yellow-50", text: "text-yellow-700" };
+  if (conf >= 8) return { label: "Sedang", color: "#f3e309", bg: "bg-yellow-50", text: "text-yellow-700" };
   return { label: "Rendah", color: "#13ce1d", bg: "bg-green-50", text: "text-green-700" };
 };
 
 // 🚀 FIX: Visual titik 11x11px (seperti radius 5.5), tapi hitbox sentuh 24x24px, tanpa efek Glow.
 const createHotspotIcon = (conf: number, isSelected: boolean) => {
-  const bgColor = conf >= 9 ? "#f00707" : conf >= 7 ? "#f3e309" : "#13ce1d";
+  const bgColor = conf >= 9 ? "#f00707" : conf >= 8 ? "#f3e309" : "#13ce1d";
   const scaleClass = isSelected ? "transform scale-125 ring-2 ring-white/50" : "hover:scale-110";
   
   const html = `
@@ -120,7 +120,7 @@ export default function HotspotMap({ data, mapStyle, spartanDate, showFfmc, show
   const getBasemapUrl = () => {
     if (mapStyle === 'dark') return "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_32wf_1_a69d1812376e13fad46ef99a";
     if (mapStyle === 'satellite') return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-    return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?cb1_32wf_1_a69d1812376e13fad46ef99a"; 
+    return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_32wf_1_a69d1812376e13fad46ef99a"; 
   };
 
   const todayTime = useMemo(() => {

@@ -123,7 +123,7 @@ export default function HotspotControl({
                        </span>
                      ) : (
                        <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 shadow-sm">
-                          {hotspotStats.total} Terfilter
+                          {hotspotStats.total} Titik
                        </span>
                      )}
                   </div>
@@ -197,8 +197,8 @@ export default function HotspotControl({
                    <select value={filterConf} onChange={(e) => setFilterConf(e.target.value as any)} className="modern-select w-full bg-white border border-slate-200 text-slate-600 text-[10px] font-medium rounded-lg py-2 pl-8 pr-8 outline-none focus:border-blue-400 transition-all shadow-sm cursor-pointer">
                       <option value="ALL">Semua Tingkat</option>
                       <option value="TINGGI">Tinggi (&ge; 9)</option>
-                      <option value="SEDANG">Sedang (7 - 8)</option>
-                      <option value="RENDAH">Rendah (&lt; 7)</option>
+                      <option value="SEDANG">Sedang (8)</option>
+                      <option value="RENDAH">Rendah (&lt; 8)</option>
                    </select>
                    <ChevronDown className="absolute right-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
                  </div>
@@ -214,11 +214,11 @@ export default function HotspotControl({
                     </div>
                     <div className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-[#f3e309] shadow-sm"></span>
-                        <span className="font-medium text-slate-600 text-[9px]">Sedang (7-8)</span>
+                        <span className="font-medium text-slate-600 text-[9px]">Sedang (8)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-[#13ce1d] shadow-sm"></span>
-                        <span className="font-medium text-slate-600 text-[9px]">Rendah (&lt;7)</span>
+                        <span className="font-medium text-slate-600 text-[9px]">Rendah (&lt;8)</span>
                     </div>
                  </div>
                </div>

@@ -10,7 +10,7 @@ const HotspotMap = dynamic(() => import("./HotspotMap"), {
   loading: () => (
     <div className="absolute inset-0 bg-slate-50 flex flex-col items-center justify-center">
       <Loader2 className="w-6 h-6 text-blue-500 animate-spin mb-2" />
-      <span className="text-slate-400 font-bold tracking-widest uppercase text-xs">Memuat Engine Peta...</span>
+      <span className="text-slate-400 font-bold tracking-widest uppercase text-xs">Memuat Peta...</span>
     </div>
   ),
 });
@@ -126,8 +126,8 @@ export default function HotspotMapWrapper() {
       let passKab = filterKab === "ALL" || (item.kabupaten && item.kabupaten.toUpperCase().includes(filterKab));
       let passConf = true;
       if (filterConf === "TINGGI") passConf = item.kepercayaan >= 9;
-      else if (filterConf === "SEDANG") passConf = item.kepercayaan >= 7 && item.kepercayaan < 9;
-      else if (filterConf === "RENDAH") passConf = item.kepercayaan < 7;
+      else if (filterConf === "SEDANG") passConf = item.kepercayaan >= 8 && item.kepercayaan < 9;
+      else if (filterConf === "RENDAH") passConf = item.kepercayaan < 8;
       let passSat = filterSat === "ALL" || item.satelit === filterSat;
 
       return passKab && passConf && passSat;
@@ -138,7 +138,7 @@ export default function HotspotMapWrapper() {
     let tinggi = 0, sedang = 0, rendah = 0;
     displayedData.forEach(d => {
       if (d.kepercayaan >= 9) tinggi++;
-      else if (d.kepercayaan >= 7) sedang++;
+      else if (d.kepercayaan >= 8 && d.kepercayaan < 9) sedang++;
       else rendah++;
     });
     return { total: displayedData.length, tinggi, sedang, rendah };
@@ -147,7 +147,7 @@ export default function HotspotMapWrapper() {
   const handleExportCSV = () => {
     const headers = ["No", "Kabupaten/Kota", "Kecamatan", "Tingkat Kepercayaan", "Level", "Satelit", "Tanggal", "Waktu (WIB)", "Latitude", "Longitude"];
     const rows = displayedData.map((d, i) => {
-      const level = d.kepercayaan >= 9 ? "Tinggi" : d.kepercayaan >= 7 ? "Sedang" : "Rendah";
+      const level = d.kepercayaan >= 9 ? "Tinggi" : d.kepercayaan >= 8 ? "Sedang" : "Rendah";
       return [
         i + 1, `"${d.kabupaten}"`, `"${d.kecamatan}"`, d.kepercayaan, level, d.satelit, d.tanggal.split("T")[0], d.waktu, d.lintang, d.bujur
       ];
@@ -186,7 +186,7 @@ export default function HotspotMapWrapper() {
                {isLoadingTable ? (
                   <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
                ) : (
-                  <span className="text-xs font-bold text-slate-700">{displayedData.length} Titik Terfilter</span>
+                  <span className="text-xs font-bold text-slate-700">{displayedData.length} Titik Panas</span>
                )}
             </div>
             <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
@@ -300,7 +300,7 @@ export default function HotspotMapWrapper() {
                             if(item.kepercayaan >= 9) {
                                 confColor = "bg-red-50 text-red-700 border-red-200";
                                 label = "Tinggi";
-                            } else if(item.kepercayaan >= 7) {
+                            } else if(item.kepercayaan >= 8) {
                                 confColor = "bg-yellow-50 text-yellow-700 border-yellow-200";
                                 label = "Sedang";
                             }
