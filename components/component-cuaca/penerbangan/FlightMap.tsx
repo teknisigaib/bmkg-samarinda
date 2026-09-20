@@ -37,7 +37,7 @@ interface MapProps {
 }
 
 const BASE_MAPS: Record<BaseMapType, string> = {
-  dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+  dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_32wf_1_a69d1812376e13fad46ef99a",
   light: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   satellite_base: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
 };

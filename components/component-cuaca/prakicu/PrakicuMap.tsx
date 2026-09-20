@@ -40,7 +40,7 @@ export default function PrakicuMap({
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
     const map = L.map(mapRef.current, { zoomControl: false }).setView([0.5, 116.5], 6);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_32wf_1_a69d1812376e13fad46ef99a", {
       attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(map);
 

@@ -80,7 +80,7 @@ export default function WarningMap({ data }: { data: any }) {
       <MapContainer center={[0.5, 116.4]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_32wf_1_a69d1812376e13fad46ef99a"
         />
         {data?.features?.length > 0 && (
           <>
