@@ -56,6 +56,8 @@ const NAV_ITEMS: NavItem[] = [
     key: "iklim",
     label: "Iklim",
     items: [
+      // NEW: Ditambahkan menu WebGIS Iklim
+      { name: "WebGIS Iklim", desc: "Visualisasi peta iklim interaktif", href: "/iklim/webgis-iklim" },
       { name: "Info Hari Tanpa Hujan", desc: "Pantauan hari tanpa hujan", href: "/iklim/hari-tanpa-hujan" },
       { name: "Prakiraan Hujan", desc: "Prakiraan Hujan", href: "/iklim/prakiraan-hujan" },
       { name: "Analisis Hujan", desc: "Analisis Hujan", href: "/iklim/analisis-hujan" },
