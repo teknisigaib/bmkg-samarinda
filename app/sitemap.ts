@@ -81,6 +81,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/iklim/webgis-iklim`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/iklim/hari-tanpa-hujan`,
       lastModified: new Date(),
       changeFrequency: 'daily',
