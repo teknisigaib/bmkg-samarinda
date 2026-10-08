@@ -16,7 +16,7 @@ import MeteogramView from './MeteogramView';
 import RoutePlanner, { RouteNode, SimulationData } from './RoutePlanner';
 import AllStationsMeteogram from './AllStationsMeteogram'; 
 import MawsPalaranModal from './MawsPalaranModal';
-import BwsTmaModal from './BwsTmaModal'; 
+import BwsMarkers from './BwsMarkers';
 
 const KECAMATAN_TO_STATION_MAP: Record<string, string> = {
   "Anggana": "Anggana", "Sambutan": "Sambutan", "Samarinda Kota": "Samarinda Kota",
@@ -34,15 +34,25 @@ const KECAMATAN_TO_STATION_MAP: Record<string, string> = {
 
 // --- DATA POS TMA (MAWS + 8 POS BWS) ---
 const TMA_STATIONS = [
+
   { id: 'maws-palaran', name: 'MAWS Pelabuhan Palaran', lat: -0.5700, lng: 117.2060, type: 'MAWS' },
+
   { id: 'bws-1', name: 'POS DUGA AIR KARANG MUMUS KP 3', lat: -0.50817, lng: 117.15670, type: 'BWS' },
+
   { id: 'bws-2', name: 'POS DUGA AIR MAHAKAM TENGGARONG', lat: -0.42090, lng: 116.99255, type: 'BWS' },
+
   { id: 'bws-3', name: 'POS DUGA AIR PELA SANGKULIMAN', lat: -0.23809, lng: 116.55520, type: 'BWS' },
+
   { id: 'bws-4', name: 'POS DUGA AIR MAHAKAM PENYINGGAHAN ULU', lat: -0.37900, lng: 116.22247, type: 'BWS' },
+
   { id: 'bws-5', name: 'POS DUGA AIR MAHAKAM LONG IRAM', lat: -0.01725, lng: 115.62550, type: 'BWS' },
+
   { id: 'bws-6', name: 'POS DUGA AIR MAHAKAM LONG BAGUN', lat: 0.52281, lng: 115.24110, type: 'BWS' },
+
   { id: 'bws-7', name: 'POS DUGA MAHAKAM AIR BATOQ KELO', lat: 0.76301, lng: 115.01789, type: 'BWS' },
+
   { id: 'bws-8', name: 'POS DUGA AIR MAHAKAM LONG PAHANGAI', lat: 0.88731, lng: 114.69078, type: 'BWS' }
+
 ];
 
 interface RiverMapProps {
@@ -59,14 +69,9 @@ const createCustomDynamicIcon = (loc: any, isActive: boolean, mode: MarkerMode) 
   let activeClassBox = '';
 
   if (mode === 'tma') {
-    // Mode TMA: Ikon dibedakan berdasarkan sumber MAWS (Biru Tua) vs BWS (Biru Muda/Sky)
-    if (loc.type === 'MAWS') {
-      activeClassBox = 'ring-2 ring-blue-500 bg-blue-50 shadow-md';
-      iconContent = `<div class="flex flex-col items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6v12c-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6z"></path></svg><span class="text-[8px] font-bold text-blue-600 leading-none mt-0.5">MAWS</span></div>`;
-    } else {
-      activeClassBox = 'ring-2 ring-sky-400 bg-sky-50 shadow-md';
-      iconContent = `<div class="flex flex-col items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6v12c-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6z"></path></svg><span class="text-[8px] font-bold text-sky-600 leading-none mt-0.5">BWS</span></div>`;
-    }
+    // Mode TMA Khusus MAWS (karena BWS ditangani BwsMarkers)
+    activeClassBox = 'ring-2 ring-blue-500 bg-blue-50 shadow-md';
+    iconContent = `<div class="flex flex-col items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.9-.5 2-.8 3.2-.8s2.3.3 3.2.8c.6.4 1.2.6 1.8.6v12c-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.9.5-2 .8-3.2.8s-2.3-.3-3.2-.8c-.6-.4-1.2-.6-1.8-.6z"></path></svg><span class="text-[8px] font-bold text-blue-600 leading-none mt-0.5">MAWS</span></div>`;
   } else {
     // Mode Normal BMKG
     const isRouteHighlight = loc.isRouteNode ? 'ring-2 ring-blue-500 bg-blue-50 shadow-blue-500/30' : 'ring-1 ring-slate-200 bg-white';
@@ -144,9 +149,7 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
   const [simData, setSimData] = useState<SimulationData | null>(null);
 
   const [showAllMeteogram, setShowAllMeteogram] = useState(false);
-  
   const [showMawsPalaran, setShowMawsPalaran] = useState(false);
-  const [selectedBws, setSelectedBws] = useState<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -211,15 +214,15 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
 
   const renderedMarkers = useMemo(() => {
     if (markerMode === 'tma') {
-      return TMA_STATIONS.map((loc) => {
+      // HANYA render MAWS di sini, BWS dihandle komponen BwsMarkers
+      return TMA_STATIONS.filter(loc => loc.type === 'MAWS').map((loc) => {
         return (
           <Marker 
             key={loc.id} position={[loc.lat, loc.lng]} 
             icon={createCustomDynamicIcon(loc, false, 'tma')} 
-            eventHandlers={{ click: () => {
-                if (loc.type === 'MAWS') setShowMawsPalaran(true);
-                if (loc.type === 'BWS') setSelectedBws(loc);
-            }}}
+            eventHandlers={{ 
+              click: () => setShowMawsPalaran(true)
+            }}
           />
         );
       });
@@ -485,11 +488,6 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
           <MawsPalaranModal onClose={() => setShowMawsPalaran(false)} />
         )}
 
-        {/* MODAL BWS (SEDANG INTEGRASI) */}
-        {selectedBws && (
-          <BwsTmaModal station={selectedBws} onClose={() => setSelectedBws(null)} />
-        )}
-
         {/* RENDER MODAL METEOGRAM SEMUA STASIUN */}
         {showAllMeteogram && (
            <AllStationsMeteogram 
@@ -530,6 +528,12 @@ export default function RiverMap({ initialData, onViewDetail }: RiverMapProps) {
             {isSimulating && boatStatus && <BoatCamera boatCoords={boatStatus.coords} />}
             {boatStatus && boatMarkerIcon && <Marker position={boatStatus.coords} icon={boatMarkerIcon} zIndexOffset={9999} />}
             {renderedMarkers}
+            
+            {/* Tampilkan angka label BWS HANYA ketika mode Muka Air (TMA) dipilih */}
+            {markerMode === 'tma' && (
+              <BwsMarkers stations={TMA_STATIONS.filter(s => s.type === 'BWS')} />
+            )}
+            
         </MapContainer>
       </div>
     </div>
