@@ -40,13 +40,16 @@ export const NAV_THRESHOLDS = {
   }
 };
 
-export const getNavigationStatus = (condition: string, windSpeed: number, visibilityMeters: number): 'aman' | 'waspada' | 'bahaya' => {
+export const getNavigationStatus = (condition: string, windSpeed: number, visibilityMeters: number | null): 'aman' | 'waspada' | 'bahaya' => {
   const cond = (condition || '').toLowerCase();
   
+  // Pastikan visibility bukan null dan lebih besar dari 0 (karena API sering mengembalikan 0 jika data kosong)
+  const isValidVisibility = visibilityMeters !== null && visibilityMeters > 0;
+
   // 1. Cek Kriteria Bahaya
   if (
       windSpeed >= NAV_THRESHOLDS.DANGER.MAX_WIND_KMH || 
-      visibilityMeters <= NAV_THRESHOLDS.DANGER.MIN_VISIBILITY_M ||
+      (isValidVisibility && visibilityMeters <= NAV_THRESHOLDS.DANGER.MIN_VISIBILITY_M) ||
       NAV_THRESHOLDS.DANGER.BAD_WEATHER_KEYWORDS.some(kw => cond.includes(kw))
   ) {
       return 'bahaya';
@@ -55,7 +58,7 @@ export const getNavigationStatus = (condition: string, windSpeed: number, visibi
   // 2. Cek Kriteria Waspada
   if (
       windSpeed >= NAV_THRESHOLDS.CAUTION.MAX_WIND_KMH || 
-      visibilityMeters <= NAV_THRESHOLDS.CAUTION.MIN_VISIBILITY_M ||
+      (isValidVisibility && visibilityMeters <= NAV_THRESHOLDS.CAUTION.MIN_VISIBILITY_M) ||
       NAV_THRESHOLDS.CAUTION.BAD_WEATHER_KEYWORDS.some(kw => cond.includes(kw))
   ) {
       return 'waspada';
@@ -322,7 +325,8 @@ export async function getMahakamData(): Promise<MahakamLocation[]> {
       });
 
       const forecastList: MahakamForecastItem[] = flatWeather.map((c: any) => {
-        const vsVal = c.vs || 0; 
+        // Jika c.vs kosong/undefined, jadikan null bukan 0
+        const vsVal = (c.vs === undefined || c.vs === null || c.vs === "") ? null : Number(c.vs); 
         const safeTime = typeof c.datetime === 'string' ? c.datetime.replace(' ', 'T') : c.datetime;
         
         return {
@@ -336,7 +340,7 @@ export async function getMahakamData(): Promise<MahakamLocation[]> {
           windDir: c.wd || "-",
           humidity: c.hu || 0,
           tcc: c.tcc || 0,
-          visibility_val: vsVal,
+          visibility_val: vsVal as any, // Paksa tipe ke any atau update interface MahakamForecastItem
           visibility_text: formatVisibility(vsVal)
         };
       });
