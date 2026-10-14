@@ -1,19 +1,15 @@
+"use client";
+
 import React from 'react';
-import type { Metadata } from "next";
 import { 
   GraduationCap, ShieldCheck, Ship, Anchor, BarChart3, 
-  MessageSquareText, Check, FileText, Info, Globe
+  MessageSquareText, Check, FileText, Info
 } from 'lucide-react';
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
-export const metadata: Metadata = {
-  title: "Layanan Data | BMKG Samarinda",
-  description: "Informasi biaya layanan PNBP dan alur permintaan data di Stasiun Meteorologi APT Pranoto Samarinda.",
-};
-
-export default function PricingLayananPage() {
+export default function LayananClient() {
   
-  // Data statis, tinggal kamu edit aja di sini kalau ada perubahan harga/link
+  // Data statis layanan
   const services = [
     {
       id: 1,
