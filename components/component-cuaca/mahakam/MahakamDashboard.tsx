@@ -61,8 +61,8 @@ export default function MahakamDashboard({ data, tideData }: Props) {
   return (
     <div className="space-y-8 pb-20 relative">
         <section className="relative flex flex-col items-center justify-center text-center mb-10 max-w-3xl mx-auto pt-0">
-           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">Cuaca Sungai Mahakam</h1>
-           <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">Sistem pemantauan alur sungai terpadu. Menyediakan informasi cuaca, visibilitas, dan data pasang surut real-time.</p>
+           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">SiCASMA</h1>
+           <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-2xl mb-8">Sistem pemantauan cuaca alur sungai terpadu. Menyediakan informasi cuaca, visibilitas, dan data pasang surut.</p>
            <div className="relative z-10 flex flex-wrap items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm p-1">
               <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100"><Map className="w-4 h-4 text-blue-500"/><span className="text-xs font-semibold text-slate-700">{data.length} Titik</span></div>
               {currentTideInfo && (<div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100"><Waves className="w-4 h-4 text-emerald-500"/><span className="text-xs font-semibold text-slate-700">Pasut: {currentTideInfo.heightLAT.toFixed(2)}m</span></div>)}

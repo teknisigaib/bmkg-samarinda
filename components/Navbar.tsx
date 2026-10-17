@@ -43,6 +43,7 @@ const NAV_ITEMS: NavItem[] = [
       { name: "Satelit Cuaca", desc: "Visualisasi citra satelit cuaca", href: "/cuaca/satelit" },
       { name: "Peringatan Karhutla", desc: "Kebakaran hutan dan lahan", href: "/cuaca/karhutla" },
       { name: "Peta Cuaca", desc: "Peta pantauan cuaca secara real-time", href: "/cuaca/peta-cuaca" },
+      { name: "SiCASMA", desc: "Sistem Informasi Cuaca Sungai Mahakam", href: "/cuaca/mahakam" },
     ]
   },
   {
@@ -337,7 +338,7 @@ export default function Navbar() {
                 Stasiun Meteorologi Kelas II
               </span>
               <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 font-medium tracking-tight leading-tight">
-                Aji Pangeran Tumenggung Pranoto, Samarinda
+                Aji Pangeran Tumenggung Pranoto
               </span>
             </div>
           </Link>
