@@ -1,12 +1,22 @@
+// LoginForm.tsx
 "use client";
 
+import { useState } from "react";
 import { login } from "./actions";
-import { useSearchParams } from "next/navigation";
-import { SubmitButton } from "./SubmitButton"; // Import tombol yang tadi dibuat
+import { SubmitButton } from "./SubmitButton"; 
 
 export default function LoginForm() {
-  const searchParams = useSearchParams();
-  const errorMessage = searchParams.get("error");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Bungkus action untuk nangkep balikan error dari Server Action
+  async function handleSubmit(formData: FormData) {
+    setErrorMessage(null);
+    const result = await login(formData);
+    
+    if (result?.error) {
+      setErrorMessage(result.error);
+    }
+  }
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
@@ -22,8 +32,8 @@ export default function LoginForm() {
         </div>
       )}
 
-      {/* Form Action langsung ke Server Action */}
-      <form action={login} className="space-y-5">
+      {/* Gunakan fungsi handleSubmit */}
+      <form action={handleSubmit} className="space-y-5">
         <div>
            <label className="block text-sm font-bold text-gray-700 mb-1.5">Email Resmi</label>
            <input 
@@ -46,7 +56,6 @@ export default function LoginForm() {
            />
         </div>
 
-        {/* Tombol Submit Otomatis (Loading State handled by useFormStatus) */}
         <SubmitButton />
       </form>
 

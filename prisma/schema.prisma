@@ -162,3 +162,15 @@ model PdieDocument {
 
   @@map("pdie_documents")
 }
+
+
+// ------------------------------------
+// Tabel 11: User
+// ------------------------------------
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Akan menyimpan hash bcrypt
+  name      String?
+  createdAt DateTime @default(now())
+}

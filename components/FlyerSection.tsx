@@ -3,6 +3,9 @@
 import { useRef, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 interface Flyer {
   id: string;
   title: string;
@@ -95,7 +98,8 @@ export default function FlyerSection({ flyers }: FlyerSectionProps) {
               {/* Gambar Utama */}
               <div className="relative w-full h-full">
                 <img 
-                  src={item.image}
+                  // Tambahkan STORAGE_URL di sini
+                  src={item.image ? `${STORAGE_URL}${item.image}` : "/placeholder.jpg"}
                   alt={item.title}
                   className="w-full h-auto block object-contain mx-auto"
                 />

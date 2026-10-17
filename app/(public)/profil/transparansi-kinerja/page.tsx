@@ -4,6 +4,9 @@ import { FileText, Download, Calendar, ShieldCheck, AlertCircle, FileBarChart } 
 import { getKinerjaDocs } from "@/lib/data-kinerja"; 
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 export const metadata: Metadata = {
   title: "Transparansi Kinerja | BMKG APT Pranoto Samarinda",
   description: "Laporan kinerja, rencana strategis, dan akuntabilitas Stasiun Meteorologi APT Pranoto.",
@@ -127,7 +130,7 @@ export default async function TransparansiKinerjaPage() {
 
                                           {/* Tombol Download */}
                                           <a 
-                                              href={doc.fileUrl} 
+                                              href={doc.fileUrl ? `${STORAGE_URL}${doc.fileUrl}` : "#"} 
                                               target="_blank" 
                                               rel="noopener noreferrer"
                                               className="flex items-center gap-2 bg-slate-50 border border-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-lg hover:shadow-blue-200 transition-all flex-shrink-0 w-full sm:w-auto justify-center"

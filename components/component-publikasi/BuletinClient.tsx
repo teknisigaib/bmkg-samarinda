@@ -12,6 +12,9 @@ import {
   Search
 } from "lucide-react";
 
+// Tarik URL dari env, default string kosong kalau di production
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 export type BuletinItem = {
   id: string;
   title: string;
@@ -87,7 +90,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
                   
                         <div className="relative w-full aspect-[3/4] max-w-[210px] mx-auto rounded-lg overflow-hidden shadow-md mb-5 bg-slate-100 border border-slate-200">
                             <Image
-                                src={item.cover}
+                                src={item.cover ? `${STORAGE_URL}${item.cover}` : "/placeholder.jpg"}
                                 alt={item.title}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -178,7 +181,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
                 <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white">
                   <div className="flex items-center gap-4">
                       <div className="hidden sm:block w-10 h-14 relative rounded border border-slate-200 overflow-hidden bg-slate-100">
-                          <Image src={selectedBuletin.cover} alt="Cover" fill className="object-cover" />
+                          <Image src={selectedBuletin.cover ? `${STORAGE_URL}${selectedBuletin.cover}` : "/placeholder.jpg"} alt="Cover" fill className="object-cover" />
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-bold text-slate-800 line-clamp-1 text-sm md:text-base mb-0.5">{selectedBuletin.title}</h3>
@@ -188,7 +191,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
 
                   <div className="flex items-center gap-3">
                     <a 
-                        href={selectedBuletin.pdfUrl} 
+                        href={`${STORAGE_URL}${selectedBuletin.pdfUrl}`} 
                         download 
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-blue-700 transition shadow-sm"
                     >
@@ -202,7 +205,7 @@ export default function BuletinClient({ initialData }: BuletinClientProps) {
                 </div>
 
                 <div className="flex-grow bg-slate-100 relative">
-                  <iframe src={`${selectedBuletin.pdfUrl}#toolbar=0&view=FitH`} className="w-full h-full border-none" title="PDF Viewer" />
+                  <iframe src={`${STORAGE_URL}${selectedBuletin.pdfUrl}#toolbar=0&view=FitH`} className="w-full h-full border-none" title="PDF Viewer" />
                 </div>
               </motion.div>
             </motion.div>

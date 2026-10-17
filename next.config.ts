@@ -83,6 +83,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.supabase.co',
       },
+      {
+        protocol: 'http',
+        hostname: '10.21.224.7',
+        pathname: '/storage/**',
+      },
     ],
   },
   eslint: {

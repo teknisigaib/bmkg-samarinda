@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Download, User, Calendar, X, ExternalLink, Tag, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 export type PublikasiType = "Artikel" | "Makalah";
 
 export type PublikasiItem = {
@@ -227,7 +230,7 @@ export default function PublikasiListClient({ initialData }: PublikasiListProps)
 
                   <div className="flex items-center gap-3">
                     <a 
-                        href={selectedItem.pdfUrl} 
+                        href={`${STORAGE_URL}${selectedItem.pdfUrl}`} 
                         download 
                         className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-blue-700 transition shadow-sm"
                     >
@@ -241,11 +244,11 @@ export default function PublikasiListClient({ initialData }: PublikasiListProps)
                 </div>
 
                 <div className="flex-grow bg-slate-100 relative">
-                  <iframe src={`${selectedItem.pdfUrl}#toolbar=0&view=FitH`} className="w-full h-full border-none" title="PDF Viewer" />
+                  <iframe src={`${STORAGE_URL}${selectedItem.pdfUrl}#toolbar=0&view=FitH`} className="w-full h-full border-none" title="PDF Viewer" />
                   
                   {/* Tombol Eksternal untuk HP */}
                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:hidden">
-                    <a href={selectedItem.pdfUrl} target="_blank" className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white shadow-xl rounded-full text-xs font-bold uppercase tracking-widest">
+                    <a href={`${STORAGE_URL}${selectedItem.pdfUrl}`} target="_blank" className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white shadow-xl rounded-full text-xs font-bold uppercase tracking-widest">
                       <ExternalLink className="w-4 h-4" /> Buka di Browser
                     </a>
                   </div>

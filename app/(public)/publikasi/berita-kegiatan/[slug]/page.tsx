@@ -6,6 +6,9 @@ import { notFound } from "next/navigation";
 import { Calendar, User, Share2, ArrowLeft } from "lucide-react";
 import prisma from "@/lib/prisma";
 
+// Tarik URL dari env, default string kosong kalau di production
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -82,7 +85,7 @@ export default async function DetailBeritaPage({ params }: PageProps) {
                 {/*  IMAGE */}
                 <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-sm mb-8 bg-slate-100">
                     <Image
-                        src={news.imageUrl || "/placeholder.jpg"}
+                        src={news.imageUrl ? `${STORAGE_URL}${news.imageUrl}` : "/placeholder.jpg"}
                         alt={news.title}
                         fill
                         className="object-cover"
@@ -141,7 +144,7 @@ export default async function DetailBeritaPage({ params }: PageProps) {
                                 <Link key={item.id} href={`/publikasi/berita-kegiatan/${item.slug}`} className="group flex gap-3 items-start">
                                     <div className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-slate-100">
                                         <Image 
-                                            src={item.imageUrl || "/placeholder.jpg"} 
+                                            src={item.imageUrl ? `${STORAGE_URL}${item.imageUrl}` : "/placeholder.jpg"} 
                                             alt={item.title} 
                                             fill 
                                             className="object-cover group-hover:scale-105 transition-transform duration-300"

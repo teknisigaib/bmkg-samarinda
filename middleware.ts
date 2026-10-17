@@ -1,19 +1,21 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { auth } from "@/auth" // Import dari file auth.ts yang baru kita buat
 
-export async function middleware(request: NextRequest) {
-  // KONFIGURASI MAINTENANCE
-  const MAINTENANCE_PATHS: string[] = [
-    // '/cuaca/maritim',     
-    // '/cuaca/penerbangan',
-    //'/cuaca/mahakam',
-    //'/cuaca/peta-cuaca',
-  ];
+// KONFIGURASI MAINTENANCE
+const MAINTENANCE_PATHS: string[] = [
+  // '/cuaca/maritim',     
+  // '/cuaca/penerbangan',
+  //'/cuaca/mahakam',
+  //'/cuaca/peta-cuaca',
+];
 
+// Bungkus dengan auth() dari Auth.js
+export default auth((request) => {
   const { pathname } = request.nextUrl;
+  
+  // --- 1. LOGIKA MAINTENANCE ---
   const isTargeted = MAINTENANCE_PATHS.some((path) => pathname.startsWith(path));
 
-  // Logika Redirect Maintenance:
   if (
       isTargeted && 
       !pathname.startsWith('/maintenance') && 
@@ -25,61 +27,27 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/maintenance', request.url));
   }
 
-  // --- AUTH SUPABASE ---
-  let response = NextResponse.next({
-    request: { headers: request.headers },
-  })
+  // --- 2. LOGIKA AUTENTIKASI (Auth.js) ---
+  const isLoggedIn = !!request.auth; // Cek apakah user memiliki session aktif
+  const isAdminRoute = pathname.startsWith('/admin');
+  const isLoginRoute = pathname === '/login';
 
-  // FIX: Deteksi apakah request ini dari Domain (HTTPS) atau Lokal/VPN (HTTP)
-  const isHttps = request.headers.get('x-forwarded-proto') === 'https' || request.url.startsWith('https://');
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response = NextResponse.next({ request: { headers: request.headers } })
-            
-            response.cookies.set(name, value, {
-              ...options,
-              secure: isHttps, // <-- DINAMIS: True untuk Domain, False untuk IP Lokal
-              httpOnly: true,
-              sameSite: 'lax',
-              path: '/',       // <-- WAJIB: Agar cookie berlaku di semua halaman (/admin, dll)
-            })
-          })
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // ==========================================
-  // PERUBAHAN DI SINI: Redirect dengan parameter
-  // ==========================================
-  if (request.nextUrl.pathname.startsWith('/admin') && !user) {
+  // Proteksi rute /admin
+  if (isAdminRoute && !isLoggedIn) {
     // Tambahkan ?akses=admin agar langsung menembus cache Cloudflare!
-    return NextResponse.redirect(new URL('/login?akses=admin', request.url))
+    return NextResponse.redirect(new URL('/login?akses=admin', request.url));
   }
 
-  // Baris ini tetap aman, karena request.nextUrl.pathname hanya membaca "/login" 
-  // (parameter "?akses=admin" otomatis diabaikan dalam pengecekan string ini)
-  if (request.nextUrl.pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/admin', request.url))
+  // Jika sudah login tapi mencoba akses /login, lempar kembali ke /admin
+  if (isLoginRoute && isLoggedIn) {
+    return NextResponse.redirect(new URL('/admin', request.url));
   }
 
-  return response
-}
+  return NextResponse.next();
+});
 
 export const config = {
-  // UPDATE MATCHER
+  // MATCHER DIPERTAHANKAN
   matcher: [
     '/admin/:path*', 
     '/login',

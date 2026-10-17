@@ -5,6 +5,9 @@ import Image from "next/image";
 import { Calendar, Info, History, ChevronRight, Map, Clock, ZoomIn } from "lucide-react";
 import ImageLightbox from "@/components/ui/ImageLightbox";
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 interface ClimateViewerProps {
   data: {
     id: string;
@@ -64,7 +67,7 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
             <div className="relative w-full rounded-xl overflow-hidden bg-white border border-slate-100">
                 <Image 
                     key={activeData.image} 
-                    src={activeData.image} 
+                    src={`${STORAGE_URL}${activeData.image}`} 
                     alt={activeData.title} 
                     width={0}
                     height={0}
@@ -82,7 +85,9 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
                 {/* Overlay Judul Bawah */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent p-4 pt-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <p className="text-white text-sm font-medium flex items-center gap-2 shadow-sm">
-                        <Map className="w-4 h-4 opacity-90 text-blue-400" /> {activeData.title}
+
+<Map className="w-4 h-4 opacity-90 text-blue-400" />
+{activeData.title}
                     </p>
                 </div>
             </div>
@@ -91,7 +96,7 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
         {/* Komponen Lightbox */}
         <ImageLightbox 
             isOpen={isLightboxOpen}
-            imageUrl={activeData.image}
+            imageUrl={`${STORAGE_URL}${activeData.image}`}
             title={activeData.title}
             description={`Data analisis/prakiraan klimatologi wilayah Kalimantan Timur. Dasarian: ${activeData.dasarian}, Periode: ${activeData.period}`}
             altText={activeData.title}
@@ -141,7 +146,7 @@ export default function ClimateViewer({ data }: ClimateViewerProps) {
                     <div className={`relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 transition-opacity border ${
                         activeData.id === item.id ? 'border-blue-300 opacity-100' : 'bg-slate-200 border-slate-200 opacity-80 group-hover:opacity-100'
                     }`}>
-                        <Image src={item.image} alt="Thumb" fill className="object-cover" />
+                        <Image src={`${STORAGE_URL}${item.image}`} alt="Thumb" fill className="object-cover" />
                     </div>
                     
                     {/* Info Text */}

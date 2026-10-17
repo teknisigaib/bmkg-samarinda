@@ -5,6 +5,9 @@ import dynamic from "next/dynamic";
 import { FileText, Download, ChevronLeft, ChevronRight, CloudRain, Sun, Calendar } from "lucide-react";
 import { RegionData } from "@/components/component-iklim/PDIEMapClient";
 
+// 1. Tambahin env untuk URL storage
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 const ClimateMapClient = dynamic(() => import("@/components/component-iklim/PDIEMapClient"), { 
   ssr: false,
   loading: () => (
@@ -163,7 +166,9 @@ export default function PeringatanDiniClient({ initialDbData }: { initialDbData:
                                     </div>
                                 </div>
                             </div>
-                            <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 w-full sm:w-auto text-xs font-bold uppercase tracking-widest bg-slate-50 border border-slate-200 text-slate-600 hover:text-white hover:bg-blue-600 hover:border-blue-600 rounded-lg transition-all">
+                            
+                            {/* 2. Gabungkan STORAGE_URL dengan doc.fileUrl */}
+                            <a href={doc.fileUrl ? `${STORAGE_URL}${doc.fileUrl}` : "#"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 w-full sm:w-auto text-xs font-bold uppercase tracking-widest bg-slate-50 border border-slate-200 text-slate-600 hover:text-white hover:bg-blue-600 hover:border-blue-600 rounded-lg transition-all">
                                 <Download className="w-4 h-4" /> Unduh
                             </a>
                         </div>

@@ -9,6 +9,9 @@ import { Search, Calendar, User, ArrowRight, ChevronLeft, ChevronRight, Filter }
 const ITEMS_PER_PAGE = 9;
 const CATEGORIES = ["Semua", "Berita", "Kegiatan", "Edukasi"];
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 interface NewsItem {
   id: string;
   title: string;
@@ -121,7 +124,7 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
               <div className="grid md:grid-cols-2 h-full">
                 <div className="relative h-64 md:h-auto overflow-hidden bg-slate-100">
                   <Image
-                    src={featuredNews.image}
+                    src={`${STORAGE_URL}${featuredNews.image}`}
                     alt={featuredNews.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -173,7 +176,7 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
                         {/* Image Container */}
                         <div className="relative h-52 overflow-hidden bg-slate-100">
                             <Image
-                                src={news.image}
+                                src={`${STORAGE_URL}${news.image}`}
                                 alt={news.title}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -222,7 +225,7 @@ export default function BeritaClient({ initialData }: BeritaClientProps) {
                 <h3 className="text-lg font-bold text-slate-800 mb-1">Tidak ada hasil ditemukan</h3>
                 <p className="text-slate-500 text-sm mb-6 font-medium">Coba kata kunci lain atau ubah filter kategori pencarian.</p>
                 <button 
-                    onClick={() => { setSearch(""); setFilterCategory("All"); }}
+                    onClick={() => { setSearch(""); setFilterCategory("Semua"); }}
                     className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
                 >
                     Reset Filter

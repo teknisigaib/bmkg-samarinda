@@ -6,6 +6,9 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Maximize2, Calendar, Layout } from "lucide-react";
 import ImageLightbox from "@/components/ui/ImageLightbox";
 
+// Tarik URL dari env, default string kosong kalau di production
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 interface ClimateItem {
   id: string;
   category: string;
@@ -87,18 +90,15 @@ export default function ClimateProductsSection({ data }: { data: ClimateItem[] }
               className="min-w-[300px] md:min-w-[360px] snap-start bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group/card hover:border-blue-400 hover:shadow-xl transition-all duration-500 flex flex-col"
             >
               {/* GAMBAR - DIPERBAIKI (MENGGUNAKAN CONTAIN DAN PADDING) */}
-              {/* bg-slate-50 memberi efek kanvas elegan, p-4 membuat gambar tidak mentok ke pinggir */}
               <div className="relative aspect-[4/3] w-full bg-slate-50 border-b border-slate-100 overflow-hidden p-4 md:p-6 flex items-center justify-center">
                 
-                {/* Dibungkus div relatif tambahan agar image fill bisa bekerja di dalam padding */}
                 <div className="relative w-full h-full">
+                  {/* STORAGE_URL dipasang & unoptimized dihapus */}
                   <Image 
-                    src={item.imageUrl} 
+                    src={item.imageUrl ? `${STORAGE_URL}${item.imageUrl}` : "/placeholder.jpg"} 
                     alt={item.title} 
                     fill 
-                    // Perubahan utama: object-contain menjaga proporsi peta agar tidak terpotong
                     className="object-contain transition-transform duration-700 group-hover/card:scale-105 drop-shadow-sm" 
-                    unoptimized
                   />
                 </div>
                 
@@ -108,7 +108,8 @@ export default function ClimateProductsSection({ data }: { data: ClimateItem[] }
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setLightbox({ isOpen: true, url: item.imageUrl, title: item.title });
+                        // STORAGE_URL dipasang di Lightbox juga
+                        setLightbox({ isOpen: true, url: `${STORAGE_URL}${item.imageUrl}`, title: item.title });
                       }}
                       className="p-4 bg-white rounded-full text-blue-600 hover:scale-110 transition-transform shadow-2xl"
                     >
@@ -118,7 +119,7 @@ export default function ClimateProductsSection({ data }: { data: ClimateItem[] }
               </div>
 
               {/* ISI CARD */}
-              <Link href={item.slug} className="p-5 flex flex-col flex-1 hover:bg-slate-50/50 transition-colors">
+              <Link href={`/publikasi/iklim/${item.slug}`} className="p-5 flex flex-col flex-1 hover:bg-slate-50/50 transition-colors">
   
                 <div className="flex items-center flex-wrap gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-wider mb-3">
                   <div className="flex items-center gap-1.5">

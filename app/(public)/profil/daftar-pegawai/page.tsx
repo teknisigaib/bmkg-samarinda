@@ -5,6 +5,9 @@ import { Award, Briefcase, Star, Users, Wrench, CloudRain, Sun, FileText, BadgeC
 import { getPegawai, Pegawai } from "@/lib/data-pegawai";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 export const metadata: Metadata = {
   title: "Daftar Pegawai | BMKG APT Pranoto Samarinda",
   description: "Daftar struktural dan fungsional pegawai Stasiun Meteorologi APT Pranoto Samarinda.",
@@ -50,7 +53,7 @@ export default async function DaftarPegawaiPage() {
             isKetuaTim ? 'border-blue-400' : 'border-slate-100 bg-slate-50'
           }`}>
             {item.image ? (
-               <Image src={item.image} alt={item.name} fill className="object-cover" />
+               <Image src={`${STORAGE_URL}${item.image}`} alt={item.name} fill className="object-cover" />
             ) : (
                <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-50">NA</div>
             )}
@@ -128,7 +131,7 @@ export default async function DaftarPegawaiPage() {
                   {/* CATATAN 1: Mengubah ring amber menjadi blue */}
                   <div className="relative w-40 h-40 md:w-52 md:h-52 flex-shrink-0 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-slate-100 mb-6 ring-4 ring-blue-50 transform -translate-y-2">
                       {kepalaStasiun.image ? (
-                        <Image src={kepalaStasiun.image} alt={kepalaStasiun.name} fill className="object-cover" />
+                        <Image src={`${STORAGE_URL}${kepalaStasiun.image}`} alt={kepalaStasiun.name} fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold">NA</div>
                       )}

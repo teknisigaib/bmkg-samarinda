@@ -4,6 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Newspaper, CalendarClock } from "lucide-react";
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 interface Post {
   id: string;
   title: string;
@@ -47,12 +50,11 @@ export default function NewsBulletinSection({ posts }: NewsBulletinSectionProps)
               {/* Gambar Utama (flex-1 agar gambar yang melar mengisi sisa ruang, bukan teksnya) */}
               <div className="relative flex-1 min-h-[250px] sm:min-h-[300px] w-full overflow-hidden bg-slate-100 shrink-0 border-b border-slate-100">
                 <Image
-                  src={mainPost.imageUrl || "/placeholder.jpg"}
+                  src={mainPost.imageUrl ? `${STORAGE_URL}${mainPost.imageUrl}` : "/placeholder.jpg"}
                   alt={mainPost.title}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                   sizes="(max-width: 1024px) 100vw, 60vw"
-                  unoptimized
                 />
               </div>
               
@@ -92,12 +94,11 @@ export default function NewsBulletinSection({ posts }: NewsBulletinSectionProps)
                 {/* Gambar Kanan (Lebar dikunci agar tidak ketarik/distorsi) */}
                 <div className="relative w-[50%] shrink-0 overflow-hidden bg-slate-100 border-r border-slate-100">
                   <Image
-                    src={post.imageUrl || "/placeholder.jpg"}
+                    src={post.imageUrl ? `${STORAGE_URL}${post.imageUrl}` : "/placeholder.jpg"}
                     alt={post.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                     sizes="(max-width: 768px) 150px, 200px"
-                    unoptimized
                   />
                 </div>
 

@@ -19,6 +19,9 @@ import RunningTextWrapper from "@/components/RunningTextWrapper";
 import AviationSection from "@/components/AviationSection";
 import ClimateProductsWrapper from "@/components/ClimateProductsWrapper";
 
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+
 // SKELETONS 
 const SkeletonBase = ({ className }: { className: string }) => (
   <div className={`bg-slate-200 animate-pulse rounded-2xl ${className}`} />
@@ -73,14 +76,14 @@ export default async function HomePage() {
           <RunningTextWrapper />
       </Suspense>
 
-     
+      
       {/* 2. HERO SECTION */}
       {heroPost && (
-        // 🔥 PERBAIKAN: Padding dikurangi (pt-12 pb-32 md:pt-16 md:pb-36) agar gambar tidak terlalu tinggi
         <section className="relative w-full flex items-center overflow-hidden bg-slate-900 pt-12 pb-32 md:pt-20 md:pb-40 mt-0">
           <div className="absolute inset-0 z-0">
+             {/* Tambahkan STORAGE_URL di sini */}
              <Image 
-               src={heroPost.imageUrl || "/placeholder.jpg"} 
+               src={heroPost.imageUrl ? `${STORAGE_URL}${heroPost.imageUrl}` : "/placeholder.jpg"} 
                alt="Hero" 
                fill 
                priority 
@@ -93,12 +96,10 @@ export default async function HomePage() {
              <div className="max-w-5xl">
                 <span className="inline-block bg-yellow-400 text-slate-900 font-bold px-3 py-1 rounded text-xs uppercase tracking-widest mb-4 shadow-sm">Berita Utama</span>
                 
-                {/* Judul sedikit disesuaikan margin bawahnya (mb-4) agar lebih rapat */}
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight drop-shadow-md">
                     {heroPost.title}
                 </h1>
                 
-                {/* Teks deskripsi juga dirapatkan (mb-6) */}
                 <p className="text-slate-200 text-base md:text-lg mb-6 max-w-3xl line-clamp-3 drop-shadow">
                     {heroPost.excerpt}
                 </p>

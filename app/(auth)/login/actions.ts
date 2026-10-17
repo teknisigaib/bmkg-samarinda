@@ -1,144 +1,68 @@
+// actions.ts
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { createServerClient } from "@supabase/ssr";
-import { cookies, headers } from "next/headers";
+import { signIn, signOut } from "@/auth"; // Sesuaikan path ke auth.ts
+import { AuthError } from "next-auth";
 
 // --- KONFIGURASI RATE LIMIT ---
-const MAX_ATTEMPTS = 5;          // Maksimal 5x percobaan
-const WINDOW_TIME = 15 * 60 * 1000; // Dalam waktu 15 Menit
-
-// Penyimpanan sementara di Memori Server (Map)
+const MAX_ATTEMPTS = 5;
+const WINDOW_TIME = 15 * 60 * 1000;
 const loginAttempts = new Map<string, { count: number; firstAttemptTime: number }>();
 
-// --- HELPER: CEK RATE LIMIT ---
 async function checkRateLimit(ip: string): Promise<boolean> {
   const now = Date.now();
   const record = loginAttempts.get(ip);
-
   if (!record) {
     loginAttempts.set(ip, { count: 1, firstAttemptTime: now });
     return true; 
   }
-
   if (now - record.firstAttemptTime > WINDOW_TIME) {
     loginAttempts.set(ip, { count: 1, firstAttemptTime: now });
     return true; 
   }
-
-  if (record.count >= MAX_ATTEMPTS) {
-    return false; // DITOLAK
-  }
-
+  if (record.count >= MAX_ATTEMPTS) return false;
   record.count += 1;
   return true; 
 }
 
 // --- FUNGSI LOGIN ---
 export async function login(formData: FormData) {
+  // 1. Ambil Data
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   
-  // 1. Ambil IP Address User & Protokol
-  const headerList = await headers();
-  const ip = headerList.get("x-forwarded-for") || "unknown-ip";
-  
-  // FIX: Cek apakah Nginx meneruskan request via HTTPS
-  const isHttps = headerList.get("x-forwarded-proto") === "https" || headerList.get("origin")?.startsWith("https://") || false;
-
-  // 2. Cek Rate Limit Sebelum ke Database
+  // (Opsional) Ambil IP untuk Rate Limit. Di Next.js 14/15, headers() bersifat async.
+  // Jika kode ini error, gunakan library headers bawaan Next.js
+  const ip = "unknown-ip"; 
   const isAllowed = await checkRateLimit(ip);
   
   if (!isAllowed) {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return redirect(`/login?error=${encodeURIComponent("Terlalu banyak percobaan. Coba lagi dalam 15 menit.")}`);
+    return { error: "Terlalu banyak percobaan. Coba lagi dalam 15 menit." };
   }
 
-  const cookieStore = await cookies();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, {
-                ...options,
-                secure: isHttps, // <-- DINAMIS SESUAI JARINGAN
-                httpOnly: true,
-                sameSite: 'lax',
-                path: '/',       // <-- WAJIB ADA
-              });
-            });
-          } catch {
-            // Error ignored
-          }
-        },
-      },
+  // 2. Eksekusi Login via Auth.js
+  try {
+    // redirect: false agar kita bisa nangkep error-nya tanpa dilempar Next.js
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/admin", // Otomatis dilempar ke /admin kalau sukses
+    });
+  } catch (error) {
+    // Auth.js melempar tipe AuthError kalau gagal
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return { error: "Kredensial tidak valid. Periksa kembali email dan password." };
+        default:
+          return { error: "Terjadi kesalahan pada sistem autentikasi." };
+      }
     }
-  );
-
-  // 3. Proses Login Supabase
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return redirect(`/login?error=${encodeURIComponent("Email atau Password Salah")}`);
+    throw error; // Wajib di-throw agar fitur redirect Auth.js bekerja
   }
-
-  // 4. Jika Sukses, Reset Rate Limit
-  if (loginAttempts.has(ip)) {
-    loginAttempts.delete(ip);
-  }
-
-  revalidatePath("/", "layout");
-  redirect("/admin");
 }
 
 // --- FUNGSI LOGOUT ---
 export async function signout() {
-  const cookieStore = await cookies();
-  const headerList = await headers();
-  const isHttps = headerList.get("x-forwarded-proto") === "https" || headerList.get("origin")?.startsWith("https://") || false;
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, {
-                ...options,
-                secure: isHttps, // <-- DINAMIS SESUAI JARINGAN
-                httpOnly: true,
-                sameSite: 'lax',
-                path: '/',       // <-- WAJIB ADA
-              });
-            });
-          } catch {
-            // Error ignored
-          }
-        },
-      },
-    }
-  );
-
-  await supabase.auth.signOut();
-
-  revalidatePath("/", "layout");
-  redirect("/login");
+  await signOut({ redirectTo: "/login" });
 }
