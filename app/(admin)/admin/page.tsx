@@ -83,18 +83,12 @@ export default async function AdminDashboard() {
             <h1 className="text-3xl md:text-4xl font-black mb-3 tracking-tight">
                 {greeting}, {userName}! 👋
             </h1>
-            <p className="text-blue-100 max-w-2xl text-sm md:text-base leading-relaxed">
-                Ini adalah pusat komando Stasiun Meteorologi APT Pranoto. 
-                Pantau statistik data, kelola konten website, dan perbarui informasi peringatan dini untuk masyarakat dari sini.
-            </p>
             <div className="mt-8 flex flex-wrap items-center gap-3 text-sm font-medium text-blue-100">
                 <span className="flex items-center gap-2 bg-black/20 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shadow-inner">
                     <CalendarDays size={16} className="text-blue-200" /> 
                     {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
-                <span className="flex items-center gap-2 bg-black/20 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shadow-inner">
-                    <Info size={16} className="text-blue-200" /> Sistem Normal
-                </span>
+                
             </div>
         </div>
       </div>
