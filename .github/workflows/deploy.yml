@@ -31,9 +31,8 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}
           build-args: |
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
             NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_STORAGE_URL=${{ secrets.NEXT_PUBLIC_STORAGE_URL }}
 
   # TAHAP 2: DEPLOY
   deploy_local:
@@ -57,28 +56,29 @@ jobs:
           docker run -d \
             -p 3000:3000 \
             --name ${{ env.CONTAINER_NAME }} \
-            -v stamet_nginx_logs:/www/wwwlogs:ro \
             --restart always \
+            -v stamet_nginx_logs:/www/wwwlogs:ro \
+            -v /www/wwwroot/storage:/app/public/storage \
+            --add-host stamet-samarinda.bmkg.go.id:host-gateway \
             --env-file ${{ env.ENV_PATH }} \
             ${{ env.IMAGE_NAME }}
 
       - name: Update Database (Prisma)
         run: |
-          # 1. Ambil DIRECT_URL (Port 5432) dari file .env
-          THE_URL=$(grep "^DIRECT_URL=" ${{ env.ENV_PATH }} | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
+          # 1. Ambil DATABASE_URL murni dari file .env
+          THE_URL=$(grep "^DATABASE_URL=" ${{ env.ENV_PATH }} | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
           
           # 2. Cek Debugging 
           echo "Debug: URL Terambil = ${THE_URL:0:10}..."
 
           if [ -z "$THE_URL" ]; then
-            echo "FATAL: Gagal mengambil DIRECT_URL dari ${{ env.ENV_PATH }}"
+            echo "FATAL: Gagal mengambil DATABASE_URL dari ${{ env.ENV_PATH }}"
             exit 1
           fi
 
-          # 3. Jalankan Prisma
+          # 3. Jalankan Prisma dengan DATABASE_URL biasa
           docker exec -u 0 \
           -e DATABASE_URL="$THE_URL" \
-          -e DIRECT_URL="$THE_URL" \
           ${{ env.CONTAINER_NAME }} \
           npx prisma@5.22.0 db push --skip-generate
           
