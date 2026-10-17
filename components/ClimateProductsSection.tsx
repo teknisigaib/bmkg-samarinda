@@ -119,7 +119,7 @@ export default function ClimateProductsSection({ data }: { data: ClimateItem[] }
               </div>
 
               {/* ISI CARD */}
-              <Link href={`/publikasi/iklim/${item.slug}`} className="p-5 flex flex-col flex-1 hover:bg-slate-50/50 transition-colors">
+              <Link href={`/iklim/${item.slug}`} className="p-5 flex flex-col flex-1 hover:bg-slate-50/50 transition-colors">
   
                 <div className="flex items-center flex-wrap gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-wider mb-3">
                   <div className="flex items-center gap-1.5">

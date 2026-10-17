@@ -18,15 +18,15 @@ export default async function ClimateProductsWrapper() {
       // LOGIKA "JIKA MENGANDUNG" (FUZZY MATCHING)
       if (typeKey.includes("HARI TANPA HUJAN") || typeKey.includes("HTH")) {
         categoryLabel = "Monitoring Hari Tanpa Hujan";
-        targetSlug = "/iklim/hari-tanpa-hujan";
+        targetSlug = "/hari-tanpa-hujan";
       } 
       else if (typeKey.includes("PRAKIRAAN")) {
         categoryLabel = "Prakiraan Curah Hujan";
-        targetSlug = "/iklim/prakiraan-hujan";
+        targetSlug = "/prakiraan-hujan";
       } 
       else if (typeKey.includes("ANALISIS")) {
         categoryLabel = "Analisis Curah Hujan";
-        targetSlug = "/iklim/analisis-hujan";
+        targetSlug = "/analisis-hujan";
       }
 
       return {
