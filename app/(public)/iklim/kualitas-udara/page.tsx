@@ -9,11 +9,10 @@ export const metadata: Metadata = {
   description: "Monitoring Kualitas Udara (PM2.5) Kota Samarinda secara real-time.",
 };
 
+// 1. Fetch data per jam
 async function getPm25Data() {
   try {
-    // 🔥 MENGUBAH SUMBER DATA: Dari FTP lokal ke API Gateway Eksternal (Server-Side Fetch)
     const res = await fetch('https://pm25.bmkgaptpranoto.com/api/v1/pm25', {
-      // Revalidate cache setiap 60 detik agar data Next.js tetap fresh mengikuti cron gateway
       next: { revalidate: 60 } 
     });
 
@@ -26,17 +25,40 @@ async function getPm25Data() {
 
   } catch (error) {
     console.error("Gagal mengambil data dari API Gateway PM2.5:", error);
-    // Data default fallback tetap dipertahankan jika API down
     return { success: false, current: 0, history: [], lastUpdate: "-" };
   }
 }
 
+// 2. Fetch data harian (TAMBAHAN BARU)
+async function getDailyPm25Data() {
+  try {
+    const res = await fetch('https://pm25.bmkgaptpranoto.com/api/v1/pm25/daily', {
+      next: { revalidate: 60 } // Cache 1 jam
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data;
+
+  } catch (error) {
+    console.error("Gagal mengambil data harian PM2.5:", error);
+    return { success: false, data: [] };
+  }
+}
+
 export default async function AirQualityPage() {
-  const initialData = await getPm25Data();
+  // 3. Jalankan kedua fetch secara paralel
+  const [initialData, dailyData] = await Promise.all([
+    getPm25Data(),
+    getDailyPm25Data()
+  ]);
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
-      <div className="w-full mx-auto pt-0  space-y-6">
+      <div className="w-full mx-auto pt-0 space-y-6">
         
         {/* --- BREADCRUMB --- */}
         <Breadcrumb 
@@ -50,7 +72,6 @@ export default async function AirQualityPage() {
         {/* --- HEADER SECTION --- */}
         <section className="relative flex flex-col items-center justify-center text-center mb-4 max-w-3xl mx-auto pt-0">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
-              {/* Glow hijau untuk tema kualitas udara */}
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
            </div>
            
@@ -76,7 +97,8 @@ export default async function AirQualityPage() {
         </section>
 
         {/* --- CLIENT COMPONENT --- */}
-        <AirQualityView initialData={initialData} />
+        {/* 4. Passing dailyData ke komponen */}
+        <AirQualityView initialData={initialData} dailyData={dailyData} />
 
       </div>
     </div>
