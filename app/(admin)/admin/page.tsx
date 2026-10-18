@@ -1,14 +1,13 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+export const dynamic = 'force-dynamic'; 
+
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth"; // <-- Import session dari Auth.js
 import { 
   Newspaper, Users, FileText, ArrowUpRight, Activity,
   CloudRain, CalendarDays, Clock, Image as ImageIcon,
-  BarChart3, AlertTriangle, Info, ShieldAlert
+  BarChart3, AlertTriangle, ShieldAlert
 } from "lucide-react";
-
-export const dynamic = 'force-dynamic'; 
 
 // Helper untuk sapaan waktu
 const getGreeting = () => {
@@ -22,20 +21,8 @@ const getGreeting = () => {
 };
 
 export default async function AdminDashboard() {
-  const cookieStore = await cookies();
-  
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) { try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {} },
-      },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
+  // AMBIL SESSION DARI AUTH.JS v5
+  const session = await auth();
 
   // AMBIL DATA STATISTIK SECARA PARALEL
   const [
@@ -68,7 +55,8 @@ export default async function AdminDashboard() {
   ]);
 
   const greeting = getGreeting();
-  const userName = user?.email?.split("@")[0] || "Admin";
+  // Ambil nama dari session Auth.js, kalau kosong ambil dari potongan email
+  const userName = session?.user?.name || session?.user?.email?.split("@")[0] || "Admin";
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -164,7 +152,6 @@ export default async function AdminDashboard() {
       </div>
 
       {/* 4. DUA KOLOM: AKSES CEPAT & AKTIVITAS TERBARU */}
-      {/* ... (KODE KOLOM INI SAMA PERSIS DENGAN SEBELUMNYA, TIDAK ADA YANG DIUBAH) ... */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <div className="lg:col-span-2 space-y-4">
