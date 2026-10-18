@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import PrakicuWrapper from "@/components/component-cuaca/prakicu/PrakicuWrapper";
+// 🔥 Import komponen Legenda yang baru dibikin (Sesuaikan letak path folder lu ya)
+import WeatherLegend from "@/components/component-cuaca/WeatherLegend"; 
 
 export const metadata: Metadata = {
   title: "Prakiraan Cuaca | BMKG APT Pranoto Samarinda",
@@ -27,7 +29,7 @@ export default function PrakicuPage() {
 
         {/* HERO SECTION - Mengikuti style PantauanCuacaPage */}
         <section className="relative flex flex-col items-center justify-center text-center mb-10 mx-auto pt-0 max-w-3xl">
-           {/* Efek Glow Latar Belakang (Warna Blue untuk membedakan dengan Cyan di Pantauan) */}
+           {/* Efek Glow Latar Belakang */}
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none">
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
            </div>
@@ -41,10 +43,12 @@ export default function PrakicuPage() {
         </section>
 
         {/* WRAPPER KOMPONEN (Peta, AI, Voice Command) */}
-        {/* Padding-x ditangani di dalam wrapper atau container ini agar tetap rapi */}
-        <div className="w-full mx-auto">
+        <div className="w-full mx-auto mb-10">
           <PrakicuWrapper />
         </div>
+
+        {/* 🔥 PANGGIL KOMPONEN LEGENDA DI SINI */}
+        <WeatherLegend />
 
       </div>
     </div>

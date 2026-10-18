@@ -9,7 +9,7 @@ export async function GET() {
     const data = await fetchArcgisNowcasting();
 
     if (!data) {
-      throw new Error("Data kosong dari satelit");
+      throw new Error("Data kosong dari BMKG");
     }
     
     return NextResponse.json(data, {
@@ -21,7 +21,7 @@ export async function GET() {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Gagal menyedot data dari satelit BMKG." },
+      { error: "Gagal mengambil data dari BMKG." },
       { status: 500 }
     );
   }
