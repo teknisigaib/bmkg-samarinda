@@ -1,8 +1,7 @@
 // lib/bmkg/nowcast.ts
 
 export async function fetchArcgisNowcasting() {
-  // Layer 2 is "Nowcasting aktif" in the nowcasting_public MapServer.
-  const endpoint = "https://datacuaca.bmkg.go.id/arcgis/rest/services/production/nowcasting_public/MapServer/2/query";
+  const baseUrl = "https://datacuaca.bmkg.go.id/arcgis/rest/services/production/nowcasting_public/MapServer/2/query";
   
   const params = new URLSearchParams({
     f: "geojson",
@@ -14,40 +13,35 @@ export async function fetchArcgisNowcasting() {
   });
 
   try {
-    const res = await fetch(`${endpoint}?${params.toString()}`, {
+    const url = `${baseUrl}?${params.toString()}`;
+
+    const res = await fetch(url, { 
       next: { revalidate: 300 },
-    });
-
-    const contentType = res.headers.get("content-type") ?? "";
-    const body = await res.text();
-    let payload: any;
-
-    try {
-      payload = JSON.parse(body);
-    } catch {
-      if (res.headers.get("cf-mitigated") === "challenge" || /just a moment/i.test(body)) {
-        throw new Error(
-          "Permintaan server ke BMKG ditahan oleh Cloudflare. Minta BMKG mengizinkan IP server atau menyediakan endpoint/API untuk akses server."
-        );
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Referer": "https://datacuaca.bmkg.go.id/",
+        "Connection": "keep-alive"
       }
+    });
+    
+    const rawText = await res.text();
 
-      const preview = body.replace(/\s+/g, " ").slice(0, 300);
-      throw new Error(
-        `Respons ArcGIS bukan JSON (HTTP ${res.status}, ${contentType || "content-type tidak diketahui"}): ${preview}`
-      );
+    if (!res.ok) {
+      throw new Error(`HTTP Error ${res.status}`);
     }
 
-    // ArcGIS may return an error object even when the HTTP status is 200.
-    if (!res.ok || payload?.error) {
-      const details = payload?.error
-        ? `${payload.error.code ?? "ArcGIS"}: ${payload.error.message ?? JSON.stringify(payload.error)}`
-        : `HTTP ${res.status} ${res.statusText}`;
-      throw new Error(`Gagal mengambil data dari ArcGIS (${details})`);
+    const data = JSON.parse(rawText);
+
+    if (data.error) {
+      console.error("⚠️ [NOWCAST] Error spesifik dari ArcGIS:", data.error);
+      return null;
     }
 
-    return payload;
+    return data;
   } catch (error) {
-    console.error("❌ Error fetchArcgisNowcasting:", error);
+    console.error("❌ [NOWCAST] Gagal fetchArcgisNowcasting:", error);
     return null;
   }
 }

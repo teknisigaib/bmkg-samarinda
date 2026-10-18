@@ -1,4 +1,4 @@
-import { ShieldCheck, AlertTriangle, FileText, Clock } from "lucide-react"; // ✅ Clock Ditambahkan
+import { ShieldCheck, AlertTriangle, FileText, Clock } from "lucide-react";
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import WarningMapWrapper from "@/components/component-cuaca/peringatan-dini/WarningMapWrapper";
@@ -33,12 +33,7 @@ export default async function PeringatanPage() {
   const hasWarnings = features.length > 0;
   
   const now = new Date();
-  const year = now.toLocaleString("en-US", { timeZone: "Asia/Makassar", year: "numeric" });
-  const month = now.toLocaleString("en-US", { timeZone: "Asia/Makassar", month: "2-digit" });
-  const day = now.toLocaleString("en-US", { timeZone: "Asia/Makassar", day: "2-digit" });
-  const imgInfografis = `https://nowcasting.bmkg.go.id/infografis/CKT/${year}/${month}/${day}/infografis.jpg`;
-  const imgText = `https://nowcasting.bmkg.go.id/infografis/CKT/${year}/${month}/${day}/infografis_text.jpg`;
-
+  
   // ✅ LOGIKA WAKTU SYNC LIVE
   const syncLabel = new Intl.DateTimeFormat("id-ID", {
     timeZone: "Asia/Makassar",
@@ -52,11 +47,25 @@ export default async function PeringatanPage() {
   const terjadi: Record<string, string[]> = {};
   const meluas: Record<string, string[]> = {};
   let waktuPembuatan = 0; let waktuBerlaku = 0; let waktuBerakhir = 0;
+  let imgInfografis = "";
+  let imgText = "";
 
   if (hasWarnings) {
     waktuPembuatan = features[0].properties.waktupembuatan;
     waktuBerlaku = features[0].properties.waktuberlaku;
     waktuBerakhir = features[0].properties.waktuberakhir;
+    
+    // ✅ BUILD URL GAMBAR BARU BMKG
+    // Pola: https://api-apps.bmkg.go.id/api/warningcuaca/image?path=CKT-YYYY-MM-DD-[ID_LAPORAN]_image0.jpg
+    const dateObj = new Date(waktuPembuatan);
+    const yyyy = dateObj.toLocaleString("en-US", { timeZone: "Asia/Makassar", year: "numeric" });
+    const mm = dateObj.toLocaleString("en-US", { timeZone: "Asia/Makassar", month: "2-digit" });
+    const dd = dateObj.toLocaleString("en-US", { timeZone: "Asia/Makassar", day: "2-digit" });
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    const idLaporan = features[0].properties.idlaporan; // Contoh: CKT20261018001
+
+    imgInfografis = `https://api-apps.bmkg.go.id/api/warningcuaca/image?path=CKT-${dateStr}-${idLaporan}_image0.jpg`;
+    imgText = `https://api-apps.bmkg.go.id/api/warningcuaca/image?path=CKT-${dateStr}-${idLaporan}_image1.jpg`;
 
     features.forEach((f: any) => {
       const props = f.properties;
@@ -108,10 +117,7 @@ export default async function PeringatanPage() {
            <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">Peringatan Dini Cuaca</h1>
            <p className="relative z-10 text-sm md:text-base text-slate-500 leading-relaxed font-medium px-4 max-w-4xl mb-8">Sistem peringatan dini cuaca (Nowcasting) untuk wilayah Provinsi Kalimantan Timur</p>
 
-           {/* ✅ SYMMETRICAL STATUS BAR (UNIFIED CAPSULE) */}
            <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-xl shadow-sm p-1 transition-all hover:shadow-md">
-             
-             {/* KIRI: Status Peringatan */}
              <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
                {!hasWarnings ? (
                   <>
@@ -130,12 +136,10 @@ export default async function PeringatanPage() {
                )}
              </div>
 
-             {/* KANAN: Waktu Sinkronisasi Live */}
              <div className="flex items-center gap-2 px-4 py-1.5">
                 <Clock className="w-4 h-4 text-blue-500" />
                 <span className="text-xs font-medium text-slate-500">Sync: {syncLabel}</span>
              </div>
-
            </div>
         </section>
 
