@@ -1,6 +1,4 @@
 "use client";
-export const dynamic = 'force-dynamic'; 
-
 import { useState, useEffect, useRef } from "react";
 import { Plus, Edit, X, Save, UploadCloud, Loader2, Star } from "lucide-react"; 
 import Image from "next/image";
