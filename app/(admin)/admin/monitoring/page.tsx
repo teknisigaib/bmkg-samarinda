@@ -1,5 +1,5 @@
 "use client"; // Diwajibkan oleh Next.js karena file ini menggunakan state interaktif React
-
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { 
   Activity, Database, RefreshCw, CheckCircle2, Cpu, ServerCrash, 

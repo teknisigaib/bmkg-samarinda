@@ -1,5 +1,5 @@
 "use client";
-
+export const dynamic = 'force-dynamic';
 import { useState, useEffect, useTransition } from "react";
 import { 
   CloudRain, Sun, Save, RotateCcw, FileText, Plus, Calendar, Loader2, Image as ImageIcon
