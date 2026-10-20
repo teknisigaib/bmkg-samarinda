@@ -3,9 +3,12 @@ import fs from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 
-export async function GET(req: Request, { params }: { params: { filepath: string[] } }) {
+// 🔥 Ubah parameter kedua menjadi context: any
+export async function GET(req: Request, context: any) {
   try {
-    const fileName = params.filepath.join('/');
+    // Ambil params dengan aman
+    const params = await context.params; 
+    const fileName = Array.isArray(params?.filepath) ? params.filepath.join('/') : params?.filepath;
     
     // 🔥 DETEKSI LINGKUNGAN: LOKAL VS VPS
     const isLocal = process.env.NODE_ENV !== "production";
@@ -29,7 +32,8 @@ export async function GET(req: Request, { params }: { params: { filepath: string
     else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
     else if (ext === '.pdf') contentType = 'application/pdf';
 
-    return new NextResponse(fileBuffer, {
+    // Ubah bagian ini
+    return new NextResponse(new Uint8Array(fileBuffer), {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000, immutable',
