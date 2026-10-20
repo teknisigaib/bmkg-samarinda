@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
+    unoptimized: true, // 🔥 TAMBAHKAN BARIS INI UNTUK MEMATIKAN OPTIMIZER NEXT.JS
     formats: ['image/avif', 'image/webp'],
     qualities: [50, 60, 75, 80, 90, 100],
     dangerouslyAllowSVG: true,
