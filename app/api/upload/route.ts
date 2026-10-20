@@ -21,9 +21,8 @@ export async function POST(req: Request) {
     
     // Saat lokal simpan di public/storage. 
     // Saat di VPS (Docker), simpan dengan aman di dalam folder /app/storage
-    const uploadDir = isLocal 
-      ? path.join(process.cwd(), "public/storage") 
-      : path.join(process.cwd(), "storage");
+    // Pastikan selalu menyisipkan ke dalam folder public/storage
+    const uploadDir = path.join(process.cwd(), "public", "storage");
 
     // Buat folder jika belum ada
     if (!fs.existsSync(uploadDir)) {
