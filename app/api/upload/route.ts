@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, chmod } from "fs/promises";
 import path from "path";
 import fs from "fs";
 
@@ -27,12 +27,25 @@ export async function POST(req: Request) {
       await mkdir(uploadDir, { recursive: true });
     }
 
-    const timestamp = Date.now().toString().slice(-6);
-    const filename = `${prefix}-${timestamp}.webp`; 
+    // 1. Buat format tanggal YYYY-MM-DD
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const dateString = `${yyyy}-${mm}-${dd}`;
+
+    // 2. Buat 4 digit ID acak dari waktu
+    const timestamp = Date.now().toString().slice(-4);
+    
+    // 3. Gabungkan jadi format: 2026-10-20-judul-berita-1234.webp
+    const filename = `${dateString}-${prefix}-${timestamp}.webp`; 
     const filepath = path.join(uploadDir, filename);
 
     // Simpan file fisik
     await writeFile(filepath, buffer);
+
+    // 🔥 PAKSA PERMISSION JADI 755 BIAR SAMA KAYAK FILE LAMA
+    await chmod(filepath, 0o755);
 
     // 3. Format URL yang dikembalikan jadi persis kayak Supabase lama: /storage/berita/nama-file.webp
     const publicUrl = `/storage/${targetFolder}/${filename}`;
