@@ -8,6 +8,9 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const prefix = formData.get("fileNamePrefix") as string || "image";
+    
+    // 1. Ambil nama folder tujuan (default ke 'berita' kalau kosong)
+    const targetFolder = formData.get("folder") as string || "berita";
 
     if (!file) {
       return NextResponse.json({ success: false, error: "Tidak ada file" }, { status: 400 });
@@ -16,15 +19,10 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 🔥 DETEKSI LINGKUNGAN: LOKAL VS DOCKER (VPS)
-    const isLocal = process.env.NODE_ENV !== "production";
-    
-    // Saat lokal simpan di public/storage. 
-    // Saat di VPS (Docker), simpan dengan aman di dalam folder /app/storage
-    // Pastikan selalu menyisipkan ke dalam folder public/storage
-    const uploadDir = path.join(process.cwd(), "public", "storage");
+    // 2. Arahkan direktori simpan ke dalam sub-folder spesifik (contoh: public/storage/berita)
+    const uploadDir = path.join(process.cwd(), "public", "storage", targetFolder);
 
-    // Buat folder jika belum ada
+    // Buat folder (beserta sub-foldernya) jika belum ada
     if (!fs.existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
@@ -36,7 +34,9 @@ export async function POST(req: Request) {
     // Simpan file fisik
     await writeFile(filepath, buffer);
 
-    const publicUrl = `/storage/${filename}`;
+    // 3. Format URL yang dikembalikan jadi persis kayak Supabase lama: /storage/berita/nama-file.webp
+    const publicUrl = `/storage/${targetFolder}/${filename}`;
+    
     return NextResponse.json({ success: true, url: publicUrl });
 
   } catch (error) {

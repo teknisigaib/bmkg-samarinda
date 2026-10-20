@@ -86,6 +86,9 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
       const cleanTitle = title ? sanitizeFileName(title) : "berita";
       formData.append("fileNamePrefix", cleanTitle);
       
+      // 🔥 TAMBAHKAN BARIS INI BIAR MASUK KE FOLDER 'berita'
+      formData.append("folder", "berita"); 
+      
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
