@@ -38,7 +38,12 @@ export async function POST(req: Request) {
     const timestamp = Date.now().toString().slice(-4);
     
     // 3. Gabungkan jadi format: 2026-10-20-judul-berita-1234.webp
-    const filename = `${dateString}-${prefix}-${timestamp}.webp`; 
+    // Cari baris ini (sekitar line 35):
+    // const filename = `${dateString}-${prefix}-${timestamp}.webp`;
+    
+    // UBAH MENJADI:
+    const ext = file.name.split('.').pop() || "webp"; // Ambil ekstensi asli file
+    const filename = `${dateString}-${prefix}-${timestamp}.${ext}`; 
     const filepath = path.join(uploadDir, filename);
 
     // Simpan file fisik

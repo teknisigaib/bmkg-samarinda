@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import { createPublication, updatePublication } from "@/app/(admin)/admin/actions";
 import { UploadCloud, FileText, Image as ImageIcon, X, Save, Loader2 } from "lucide-react";
 import imageCompression from 'browser-image-compression'; 
+
+// Tarik URL dari env buat preview gambar (Opsional)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
 interface PublicationFormProps {
   initialData?: any;
@@ -44,7 +46,6 @@ export default function PublicationForm({ initialData, activeTab, onClose, onSuc
     const formData = new FormData(e.currentTarget);
     const title = formData.get("title") as string;
     const cleanTitle = title ? sanitizeFileName(title) : "publikasi";
-    const timestamp = Date.now().toString().slice(-4);
 
     if (activeTab === "Buletin") {
         formData.set("type", "Buletin");
@@ -54,31 +55,44 @@ export default function PublicationForm({ initialData, activeTab, onClose, onSuc
       let finalCoverUrl = initialData?.coverUrl || "";
       let finalPdfUrl = initialData?.pdfUrl || "";
 
-      // Upload Cover (Hanya dieksekusi jika ada file cover yang dipilih)
+      // 🔥 1. UPLOAD COVER KE API LOKAL 🔥
       if (coverFile) {
         const compressedCover = await imageCompression(coverFile, {
             maxSizeMB: 0.5, maxWidthOrHeight: 800, useWebWorker: true, fileType: "image/webp"
         });
-        const coverName = `covers/${cleanTitle}-${timestamp}.webp`;
-        const { error } = await supabase.storage.from("bmkg-public").upload(coverName, compressedCover);
-        if (error) throw error;
-        finalCoverUrl = supabase.storage.from("bmkg-public").getPublicUrl(coverName).data.publicUrl;
+        
+        const coverFormData = new FormData();
+        // Bungkus ulang agar namanya tercatat sebagai .webp
+        coverFormData.append("file", new File([compressedCover], `cover-${cleanTitle}.webp`, { type: "image/webp" }));
+        coverFormData.append("fileNamePrefix", `cover-${cleanTitle}`);
+        coverFormData.append("folder", "covers"); // Masuk ke folder /storage/covers/
+
+        const coverRes = await fetch("/api/upload", { method: "POST", body: coverFormData });
+        if (!coverRes.ok) throw new Error("Gagal upload cover");
+        const coverData = await coverRes.json();
+        finalCoverUrl = coverData.url;
       }
 
+      // 🔥 2. UPLOAD PDF KE API LOKAL 🔥
       if (pdfFile) {
-        const pdfFileName = `dokumen/${cleanTitle}-${timestamp}.pdf`;
-        const { error } = await supabase.storage.from("bmkg-public").upload(pdfFileName, pdfFile, {
-            contentType: 'application/pdf'
-        });
-        if (error) throw error;
-        finalPdfUrl = supabase.storage.from("bmkg-public").getPublicUrl(pdfFileName).data.publicUrl;
+        const pdfFormData = new FormData();
+        pdfFormData.append("file", pdfFile); // Ekstensi .pdf otomatis terbaca
+        pdfFormData.append("fileNamePrefix", `dokumen-${cleanTitle}`);
+        pdfFormData.append("folder", "dokumen"); // Masuk ke folder /storage/dokumen/
+
+        const pdfRes = await fetch("/api/upload", { method: "POST", body: pdfFormData });
+        if (!pdfRes.ok) throw new Error("Gagal upload PDF");
+        const pdfData = await pdfRes.json();
+        finalPdfUrl = pdfData.url;
       }
 
       if (!finalPdfUrl) throw new Error("File PDF wajib diupload!");
 
+      // Sisipkan URL hasil upload lokal ke FormData untuk disimpan ke Database
       formData.set("coverUrl", finalCoverUrl);
       formData.set("pdfUrl", finalPdfUrl);
 
+      // Simpan ke DB
       if (isEditMode) {
         await updatePublication(initialData.id, formData);
       } else {
@@ -106,7 +120,7 @@ export default function PublicationForm({ initialData, activeTab, onClose, onSuc
             </h2>
             <p className="text-xs text-slate-500">Lengkapi data dokumen di bawah ini.</p>
           </div>
-          <button onClick={onClose} className="p-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full transition">
+          <button type="button" onClick={onClose} className="p-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full transition">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -141,14 +155,14 @@ export default function PublicationForm({ initialData, activeTab, onClose, onSuc
                             <p className="text-sm font-bold text-slate-700 truncate">
                                 {pdfName || "Pilih File PDF..."}
                             </p>
-                            <p className="text-[10px] text-slate-500 mt-0.5">Maks. 2MB. Format penamaan otomatis.</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">Maks. 5MB. Masuk ke penyimpanan lokal.</p>
                         </div>
                         <input 
                             type="file" accept="application/pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if(file) {
-                                    if(file.size > 2*1024*1024) return alert("Maks 2MB!");
+                                    if(file.size > 5*1024*1024) return alert("Maks 5MB!"); // Ditingkatkan sedikit buat antisipasi PDF berat
                                     setPdfFile(file);
                                     setPdfName(file.name);
                                 }
@@ -157,7 +171,7 @@ export default function PublicationForm({ initialData, activeTab, onClose, onSuc
                     </div>
                   </div>
 
-                  {/* --- PERUBAHAN DI SINI: Cover HANYA untuk Buletin --- */}
+                  {/* Cover HANYA untuk Buletin */}
                   {activeTab === "Buletin" && (
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1.5">
@@ -166,7 +180,7 @@ export default function PublicationForm({ initialData, activeTab, onClose, onSuc
                         <div className="relative border-2 border-dashed border-slate-300 rounded-xl h-40 hover:bg-slate-50 transition flex flex-col items-center justify-center text-slate-400 overflow-hidden group">
                             <input 
                                 type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                required={!isEditMode} // Wajib jika baru nambah buletin
+                                required={!isEditMode && !coverPreview} // Wajib jika baru nambah buletin & belum ada gambar
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if(file) {
@@ -177,8 +191,12 @@ export default function PublicationForm({ initialData, activeTab, onClose, onSuc
                             />
                             {coverPreview ? (
                                 <>
-                                    <img src={coverPreview} alt="Preview" className="w-full h-full object-cover opacity-60" />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <img 
+                                        src={coverPreview.startsWith("http") || coverPreview.startsWith("blob") ? coverPreview : `${STORAGE_URL}${coverPreview}`} 
+                                        alt="Preview" 
+                                        className="w-full h-full object-cover opacity-60" 
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-0">
                                         <span className="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Ganti Cover</span>
                                     </div>
                                 </>
