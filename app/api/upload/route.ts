@@ -9,20 +9,23 @@ export async function POST(req: Request) {
     const file = formData.get("file") as File | null;
     const prefix = formData.get("fileNamePrefix") as string || "image";
 
-    if (!file) return NextResponse.json({ success: false, error: "Tidak ada file" }, { status: 400 });
+    if (!file) {
+      return NextResponse.json({ success: false, error: "Tidak ada file" }, { status: 400 });
+    }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 🔥 DETEKSI LINGKUNGAN: LOKAL VS VPS
+    // 🔥 DETEKSI LINGKUNGAN: LOKAL VS DOCKER (VPS)
     const isLocal = process.env.NODE_ENV !== "production";
     
-    // Jika lokal, simpan di folder public/storage. Jika VPS, simpan di aaPanel.
+    // Saat lokal simpan di public/storage. 
+    // Saat di VPS (Docker), simpan dengan aman di dalam folder /app/storage
     const uploadDir = isLocal 
       ? path.join(process.cwd(), "public/storage") 
-      : "/www/wwwroot/storage";
+      : path.join(process.cwd(), "storage");
 
-    // Pastikan folder ada
+    // Buat folder jika belum ada
     if (!fs.existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }

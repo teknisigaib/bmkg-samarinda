@@ -58,7 +58,7 @@ jobs:
             --name ${{ env.CONTAINER_NAME }} \
             --restart always \
             -v stamet_nginx_logs:/www/wwwlogs:ro \
-            -v /www/wwwroot/storage:/app/public/storage \
+            -v /www/wwwroot/storage:/app/storage \
             --add-host stamet-samarinda.bmkg.go.id:host-gateway \
             --env-file ${{ env.ENV_PATH }} \
             ${{ env.IMAGE_NAME }}
