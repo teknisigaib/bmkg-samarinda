@@ -9,35 +9,50 @@ interface DeleteProps {
   id: string;
   model: "post" | "flyer" | "publication" | "pegawai" | "kinerja" | "pdieDocument" | "iklim"; 
   fileUrl?: string | null;
-  // bucketName sudah dihapus karena kita pakai storage lokal
   revalidateUrl: string;
+}
+
+// Helper untuk menghapus file lokal di dalam container Docker
+async function deleteLocalFile(fileUrl?: string | null) {
+  if (!fileUrl || !fileUrl.startsWith("/storage/")) return;
+
+  try {
+    // Hilangkan awalan "/storage/" -> contoh: "berita/2026-10-20-judul-1234.webp"
+    const relativePath = fileUrl.replace("/storage/", "");
+
+    // Arahkan ke folder internal container (/app/public/storage)
+    const absolutePath = path.join(process.cwd(), "public", "storage", relativePath);
+
+    await fs.unlink(absolutePath);
+    console.log(`✅ File fisik terhapus: ${absolutePath}`);
+  } catch (fsError: any) {
+    if (fsError.code !== 'ENOENT') {
+      console.error(`❌ Gagal hapus file fisik (${fileUrl}):`, fsError);
+    }
+  }
 }
 
 export async function globalDelete(params: DeleteProps) {
   const { id, model, fileUrl, revalidateUrl } = params;
 
   try {
-    // 1. HAPUS FILE FISIK DI SERVER LOKAL (AAPANEL)
-    if (fileUrl && fileUrl.startsWith("/storage/")) {
-      // Hilangkan awalan "/storage/" untuk mendapatkan nama file murni
-      const fileName = fileUrl.replace("/storage/", "");
-      
-      // Arahkan langsung ke direktori storage aaPanel lu
-      const absolutePath = path.join("/www/wwwroot/storage", fileName);
+    // 1. KHUSUS PUBLIKASI: Hapus PDF dan Cover sekaligus dari DB & Storage
+    if (model === "publication") {
+      const pubData = await prisma.publication.findUnique({
+        where: { id },
+        select: { pdfUrl: true, coverUrl: true }
+      });
 
-      try {
-        // Hapus file fisiknya
-        await fs.unlink(absolutePath);
-        console.log(`✅ File fisik terhapus: ${absolutePath}`);
-      } catch (fsError: any) {
-        // Jika file tidak ditemukan di folder (ENOENT), abaikan agar data DB tetap bisa dihapus
-        if (fsError.code !== 'ENOENT') {
-          console.error(`❌ Gagal hapus file fisik ${absolutePath}:`, fsError);
-        }
+      if (pubData) {
+        await deleteLocalFile(pubData.pdfUrl);
+        await deleteLocalFile(pubData.coverUrl);
       }
+    } else {
+      // 2. UNTUK MODEL LAIN: Hapus file fisik sesuai fileUrl yang dikirim
+      await deleteLocalFile(fileUrl);
     }
 
-    // 2. HAPUS DATA DI DATABASE (PRISMA) 
+    // 3. HAPUS DATA DI DATABASE (PRISMA) 
     switch (model) {
       case "post":
         await prisma.post.delete({ where: { id } });
@@ -64,7 +79,7 @@ export async function globalDelete(params: DeleteProps) {
         throw new Error("Tabel/Model tidak dikenali!");
     }
 
-    // 3. REFRESH HALAMAN ADMIN
+    // 4. REFRESH HALAMAN ADMIN
     revalidatePath(revalidateUrl);
     return { success: true, message: "Data dan file berhasil dihapus!" };
 

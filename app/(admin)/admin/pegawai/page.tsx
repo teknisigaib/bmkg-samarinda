@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Plus, Edit, X, Save, UploadCloud, Loader2, Star } from "lucide-react"; 
-import Image from "next/image";
 import { getPegawai, savePegawai, Pegawai } from "@/lib/data-pegawai"; 
-import { supabase } from "@/lib/supabase"; 
 import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; 
 import imageCompression from 'browser-image-compression';
+
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
 const sanitizeFileName = (text: string) => {
   return text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 50);              
@@ -61,19 +61,33 @@ export default function AdminPegawaiPage() {
       setUploading(true);
       const compressedFile = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 800, useWebWorker: true, fileType: "image/webp" });
       const cleanName = formData.name ? sanitizeFileName(formData.name) : "pegawai";
-      const timestamp = Date.now().toString().slice(-4);
-      const filePath = `pegawai/${cleanName}-${timestamp}.webp`;
+      
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", new File([compressedFile], `pegawai-${cleanName}.webp`, { type: "image/webp" }));
+      uploadFormData.append("fileNamePrefix", cleanName);
+      uploadFormData.append("folder", "pegawai"); 
 
-      const { error: uploadError } = await supabase.storage.from('bmkg-public').upload(filePath, compressedFile, { cacheControl: '3600', upsert: false, contentType: 'image/webp' });
-      if (uploadError) throw uploadError;
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadFormData,
+      });
 
-      const { data: publicUrlData } = supabase.storage.from('bmkg-public').getPublicUrl(filePath);
-      setFormData((prev) => ({ ...prev, image: publicUrlData.publicUrl }));
+      if (!response.ok) throw new Error("Gagal upload gambar");
+      const result = await response.json();
+
+      setFormData((prev) => ({ ...prev, image: result.url }));
     } catch (error) {
+      console.error(error);
       alert("Gagal mengupload gambar.");
     } finally {
       setUploading(false);
     }
+  };
+
+  // Helper untuk format URL Gambar
+  const getImageUrl = (url: string) => {
+    if (!url) return "";
+    return url.startsWith("http") || url.startsWith("blob") ? url : `${STORAGE_URL}${url}`;
   };
 
   return (
@@ -83,7 +97,7 @@ export default function AdminPegawaiPage() {
           <h1 className="text-2xl font-bold text-gray-800">Manajemen Pegawai</h1>
           <p className="text-gray-500 text-sm">Kelola daftar pimpinan, staff, dan PPNPN.</p>
         </div>
-        <button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors shadow-sm">
+        <button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors shadow-sm text-sm">
           <Plus className="w-4 h-4" /> Tambah Pegawai
         </button>
       </div>
@@ -105,7 +119,15 @@ export default function AdminPegawaiPage() {
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden relative border border-gray-200 shrink-0">
-                      {item.image ? <Image src={item.image} alt={item.name} fill className="object-cover" sizes="40px" /> : <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-xs">NA</div>}
+                      {item.image ? (
+                        <img 
+                          src={getImageUrl(item.image)} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-xs">NA</div>
+                      )}
                     </div>
                     <div>
                       <div className="font-bold text-gray-900 text-sm sm:text-base flex items-center gap-2">
@@ -134,7 +156,7 @@ export default function AdminPegawaiPage() {
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
                     <button onClick={() => handleEdit(item)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit className="w-4 h-4" /></button>
-                    <GlobalDeleteButton id={item.id} model="pegawai" fileUrl={item.image} bucketName="bmkg-public" revalidateUrl="/admin/pegawai" onSuccess={loadData} />
+                    <GlobalDeleteButton id={item.id} model="pegawai" fileUrl={item.image} revalidateUrl="/admin/pegawai" onSuccess={loadData} />
                   </div>
                 </td>
               </tr>
@@ -154,7 +176,18 @@ export default function AdminPegawaiPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div className="grid grid-cols-[auto_1fr] gap-5 items-start">
                   <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 shrink-0">
-                      {formData.image ? <Image src={formData.image} alt="Preview" fill className="object-cover" /> : <div className="w-full h-full flex flex-col items-center justify-center text-gray-400"><UploadCloud className="w-6 h-6 mb-1 opacity-50" /><span className="text-[9px] font-bold">Upload</span></div>}
+                      {formData.image ? (
+                        <img 
+                          src={getImageUrl(formData.image)} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                          <UploadCloud className="w-6 h-6 mb-1 opacity-50" />
+                          <span className="text-[9px] font-bold">Upload</span>
+                        </div>
+                      )}
                       {uploading && <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white z-20"><Loader2 className="w-6 h-6 animate-spin" /></div>}
                   </div>
                   <div className="space-y-2 pt-1">
@@ -194,7 +227,6 @@ export default function AdminPegawaiPage() {
                         </select>
                     </div>
 
-                    {/* HANYA MUNCUL JIKA FUNGSIONAL */}
                     {formData.group === "Fungsional" && (
                       <div>
                           <label className="block text-sm font-bold text-gray-700 mb-1.5">Pilih Tim</label>
@@ -217,7 +249,6 @@ export default function AdminPegawaiPage() {
                     <input required type="text" placeholder={formData.group === "Fungsional" ? "Contoh: PMG Muda / Penyelia" : "Contoh: Kepala Stasiun / Kasubag"} className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" value={formData.position} onChange={e => setFormData({...formData, position: e.target.value})} />
                 </div>
 
-                {/* CHECKBOX KETUA */}
                 {(formData.group === "Pimpinan" || formData.group === "Fungsional") && (
                   <div className={`mt-4 p-4 rounded-xl border ${formData.is_ketua ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
                     <label className="flex items-center gap-3 cursor-pointer">
