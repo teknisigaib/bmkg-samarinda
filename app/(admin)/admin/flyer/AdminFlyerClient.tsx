@@ -1,23 +1,14 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Image from "next/image";
-import { createClient } from "@supabase/supabase-js";
 import { createFlyer, toggleFlyerStatus } from "@/app/(admin)/admin/flyer/actions";
 import { Loader2, Plus, Link as LinkIcon, UploadCloud, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
-import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
-
-// --- IMPORT LIBRARY KOMPRESI ---
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton";
 import imageCompression from 'browser-image-compression'; 
 
-// Inisialisasi Supabase Client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
-// --- HELPER: SANITIZE FILENAME ---
 const sanitizeFileName = (text: string) => {
   return text
     .toLowerCase()
@@ -33,7 +24,7 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
 
-  // --- HANDLE UPLOAD & SAVE ---
+  // --- HANDLE UPLOAD LOKAL & SAVE ---
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsUploading(true);
@@ -63,30 +54,23 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
       };
 
       const compressedFile = await imageCompression(file, options);
-
       const cleanTitle = title ? sanitizeFileName(title) : "banner-info";
-      const datePrefix = new Date().toISOString().split('T')[0];
-      const timestamp = Date.now().toString().slice(-4);
-      
-      const fileName = `flyers/${datePrefix}-${cleanTitle}-${timestamp}.webp`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("bmkg-public") 
-        .upload(fileName, compressedFile, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: 'image/webp'
-        });
 
-      if (uploadError) throw new Error("Gagal upload ke Storage: " + uploadError.message);
+      // 🔥 BIKIN FORMDATA UNTUK API UPLOAD LOKAL 🔥
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", new File([compressedFile], `banner-${cleanTitle}.webp`, { type: "image/webp" }));
+      uploadFormData.append("fileNamePrefix", `banner-${cleanTitle}`);
+      uploadFormData.append("folder", "flyers"); // Tersimpan di /storage/flyers/
 
-      const { data: urlData } = supabase.storage
-        .from("bmkg-public")
-        .getPublicUrl(fileName);
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadFormData,
+      });
 
-      const publicUrl = urlData.publicUrl;
+      if (!uploadRes.ok) throw new Error("Gagal mengupload gambar banner ke server lokal");
+      const uploadResult = await uploadRes.json();
 
-      formData.set("imageUrl", publicUrl);
+      formData.set("imageUrl", uploadResult.url);
       
       const result = await createFlyer(formData);
 
@@ -110,10 +94,15 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
     if (file) setPreview(URL.createObjectURL(file));
   };
 
+  const getImageUrl = (url: string) => {
+    if (!url) return "";
+    return url.startsWith("http") || url.startsWith("blob") ? url : `${STORAGE_URL}${url}`;
+  };
+
   return (
     <div className="space-y-8">
       
-      {/* --- FORM INPUT TETAP SAMA --- */}
+      {/* --- FORM INPUT --- */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
           <Plus className="w-5 h-5 text-blue-600" /> Tambah Banner Baru
@@ -153,7 +142,7 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
                   {preview ? (
                       <div className="absolute inset-0 p-2 bg-white">
                         <div className="relative w-full h-full rounded overflow-hidden border border-slate-100">
-                           <Image src={preview} alt="Preview" fill className="object-cover" />
+                           <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold">
                                 Ganti Gambar
                            </div>
@@ -163,7 +152,7 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
                       <>
                           <UploadCloud className="w-8 h-8 mb-2 opacity-50" />
                           <span className="text-xs">Klik untuk upload gambar</span>
-                          <span className="text-[10px] mt-1 text-emerald-600 font-medium">Auto-Convert WebP</span>
+                          <span className="text-[10px] mt-1 text-emerald-600 font-medium">Auto-Convert WebP ke /storage/flyers/</span>
                       </>
                   )}
               </div>
@@ -199,13 +188,17 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
                         <tr key={flyer.id} className="hover:bg-slate-50 group">
                             <td className="px-6 py-4">
                                 <div className="relative w-32 h-16 rounded-md overflow-hidden border border-slate-200 bg-slate-100">
-                                    <Image src={flyer.image} alt={flyer.title} fill className="object-cover" sizes="150px" />
+                                    <img 
+                                      src={getImageUrl(flyer.image)} 
+                                      alt={flyer.title} 
+                                      className="w-full h-full object-cover" 
+                                    />
                                 </div>
                             </td>
                             <td className="px-6 py-4">
                                 <div className="font-bold text-slate-800 text-base">{flyer.title}</div>
                                 <div className="text-xs text-slate-400 truncate max-w-[200px]">
-                                    {flyer.link ? <a href={flyer.link} target="_blank" className="text-blue-500 hover:underline">{flyer.link}</a> : "Tidak ada link"}
+                                    {flyer.link ? <a href={flyer.link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{flyer.link}</a> : "Tidak ada link"}
                                 </div>
                                 <div className="text-[10px] text-slate-300 mt-1">ID: {flyer.id.slice(0,8)}...</div>
                             </td>
@@ -226,17 +219,12 @@ export default function AdminFlyerClient({ flyers }: { flyers: any[] }) {
                                 </button>
                             </td>
                             <td className="px-6 py-4 text-right">
-                                
-                                {/* --- TOMBOL HAPUS GLOBAL --- */}
                                 <GlobalDeleteButton 
                                   id={flyer.id} 
                                   model="flyer" 
-                                  fileUrl={flyer.image} // Di prisma kolomnya bernama "image"
-                                  bucketName="bmkg-public" 
+                                  fileUrl={flyer.image} 
                                   revalidateUrl="/admin/flyer" 
                                 />
-                                {/* ------------------------- */}
-                                
                             </td>
                         </tr>
                     ))

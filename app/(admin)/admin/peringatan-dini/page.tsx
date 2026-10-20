@@ -6,11 +6,12 @@ import {
 } from "lucide-react";
 import { 
   getPdieData, updateRegionStatus, updatePeriodeLabel, resetAllRegions, uploadDocument 
-} from "./actions"; // deleteDocument dihapus
+} from "./actions";
 
-import { supabase } from "@/lib/supabase";
 import imageCompression from 'browser-image-compression'; 
-import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton";
+
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
 type WarningLevel = "AWAS" | "SIAGA" | "WASPADA" | "AMAN";
 
@@ -131,38 +132,34 @@ export default function AdminPeringatanPage() {
 
     try {
         let finalFileToUpload = uploadFile;
-        let fileExtension = uploadFile.name.split('.').pop()?.toLowerCase();
-        let mimeType = uploadFile.type;
         const cleanTitle = sanitizeFileName(uploadTitle);
-        const timestamp = Date.now().toString().slice(-4);
 
         if (uploadFile.type.startsWith("image/")) {
             const compressed = await imageCompression(uploadFile, {
                 maxSizeMB: 1, maxWidthOrHeight: 1600, useWebWorker: true, fileType: "image/webp"
             });
-            finalFileToUpload = compressed;
-            fileExtension = "webp";
-            mimeType = "image/webp";
+            finalFileToUpload = new File([compressed], `${cleanTitle}.webp`, { type: "image/webp" });
         }
 
-        const folderTab = activeTab.toLowerCase();
-        const filePath = `pdie/${folderTab}/${cleanTitle}-${timestamp}.${fileExtension}`;
+        // 🔥 UPLOAD KE API SERVER LOKAL 🔥
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", finalFileToUpload);
+        uploadFormData.append("fileNamePrefix", cleanTitle);
+        uploadFormData.append("folder", "pdie"); // Tersimpan di /storage/pdie/
 
-        const { error: uploadError } = await supabase.storage
-            .from("bmkg-public")
-            .upload(filePath, finalFileToUpload, {
-                contentType: mimeType,
-                upsert: false
-            });
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
 
-        if (uploadError) throw new Error("Gagal upload ke Storage: " + uploadError.message);
+        if (!response.ok) throw new Error("Gagal upload file ke server lokal");
+        const result = await response.json();
 
-        const { data: { publicUrl } } = supabase.storage.from("bmkg-public").getPublicUrl(filePath);
-        
+        const publicUrl = result.url;
         const fileSizeMB = (finalFileToUpload.size / (1024 * 1024)).toFixed(1) + " MB";
         const todayDate = new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' });
 
-        await uploadDocument(uploadTitle, activeTab, todayDate, publicUrl, filePath, fileSizeMB);
+        await uploadDocument(uploadTitle, activeTab, todayDate, publicUrl, publicUrl, fileSizeMB);
 
         setUploadFile(null);
         setUploadTitle("");
@@ -178,6 +175,11 @@ export default function AdminPeringatanPage() {
     } finally {
         setIsUploadingFile(false);
     }
+  };
+
+  const getFileUrl = (url: string) => {
+    if (!url) return "#";
+    return url.startsWith("http") ? url : `${STORAGE_URL}${url}`;
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center text-slate-500 gap-2"><Loader2 className="animate-spin" /> Memuat Data Admin...</div>;
@@ -321,7 +323,7 @@ export default function AdminPeringatanPage() {
                         {isUploadingFile ? <><Loader2 className="animate-spin w-4 h-4"/> Mengupload...</> : <><Plus className="w-4 h-4" /> Upload</>}
                     </button>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-2 font-medium">Gambar akan otomatis dikompres ke WebP. Dokumen ini akan muncul di tab {activeTab} halaman publik.</p>
+                <p className="text-[10px] text-slate-400 mt-2 font-medium">Dokumen akan tersimpan di /storage/pdie/ dan muncul di tab {activeTab} halaman publik.</p>
             </div>
 
             <div className="space-y-3">
@@ -350,24 +352,19 @@ export default function AdminPeringatanPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat">
+                            <a href={getFileUrl(doc.fileUrl)} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat">
                                 <FileText className="w-4 h-4" />
                             </a>
                             
-                            {/* --- TOMBOL HAPUS GLOBAL --- */}
                             <GlobalDeleteButton 
                                 id={doc.id} 
                                 model="pdieDocument" 
                                 fileUrl={doc.fileUrl} 
-                                bucketName="bmkg-public" 
                                 revalidateUrl="/admin/peringatan-dini"
                                 onSuccess={() => {
-                                    // Filter data lokal secara instan agar tabel langsung update
                                     setDocuments(prev => prev.filter(d => d.id !== doc.id));
                                 }}
                             />
-                            {/* ------------------------- */}
-                            
                         </div>
                     </div>
                 ))}

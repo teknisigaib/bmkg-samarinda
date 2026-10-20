@@ -1,11 +1,11 @@
 "use client";
-export const dynamic = 'force-dynamic'; 
 
 import { useState, useEffect, useRef } from "react";
 import { Plus, X, Loader2, UploadCloud, FileText } from "lucide-react";
-import { getKinerjaDocs, saveKinerjaDoc, KinerjaDoc } from "@/lib/data-kinerja"; // deleteKinerjaDoc dihapus
-import { supabase } from "@/lib/supabase";
-import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton"; // IMPORT TOMBOL GLOBAL
+import { getKinerjaDocs, saveKinerjaDoc, KinerjaDoc } from "@/lib/data-kinerja"; 
+import GlobalDeleteButton from "@/components/component-admin/GlobalDeleteButton";
+
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
 // Label
 const CATEGORY_LABELS: Record<string, string> = {
@@ -76,8 +76,8 @@ export default function AdminKinerjaPage() {
         return;
       }
 
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Ukuran file terlalu besar! Maksimal 2MB.");
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Ukuran file terlalu besar! Maksimal 10MB.");
         return;
       }
 
@@ -85,19 +85,22 @@ export default function AdminKinerjaPage() {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + " MB";
       
       const cleanCategory = sanitizeFileName(CATEGORY_LABELS[formData.category] || formData.category);
-      const timestamp = Date.now().toString().slice(-4);
-      const fileName = `kinerja/${formData.year}-${cleanCategory}-${timestamp}.pdf`;
 
-      const { error } = await supabase.storage.from('bmkg-public').upload(fileName, file, {
-        contentType: 'application/pdf', 
-        upsert: false
+      // 🔥 UPLOAD KE API SERVER LOKAL 🔥
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+      uploadFormData.append("fileNamePrefix", `${formData.year}-${cleanCategory}`);
+      uploadFormData.append("folder", "kinerja"); // Tersimpan di /storage/kinerja/
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadFormData,
       });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error("Gagal upload PDF ke server lokal");
+      const result = await response.json();
 
-      const { data: urlData } = supabase.storage.from('bmkg-public').getPublicUrl(fileName);
-
-      setFormData(prev => ({ ...prev, fileUrl: urlData.publicUrl, fileSize: sizeMB }));
+      setFormData(prev => ({ ...prev, fileUrl: result.url, fileSize: sizeMB }));
 
     } catch (error) {
       console.error(error);
@@ -105,6 +108,11 @@ export default function AdminKinerjaPage() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const getFileUrl = (url: string) => {
+    if (!url) return "#";
+    return url.startsWith("http") ? url : `${STORAGE_URL}${url}`;
   };
 
   return (
@@ -142,7 +150,7 @@ export default function AdminKinerjaPage() {
                 <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4">
                       <div className="font-bold text-gray-900">{displayTitle}</div>
-                      <a href={item.fileUrl} target="_blank" className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-1">
+                      <a href={getFileUrl(item.fileUrl)} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-1">
                           <FileText className="w-3 h-3" /> {item.fileSize || "PDF File"}
                       </a>
                   </td>
@@ -153,18 +161,13 @@ export default function AdminKinerjaPage() {
                   </td>
                   <td className="p-4 text-sm font-mono">{item.year}</td>
                   <td className="p-4 text-right">
-                      
-                      {/* --- TOMBOL HAPUS GLOBAL DENGAN ONSUCCESS --- */}
-                      <GlobalDeleteButton 
-                        id={item.id} 
-                        model="kinerja" 
-                        fileUrl={item.fileUrl} 
-                        bucketName="bmkg-public" 
-                        revalidateUrl="/admin/kinerja"
-                        onSuccess={loadData} // <-- Akan merefresh tabel secara instan
-                      />
-                      {/* ------------------------------------------ */}
-
+                    <GlobalDeleteButton 
+                      id={item.id} 
+                      model="kinerja" 
+                      fileUrl={item.fileUrl} 
+                      revalidateUrl="/admin/kinerja"
+                      onSuccess={loadData}
+                    />
                   </td>
                 </tr>
               );
@@ -173,13 +176,13 @@ export default function AdminKinerjaPage() {
         </table>
       </div>
 
-      {/* --- KODE MODAL FORM SAMA SEPERTI SEBELUMNYA --- */}
+      {/* --- MODAL FORM --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-gray-800">Upload Dokumen</h3>
-                <button onClick={() => setIsModalOpen(false)}><X className="w-5 h-5 text-gray-400" /></button>
+                <button type="button" onClick={() => setIsModalOpen(false)}><X className="w-5 h-5 text-gray-400" /></button>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -220,7 +223,7 @@ export default function AdminKinerjaPage() {
                         {uploading ? (
                             <div className="flex flex-col items-center">
                                 <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-2" />
-                                <span className="text-sm text-gray-500">Mengupload...</span>
+                                <span className="text-sm text-gray-500">Mengupload ke /storage/kinerja/...</span>
                             </div>
                         ) : (
                             <>
