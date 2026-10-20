@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import { createClimateData, updateClimateData } from "@/app/(admin)/admin/iklim-actions";
 import RichTextEditor from "./RichTextEditor";
-import { Image as ImageIcon, Calendar, Wand2, X, Loader2, Save } from "lucide-react";
+import { Image as ImageIcon, Calendar, Wand2, X, Loader2 } from "lucide-react";
 import imageCompression from 'browser-image-compression';
+
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
 interface ClimateFormProps {
   type: string;
@@ -62,7 +63,7 @@ export default function ClimateForm({ type, initialData, onClose, onSuccess }: C
     // Generate Judul
     const typeLabel = type === "HTH" ? "Hari Tanpa Hujan (HTH)" : type === "HujanDasarian" ? "Analisis Curah Hujan" : type === "PotensiBanjir" ? "Potensi Banjir" : "Informasi Iklim";
     setAutoPeriod(periodString);
-    setAutoTitle(`${typeLabel} - ${selectedDasarian} ${selectedMonth} ${selectedYear}`);
+    setAutoTitle(`${typeLabel} ${selectedDasarian} ${selectedMonth} ${selectedYear}`);
   }, [selectedDasarian, selectedMonth, selectedYear, type]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,20 +73,27 @@ export default function ClimateForm({ type, initialData, onClose, onSuccess }: C
     try {
         let finalImageUrl = initialData?.imageUrl || "";
 
-        // PROSES KOMPRESI & UPLOAD JIKA ADA FILE BARU
+        // 🔥 UPLOAD KE API LOKAL JIKA ADA FILE BARU 🔥
         if (imageFile) {
             const compressedFile = await imageCompression(imageFile, {
                 maxSizeMB: 1, maxWidthOrHeight: 1600, useWebWorker: true, fileType: "image/webp"
             });
             
             const cleanTitle = sanitizeFileName(autoTitle);
-            const timestamp = Date.now().toString().slice(-4);
-            const fileName = `iklim/${type}-${cleanTitle}-${timestamp}.webp`;
-
-            const { error } = await supabase.storage.from("bmkg-public").upload(fileName, compressedFile, { contentType: 'image/webp' });
-            if (error) throw error;
             
-            finalImageUrl = supabase.storage.from("bmkg-public").getPublicUrl(fileName).data.publicUrl;
+            const uploadFormData = new FormData();
+            uploadFormData.append("file", new File([compressedFile], `${type}-${cleanTitle}.webp`, { type: "image/webp" }));
+            uploadFormData.append("fileNamePrefix", `${type}-${cleanTitle}`);
+            uploadFormData.append("folder", "iklim"); // Masuk ke folder /storage/iklim/
+
+            const response = await fetch("/api/upload", {
+              method: "POST",
+              body: uploadFormData,
+            });
+
+            if (!response.ok) throw new Error("Gagal mengupload peta ke server lokal");
+            const result = await response.json();
+            finalImageUrl = result.url;
         }
 
         if (!finalImageUrl) throw new Error("Peta visualisasi wajib diupload!");
@@ -112,6 +120,12 @@ export default function ClimateForm({ type, initialData, onClose, onSuccess }: C
     }
   };
 
+  // Helper URL Gambar
+  const getImageUrl = (url: string) => {
+    if (!url) return "";
+    return url.startsWith("http") || url.startsWith("blob") ? url : `${STORAGE_URL}${url}`;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl flex flex-col">
@@ -121,7 +135,7 @@ export default function ClimateForm({ type, initialData, onClose, onSuccess }: C
                 <Calendar className="w-5 h-5 text-blue-600" />
                 {isEditMode ? "Edit Data Iklim" : "Input Data Iklim Baru"}
             </h1>
-            <button onClick={onClose} className="p-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full transition">
+            <button type="button" onClick={onClose} className="p-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full transition">
                 <X className="w-5 h-5" />
             </button>
         </div>
@@ -168,7 +182,7 @@ export default function ClimateForm({ type, initialData, onClose, onSuccess }: C
                 <label className="block text-sm font-bold mb-3 text-slate-700">Upload Peta Visualisasi</label>
                 {imagePreview ? (
                     <div className="relative mb-2">
-                        <img src={imagePreview} alt="Preview" className="h-64 mx-auto object-contain rounded-lg shadow-sm bg-white p-2 border border-slate-200" />
+                        <img src={getImageUrl(imagePreview)} alt="Preview" className="h-64 mx-auto object-contain rounded-lg shadow-sm bg-white p-2 border border-slate-200" />
                     </div>
                 ) : (
                     <div className="h-40 w-full flex flex-col items-center justify-center bg-white rounded-lg mb-2 border border-slate-200">
@@ -187,7 +201,7 @@ export default function ClimateForm({ type, initialData, onClose, onSuccess }: C
                         }
                     }} 
                 />
-                <p className="text-[10px] text-slate-400 font-medium">Gambar akan otomatis dikompres & diubah ke format WebP.</p>
+                <p className="text-[10px] text-slate-400 font-medium">Gambar akan otomatis dikompres & diubah ke format WebP di folder /storage/iklim/.</p>
             </div>
 
             <div>
