@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Link from "next/link";
 import LogoutButton from "@/components/component-admin/LogoutButton"; // Pastikan path benar
 import { 

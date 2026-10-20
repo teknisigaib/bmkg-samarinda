@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import { createPost, updatePost } from "@/app/(admin)/admin/actions";
 import RichTextEditor from "./RichTextEditor";
 import { Image as ImageIcon, X, Save, Calendar, Loader2 } from "lucide-react";
-
-// --- IMPORT LIBRARY KOMPRESI ---
 import imageCompression from 'browser-image-compression'; 
+
+// Tarik URL dari env, default string kosong kalau di production (server)
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
 export interface PostData {
   id: string;
@@ -33,7 +33,6 @@ const formatDateForInput = (dateString?: Date | string) => {
   return (new Date(date.getTime() - offset)).toISOString().split('T')[0];
 };
 
-// --- HELPER: SANITIZE FILENAME ---
 const sanitizeFileName = (text: string) => {
   return text
     .toLowerCase()
@@ -58,13 +57,12 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
     return () => { document.body.style.overflow = "unset"; };
   }, []);
 
-  // --- HANDLE UPLOAD DENGAN KOMPRESI ---
+  // --- HANDLE UPLOAD KE API LOKAL AAPANEL ---
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     const originalFile = e.target.files[0];
     
-    // Validasi Awal (Misal tolak jika > 10MB biar browser gak hang)
     if (originalFile.size > 10 * 1024 * 1024) { 
       alert("File asli terlalu besar (>10MB). Silakan pilih file lain."); 
       return; 
@@ -73,38 +71,37 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
     setUploading(true);
 
     try {
-      // 1. KONFIGURASI KOMPRESI
       const options = {
-        maxSizeMB: 0.5,          // Target ukuran file maksimal 500KB (0.5MB)
-        maxWidthOrHeight: 1280,  // Resize lebar maksimal jadi 1280px (Cukup buat Web)
-        useWebWorker: true,      // Biar browser gak nge-lag saat kompres
-        fileType: "image/webp"   // Paksa ubah jadi WebP (Lebih kecil dari JPG/PNG)
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1280,
+        useWebWorker: true,
+        fileType: "image/webp"
       };
 
-      // 2. PROSES KOMPRESI
-      // console.log(`Original: ${(originalFile.size / 1024 / 1024).toFixed(2)} MB`);
       const compressedFile = await imageCompression(originalFile, options);
-      // console.log(`Compressed: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
 
-      // 3. BUAT NAMA FILE RAPI
-      const cleanTitle = title ? sanitizeFileName(title) : "untitled";
-      const datePrefix = new Date().toISOString().split('T')[0];
-      const timestamp = Date.now().toString().slice(-4);
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+
+      const cleanTitle = title ? sanitizeFileName(title) : "berita";
+      formData.append("fileNamePrefix", cleanTitle);
       
-      // Extensi selalu .webp karena kita sudah convert
-      const newFileName = `berita/${datePrefix}-${cleanTitle}-${timestamp}.webp`;
-
-      // 4. UPLOAD KE SUPABASE
-      const { error } = await supabase.storage.from("bmkg-public").upload(newFileName, compressedFile, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: 'image/webp' // Pastikan mime-type benar
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      const { data } = supabase.storage.from("bmkg-public").getPublicUrl(newFileName);
-      setImageUrl(data.publicUrl);
+      const result = await response.json();
+
+      if (result.success && result.url) {
+        setImageUrl(result.url);
+      } else {
+        throw new Error(result.error || "Gagal mendapatkan URL gambar dari server");
+      }
 
     } catch (error) {
       console.error("Upload Error:", error);
@@ -119,6 +116,7 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
     setIsSubmitting(true);
     formData.set("content", content);
     formData.set("imageUrl", imageUrl);
+    formData.set("date", date); 
 
     try {
         if (isEditMode && initialData) { 
@@ -137,7 +135,6 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
-      
       <div className="bg-white w-full max-w-5xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl border border-slate-200 flex flex-col animate-in zoom-in-95 duration-200">
         
         {/* Header */}
@@ -161,14 +158,11 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
         {/* Content Form */}
         <div className="p-6 sm:p-8 space-y-8">
              <form id="post-form" action={handleSubmit} className="space-y-6">
-                
-                {/* Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     {/* Kolom Kiri: Gambar */}
                     <div className="lg:col-span-1 space-y-3">
                         <label className="block text-sm font-bold text-slate-700">Cover Gambar</label>
-                        
                         <div className={`border-2 border-dashed rounded-xl p-4 text-center transition group relative bg-slate-50/50 overflow-hidden
                             ${uploading ? 'border-blue-400 bg-blue-50' : 'border-slate-300 hover:bg-slate-50 cursor-pointer'}`}
                         >
@@ -179,7 +173,12 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
                                 </div>
                             ) : imageUrl ? (
                                 <>
-                                    <img src={imageUrl} alt="Preview" className="h-48 w-full object-cover rounded-lg shadow-sm" />
+                                    {/* 🔥 Preview Gambar yang sudah diupdate dengan STORAGE_URL 🔥 */}
+                                    <img 
+                                      src={imageUrl.startsWith("http") ? imageUrl : `${STORAGE_URL}${imageUrl}`} 
+                                      alt="Preview" 
+                                      className="h-48 w-full object-cover rounded-lg shadow-sm" 
+                                    />
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity duration-300">
                                         <span className="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Ganti Gambar</span>
                                     </div>
@@ -192,7 +191,6 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
                                 </div>
                             )}
                             
-                            {/* Input File */}
                             <input 
                               type="file" 
                               onChange={handleUpload} 
@@ -287,7 +285,6 @@ export default function PostForm({ initialData, onCancel, onSuccess }: PostFormP
                 {isSubmitting ? "Menyimpan..." : (isEditMode ? "Simpan Perubahan" : "Terbitkan")}
             </button>
         </div>
-
       </div>
     </div>
   );

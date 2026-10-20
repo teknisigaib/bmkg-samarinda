@@ -2,36 +2,41 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
-import { createClient } from "@supabase/supabase-js"; 
+import fs from "fs/promises";
+import path from "path";
 
 interface DeleteProps {
   id: string;
   model: "post" | "flyer" | "publication" | "pegawai" | "kinerja" | "pdieDocument" | "iklim"; 
   fileUrl?: string | null;
-  bucketName?: string;
+  // bucketName sudah dihapus karena kita pakai storage lokal
   revalidateUrl: string;
 }
 
 export async function globalDelete(params: DeleteProps) {
-  const { id, model, fileUrl, bucketName, revalidateUrl } = params;
+  const { id, model, fileUrl, revalidateUrl } = params;
 
   try {
-    if (fileUrl && bucketName && fileUrl.includes("supabase.co")) {
-      const basePath = `/storage/v1/object/public/${bucketName}/`;
-      const filePath = fileUrl.includes(basePath) ? fileUrl.split(basePath)[1] : null;
+    // 1. HAPUS FILE FISIK DI SERVER LOKAL (AAPANEL)
+    if (fileUrl && fileUrl.startsWith("/storage/")) {
+      // Hilangkan awalan "/storage/" untuk mendapatkan nama file murni
+      const fileName = fileUrl.replace("/storage/", "");
+      
+      // Arahkan langsung ke direktori storage aaPanel lu
+      const absolutePath = path.join("/www/wwwroot/storage", fileName);
 
-      if (filePath) {
-        const supabaseAdmin = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY! 
-        );
-
-        const { error } = await supabaseAdmin.storage.from(bucketName).remove([filePath]);
-        if (error) console.error("❌ Gagal hapus file Storage:", error.message);
+      try {
+        // Hapus file fisiknya
+        await fs.unlink(absolutePath);
+        console.log(`✅ File fisik terhapus: ${absolutePath}`);
+      } catch (fsError: any) {
+        // Jika file tidak ditemukan di folder (ENOENT), abaikan agar data DB tetap bisa dihapus
+        if (fsError.code !== 'ENOENT') {
+          console.error(`❌ Gagal hapus file fisik ${absolutePath}:`, fsError);
+        }
       }
     }
 
-   
     // 2. HAPUS DATA DI DATABASE (PRISMA) 
     switch (model) {
       case "post":
@@ -43,36 +48,28 @@ export async function globalDelete(params: DeleteProps) {
       case "publication":
         await prisma.publication.delete({ where: { id } });
         break;
-
-      // 2. TAMBAHKAN CASE KINERJA DI SINI
       case "kinerja":
-        
         await prisma.performanceDoc.delete({ where: { id } }); 
         break;
-
-        case "pegawai":
+      case "pegawai":
         await prisma.employee.delete({ where: { id } });
         break;
-
-        case "pdieDocument":
+      case "pdieDocument":
         await prisma.pdieDocument.delete({ where: { id } });
         break;
-
-        case "iklim":
+      case "iklim":
         await prisma.climateData.delete({ where: { id } }); 
         break;
-
       default:
-        throw new Error("Tabel tidak dikenali!");
+        throw new Error("Tabel/Model tidak dikenali!");
     }
 
     // 3. REFRESH HALAMAN ADMIN
-   
     revalidatePath(revalidateUrl);
     return { success: true, message: "Data dan file berhasil dihapus!" };
 
   } catch (error) {
-    console.error(`❌ Gagal menghapus ${model}:`, error);
+    console.error(`❌ Gagal menghapus data dari model ${model}:`, error);
     return { error: "Terjadi kesalahan sistem saat menghapus data." };
   }
 }
