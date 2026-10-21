@@ -49,7 +49,7 @@ const TMA_STATIONS = [
 
   { id: 'bws-6', name: 'POS DUGA AIR MAHAKAM LONG BAGUN', lat: 0.52281, lng: 115.24110, type: 'BWS' },
 
-  { id: 'bws-7', name: 'POS DUGA MAHAKAM AIR BATOQ KELO', lat: 0.76301, lng: 115.01789, type: 'BWS' },
+  { id: 'bws-7', name: 'POS DUGA AIR MAHAKAM BATOQ KELO', lat: 0.76301, lng: 115.01789, type: 'BWS' },
 
   { id: 'bws-8', name: 'POS DUGA AIR MAHAKAM LONG PAHANGAI', lat: 0.88731, lng: 114.69078, type: 'BWS' }
 
