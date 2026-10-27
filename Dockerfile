@@ -1,5 +1,5 @@
 # 1. Base Image
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 
 # Install OpenSSL (Wajib untuk Prisma)
 RUN apt-get update -y && apt-get install -y openssl ca-certificates
