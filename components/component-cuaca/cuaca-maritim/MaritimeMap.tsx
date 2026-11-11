@@ -22,7 +22,6 @@ interface MapProps {
 
 export default function MaritimeMap({ onSelect, regionCache, dayIndex, geoData }: MapProps) {
   
-  // FIX: Gunakan useRef agar event Leaflet selalu baca data terbaru, bukan memori lama!
   const cacheRef = useRef(regionCache);
   const dayRef = useRef(dayIndex);
 
@@ -38,33 +37,34 @@ export default function MaritimeMap({ onSelect, regionCache, dayIndex, geoData }
 
       filteredData.features = geoData.features.filter((f: any) => {
           if (f.geometry.type === 'Point') return false; 
-          // Amankan dari spasi nyasar menggunakan .trim()
           const rawName = (f.properties?.perairan || f.properties?.WSB || "").trim();
           if (!rawName) return false;
           return allowedAreas.has(rawName.toLowerCase());
       });
   }
 
+  // LOGIKA UTAMA: Fungsi helper murni untuk hitung warna
+  const calculateStyle = (feature: any, cacheData: Record<string, NewMaritimeForecastItem[]>, dayIdx: number) => {
+      if (feature.geometry.type === 'Point') return {}; 
+
+      const rawName = (feature.properties?.perairan || feature.properties?.WSB || "").trim();
+      const matchedArea = KALTIM_AREAS.find(a => a.name.toLowerCase() === rawName.toLowerCase());
+      
+      let fillColor = "#cbd5e1"; 
+      let fillOpacity = 0.3;
+
+      if (matchedArea && cacheData[matchedArea.id] && cacheData[matchedArea.id][dayIdx]) {
+          const forecastNow = cacheData[matchedArea.id][dayIdx];
+          fillColor = getWaveColor(forecastNow.wave_cat);
+          fillOpacity = 0.6; 
+      }
+
+      return { fillColor, weight: 1.5, opacity: 1, color: "white", fillOpacity };
+  };
+
+  // 1. Dipanggil saat render awal (Harus langsung pakai PROPS `regionCache`)
   const getStyle = (feature: any) => {
-    if (feature.geometry.type === 'Point') return {}; 
-
-    const rawName = (feature.properties?.perairan || feature.properties?.WSB || "").trim();
-    const matchedArea = KALTIM_AREAS.find(a => a.name.toLowerCase() === rawName.toLowerCase());
-    
-    let fillColor = "#cbd5e1"; 
-    let fillOpacity = 0.3;
-
-    // BACA DARI REF agar tidak pernah terjebak status abu-abu
-    const currentCache = cacheRef.current;
-    const currentDay = dayRef.current;
-
-    if (matchedArea && currentCache[matchedArea.id] && currentCache[matchedArea.id][currentDay]) {
-        const forecastNow = currentCache[matchedArea.id][currentDay];
-        fillColor = getWaveColor(forecastNow.wave_cat);
-        fillOpacity = 0.6; 
-    }
-
-    return { fillColor, weight: 1.5, opacity: 1, color: "white", fillOpacity };
+      return calculateStyle(feature, regionCache, dayIndex);
   };
 
   const onEachFeature = (feature: any, layer: any) => {
@@ -86,21 +86,19 @@ export default function MaritimeMap({ onSelect, regionCache, dayIndex, geoData }
       mouseout: (e: any) => {
         const target = e.target;
         if (typeof target.setStyle === "function") {
-           // Karena getStyle membaca cacheRef, warnanya akan kembali ke warna gelombang yang benar!
-           target.setStyle(getStyle(feature));
+           // 2. Khusus untuk mouseout, wajib baca dari REF agar tidak Stale Closure
+           target.setStyle(calculateStyle(feature, cacheRef.current, dayRef.current));
         }
       },
     });
 
+    // 3. Tooltip awal juga pakai PROPS `regionCache`
     if (rawName && matchedLocation) {
         const locationId = matchedLocation.id;
         let info = "";
         
-        const currentCache = cacheRef.current;
-        const currentDay = dayRef.current;
-
-        if (currentCache[locationId] && currentCache[locationId][currentDay]) {
-            const data = currentCache[locationId][currentDay];
+        if (regionCache[locationId] && regionCache[locationId][dayIndex]) {
+            const data = regionCache[locationId][dayIndex];
             info = ` • ${data.wave_height}m (${data.wave_cat})`;
         }
         layer.bindTooltip(`${rawName}${info}`, {
@@ -109,7 +107,6 @@ export default function MaritimeMap({ onSelect, regionCache, dayIndex, geoData }
     }
   };
 
-  // Kunci perbaikan ke-2: Ubah Key agar peta otomatis nge-cat ulang saat data cache masuk
   const cacheSize = Object.keys(regionCache).length;
 
   return (
@@ -117,7 +114,6 @@ export default function MaritimeMap({ onSelect, regionCache, dayIndex, geoData }
       <MapContainer center={[1.0, 118.0]} zoom={6.5} className="h-full w-full" zoomControl={false}>
         <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_32wf_1_a69d1812376e13fad46ef99a" />
         
-        {/* 1. Gambar Area Perairan (Poligon Biru) */}
         {filteredData && filteredData.features.length > 0 && (
           <GeoJSON
             key={`map-${dayIndex}-${cacheSize}`} 
@@ -127,7 +123,6 @@ export default function MaritimeMap({ onSelect, regionCache, dayIndex, geoData }
           />
         )}
 
-        {/* 2. Gambar Titik Pelabuhan Manual (Marker Merah) */}
         {KALTIM_PORTS.map((port) => {
            if (!port.lat || !port.lon) return null;
 
@@ -177,8 +172,6 @@ export default function MaritimeMap({ onSelect, regionCache, dayIndex, geoData }
           font-size: 10px !important; text-transform: uppercase;
         }
         .leaflet-tooltip-top:before { border-top-color: white !important; }
-        
-        /* HILANGKAN KOTAK TEBAL (OUTLINE) SAAT AREA DIKLIK */
         .leaflet-interactive:focus { outline: none !important; }
         path.leaflet-interactive:focus { outline: none !important; }
       `}</style>
