@@ -1,11 +1,10 @@
 "use client";
 
-// Import fungsi helper dari Library
+// Import fungsi helper dari Library (calculateDensityAltitude dihapus)
 import { 
     AwosFullData, 
     AwosItem, 
     calculateWindComponents, 
-    calculateDensityAltitude, 
     parseClouds 
 } from "@/lib/awos-utils";
 
@@ -26,10 +25,12 @@ const CrosswindWidget = ({ windSpd, windDir, rwyLabel }: { windSpd: number, wind
     // Limit Warning
     const isXwHigh = crosswind >= 15;
     const isTwHigh = isTailwind && Math.abs(headwind) >= 5;
+    
+    // Perbaikan hitung sudut rotasi visual pesawat relatif terhadap angin
+    const windRotation = windDir - rwyHeading;
 
     return (
         <div className="bg-slate-50 rounded-xl border border-slate-200 p-3 mt-3 w-full">
-            {/* ... (Visualisasi UI tetap sama seperti sebelumnya) ... */}
             <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Wind Components</span>
                 <span className="text-[9px] font-mono text-slate-300">RWY {rwyLabel} ({rwyHeading}°)</span>
@@ -42,7 +43,7 @@ const CrosswindWidget = ({ windSpd, windDir, rwyLabel }: { windSpd: number, wind
                     <Plane className="text-slate-300 relative z-10" size={24} strokeWidth={1.5} />
                     <div 
                         className="absolute inset-0 flex items-center justify-center transition-transform duration-500"
-                        style={{ transform: `rotate(${windDir - rwyHeading}deg)` }}
+                        style={{ transform: `rotate(${windRotation}deg)` }}
                     >
                         <div className="absolute -top-4">
                             <ArrowDown size={16} className="text-blue-500 fill-blue-500 animate-bounce" />
@@ -110,7 +111,6 @@ const WindCompass = ({ data, rwyLabel }: { data: AwosItem | null, rwyLabel: stri
     return (
         <div className="relative w-48 h-48 flex items-center justify-center mb-2">
             <svg viewBox="0 0 200 200" className="w-full h-full">
-                {/* ... (SVG Drawing tetap sama) ... */}
                 <circle cx="100" cy="100" r="98" fill="white" stroke="#e2e8f0" strokeWidth="1" />
                 {Array.from({ length: 36 }).map((_, i) => {
                     const deg = i * 10;
@@ -165,12 +165,8 @@ const MiddlePanel = ({ data }: { data: AwosItem | null }) => {
         </div>
     );
 
-    // PENGGUNAAN FUNGSI DARI LIB
-    const densityAlt = calculateDensityAltitude(data.air_temperature, data.qnh);
-
     return (
         <div className="bg-slate-50/50 rounded-3xl border border-slate-200 p-6 flex flex-col h-full space-y-3">
-             {/* ... (Tampilan Middle Panel sama seperti sebelumnya) ... */}
             <div className="flex justify-center mb-1">
                 <div className="bg-slate-200 text-slate-700 px-4 py-1 rounded-full text-[12px] font-bold border border-slate-300 tracking-widest uppercase">
                     Middle
@@ -190,14 +186,14 @@ const MiddlePanel = ({ data }: { data: AwosItem | null }) => {
                 </div>
             </div>
 
-            {/* Density Altitude */}
+            {/* Density Altitude - SEKARANG MENGGUNAKAN DATA API LANGSUNG */}
             <div className="bg-white rounded-2xl border border-slate-200 p-3 shadow-sm flex flex-col items-center">
                 <div className="flex items-center gap-1 text-slate-400 mb-0.5">
                     <ChevronUp size={15} />
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Density Altitude</span>
                 </div>
                 <div className="text-lg font-bold text-slate-700">
-                    {densityAlt.toLocaleString()} <span className="text-[10px] font-sans font-bold uppercase">ft</span>
+                    {data.density_altitude !== undefined ? data.density_altitude.toLocaleString() : '-'} <span className="text-[10px] font-sans font-bold uppercase">ft</span>
                 </div>
             </div>
             
@@ -389,7 +385,7 @@ const RunwayPanel = ({ data, label }: { data: AwosItem | null, label: string }) 
     );
 };
 
-// --- MAIN LAYOUT (Tidak Berubah) ---
+// --- MAIN LAYOUT ---
 export default function AwosDisplay({ fullData }: { fullData: AwosFullData | null }) {
     if (!fullData) return null;
 
@@ -423,7 +419,7 @@ export default function AwosDisplay({ fullData }: { fullData: AwosFullData | nul
                     <div className="flex items-center gap-2 text-slate-500">
                         <Clock size={14} className="text-slate-400" />
                         <span className="text-sm font-bold tracking-tight">
-                            {lastUpdate} <span className="text-[10px] font-sans font-bold text-slate-400">UTC</span>
+                            {lastUpdate} <span className="text-[10px] font-sans font-bold text-slate-400">WITA</span>
                         </span>
                     </div>
                 </div>

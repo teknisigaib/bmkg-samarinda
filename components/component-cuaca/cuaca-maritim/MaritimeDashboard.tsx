@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { 
-  Ship, Anchor, Info, Clock, Map, Waves, Loader2 
+  Info, Clock, Map, Loader2 
 } from "lucide-react";
 import SectionDivider from "@/components/ui/SectionDivider";
 
@@ -12,15 +12,21 @@ import MaritimeControl from "./MaritimeControl";
 import MaritimeDetail from "./MaritimeDetail";
 import MaritimeForecastTable from "./MaritimeForecastTable";
 
-// Import Utils (HAPUS import action getMaritimeDetail)
+// 1. Import Utils & Constants dari file asli
 import { 
-  createSlug, 
   KALTIM_AREAS, 
   KALTIM_PORTS, 
   findClosestIndex,
   NewMaritimeForecastItem,
-  combineForecasts // Pastikan ini di-import ya cuy
+  combineForecasts
 } from "@/lib/bmkg/maritim";
+
+// 2. Import Fungsi Fetch dari file ACTIONS yang baru
+import {
+  getWilmetosGeoJson,
+  getPerairanData,
+  getPelabuhanData
+} from "@/lib/bmkg/maritim-actions";
 
 // Dynamic Import Peta (No SSR)
 const MaritimeMap = dynamic(() => import("./MaritimeMap"), { 
@@ -56,7 +62,6 @@ function DetailLoadingCard() {
   );
 }
 
-// HAPUS PROPS initialData dan geoJsonData KARENA SEKARANG MANDIRI
 export default function MaritimeDashboard() {
   // State
   const [regionDataCache, setRegionDataCache] = useState<Record<string, NewMaritimeForecastItem[]>>({});
@@ -73,39 +78,36 @@ export default function MaritimeDashboard() {
   });
   const totalPoints = KALTIM_AREAS.length + KALTIM_PORTS.length;
 
-  // --- EFEK PERTAMA: Tarik Peta & Data Latar Belakang (Murni dari Browser Warga) ---
+  // --- EFEK PERTAMA: Tarik Peta & Data Latar Belakang menggunakan fungsi Library ---
   useEffect(() => {
     let isMounted = true;
 
     async function initData() {
       try {
-        // 1. Tarik Peta GeoJSON
-        const resGeo = await fetch("https://maritim.bmkg.go.id/api/data/wilmetos");
-        if (resGeo.ok) {
-          const geoJson = await resGeo.json();
-          if (isMounted) {
-            setGeoJsonData(geoJson);
-            setIsMapReady(true);
-          }
+        // 1. Tarik Peta GeoJSON via Library
+        const geoJson = await getWilmetosGeoJson();
+        if (geoJson && isMounted) {
+          setGeoJsonData(geoJson);
+          setIsMapReady(true);
         }
 
-        // 2. Tarik Data 27 Area (Background Fetch Antrean) Biar Peta Berwarna
+        // 2. Tarik Data Area (Background Fetch) Biar Peta Berwarna
         const tempCache: Record<string, any> = {};
-        for (const name of KALTIM_AREAS) {
-          const slug = createSlug(name);
+        for (const area of KALTIM_AREAS) {
           try {
-            const res = await fetch(`https://maritim.bmkg.go.id/api/perairan?slug=${slug}`);
-            if (res.ok) {
-              const json = await res.json();
-              tempCache[slug] = combineForecasts(json);
+            // Menggunakan area.id (misal: "P.Y.02")
+            const data = await getPerairanData(area.id);
+            if (data) {
+              const combined = combineForecasts(data);
+              tempCache[area.id] = combined;
               
               // Set index waktu otomatis berdasarkan data pertama yang berhasil ditarik
               if (Object.keys(tempCache).length === 1 && isMounted) {
-                setDayIndex(findClosestIndex(tempCache[slug]));
+                setDayIndex(findClosestIndex(combined));
               }
             }
           } catch (e) {
-            console.warn(`Gagal ambil cuaca awal ${name}`);
+            console.warn(`Gagal ambil cuaca awal ${area.name}`);
           }
         }
         if (isMounted) setRegionDataCache(tempCache);
@@ -118,45 +120,50 @@ export default function MaritimeDashboard() {
     return () => { isMounted = false; };
   }, []);
 
-
-  // --- HANDLER SELEKSI WILAYAH (Bypass Server Action) ---
-  const handleSelect = async (name: string, type: 'area' | 'port' = 'area') => {
-    const slug = createSlug(name);
+  // --- HANDLER SELEKSI WILAYAH ---
+ // --- HANDLER SELEKSI WILAYAH ---
+  const handleSelect = async (name: string, type: 'area' | 'port' = 'area', codeId?: string) => {
+    if (!codeId) {
+       console.error("ID Kode tidak ditemukan untuk area/pelabuhan:", name);
+       return;
+    }
+    
     setCurrentType(type);
     
-    // 1. Cek Cache Lokal Browser
-    if (type === 'area' && regionDataCache[slug]) {
-        const combined = regionDataCache[slug];
+    // 1. Cek Cache Lokal Browser menggunakan codeId
+    if (type === 'area' && regionDataCache[codeId]) {
+        const combined = regionDataCache[codeId];
         setSelectedDetail({ name, combined, type });
         setDayIndex(findClosestIndex(combined)); 
         return;
     }
 
-    // 2. Fetch Baru Murni dari Browser
+    // 2. Fetch Baru Menggunakan Library API
     setLoadingDetail(true);
-    setSelectedDetail(null); 
+    // HAPUS atau KOMENTARI baris ini: setSelectedDetail(null); 
+    // Biarkan UI menampilkan data lama sambil loading yang baru
 
     try {
-      // BMKG bedain endpoint perairan dan pelabuhan
-      const endpoint = type === 'port' ? 'pelabuhan' : 'perairan';
-      const res = await fetch(`https://maritim.bmkg.go.id/api/${endpoint}?slug=${slug}`);
+      const data = type === 'port' 
+        ? await getPelabuhanData(codeId)
+        : await getPerairanData(codeId);
       
-      if (res.ok) {
-        const json = await res.json();
-        const combined = combineForecasts(json);
+      if (data) {
+        const combined = combineForecasts(data);
         const result = { name, type, combined };
         
         setSelectedDetail(result);
         
+        // TETAP PERTAHANKAN CACHE LAMA SAAT MENYIMPAN YANG BARU
         if (type === 'area') {
-            setRegionDataCache((prev: any) => ({ ...prev, [slug]: combined }));
+            setRegionDataCache((prev: any) => ({ ...prev, [codeId]: combined }));
         }
         setDayIndex(findClosestIndex(combined));
       } else {
-        throw new Error(`API nolak. Status: ${res.status}`);
+        throw new Error(`Data tidak ditemukan.`);
       }
     } catch (error) {
-      console.error("Gagal mengambil data dari browser:", error);
+      console.error("Gagal mengambil data dari API:", error);
       alert(`Waduh, data ${name} gagal ditarik dari BMKG Pusat. Coba lagi nanti ya.`);
     } finally {
       setLoadingDetail(false);
@@ -189,7 +196,6 @@ export default function MaritimeDashboard() {
           </p>
           <div className="relative z-10 flex items-center bg-white border border-slate-200 rounded-md shadow-sm p-1">
              <div className="flex items-center gap-2 px-4 py-1.5 border-r border-slate-100">
-                <Map className="w-4 h-4 text-emerald-500" />
                 <span className="text-xs font-semibold text-slate-700">{totalPoints} Area Terpantau</span>
              </div>
              <div className="flex items-center gap-2 px-4 py-1.5">
